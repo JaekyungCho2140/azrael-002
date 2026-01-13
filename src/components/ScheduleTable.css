@@ -1,0 +1,129 @@
+/**
+ * Schedule Table Styles
+ * 참조: prd/Azrael-PRD-Design.md §5.4 Tables
+ */
+
+.table-container {
+  background: white;
+  border: 2px solid var(--azrael-gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 2rem;
+}
+
+.table-header {
+  background: linear-gradient(135deg, var(--azrael-orange-50) 0%, var(--azrael-gray-50) 100%);
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid var(--azrael-orange-300);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.table-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-orange-900);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+}
+
+thead {
+  background: var(--azrael-gray-50);
+  border-bottom: 2px solid var(--azrael-gray-300);
+}
+
+th {
+  padding: 0.875rem 1rem;
+  text-align: center;
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-gray-800);
+  white-space: nowrap;
+}
+
+td {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--azrael-gray-200);
+  color: var(--azrael-gray-900);
+}
+
+tr:hover {
+  background: var(--azrael-orange-50);
+}
+
+tr.subtask td:nth-child(3) {
+  text-align: left;
+}
+
+.editable {
+  cursor: text;
+  position: relative;
+}
+
+.editable:hover {
+  background: var(--azrael-orange-50);
+  outline: 1px dashed var(--azrael-orange-300);
+}
+
+.editable input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 2px solid var(--azrael-orange-500);
+  border-radius: 4px;
+  font-size: var(--text-sm);
+  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: center;
+}
+
+.btn-icon {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 4px;
+  background: transparent;
+  border: none;
+  color: var(--azrael-gray-600);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+}
+
+.btn-icon:hover {
+  background: var(--azrael-orange-50);
+  color: var(--azrael-orange-600);
+}
+
+.btn-icon.btn-danger:hover {
+  background: var(--azrael-error-light);
+  color: var(--azrael-error);
+}
+
+.disclaimer {
+  padding: 1rem 1.5rem;
+  background: var(--azrael-gray-50);
+  border-top: 1px solid var(--azrael-gray-200);
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-700);
+}
+
+.disclaimer strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--azrael-gray-900);
+}

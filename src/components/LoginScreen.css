@@ -1,0 +1,76 @@
+/**
+ * Login Screen Styles
+ * 참조: prd/Azrael-PRD-Design.md §7.1
+ */
+
+.login-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFF4E6 0%, #FFFFFF 100%);
+  padding: var(--space-4);
+}
+
+.login-card {
+  max-width: 400px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 8px 32px rgba(255, 152, 0, 0.15);
+  border: 2px solid var(--azrael-orange-100);
+  text-align: center;
+}
+
+.cat-logo {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: fadeInUp 0.6s var(--ease-out);
+}
+
+.login-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h1);
+  font-weight: var(--weight-bold);
+  color: var(--azrael-orange-600);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+  animation: fadeInUp 0.6s var(--ease-out) 0.1s backwards;
+}
+
+.login-subtitle {
+  font-size: var(--text-base);
+  color: var(--azrael-gray-600);
+  margin-bottom: 2rem;
+  animation: fadeInUp 0.6s var(--ease-out) 0.2s backwards;
+}
+
+.login-form {
+  margin-bottom: 1.5rem;
+  animation: fadeInUp 0.6s var(--ease-out) 0.3s backwards;
+}
+
+.login-error {
+  color: var(--azrael-error);
+  font-size: var(--text-sm);
+  margin-top: 0.5rem;
+  text-align: left;
+}
+
+.login-note {
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-500);
+  animation: fadeInUp 0.6s var(--ease-out) 0.4s backwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

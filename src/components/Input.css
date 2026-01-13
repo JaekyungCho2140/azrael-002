@@ -1,0 +1,49 @@
+/**
+ * Input Styles
+ * 참조: prd/Azrael-PRD-Design.md §5.2
+ */
+
+.input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-label {
+  font-weight: var(--weight-medium);
+  color: var(--azrael-gray-800);
+  font-size: var(--text-sm);
+}
+
+.input {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  padding: 0.625rem 1rem;
+  border: 1.5px solid var(--azrael-gray-300);
+  border-radius: 6px;
+  background: white;
+  color: var(--azrael-gray-900);
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--azrael-orange-500);
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.input::placeholder {
+  color: var(--azrael-gray-400);
+  font-style: italic;
+}
+
+.input:disabled {
+  background: var(--azrael-gray-100);
+  cursor: not-allowed;
+}
+
+/* Date Input */
+.date-input {
+  font-family: var(--font-mono);
+  letter-spacing: 0.02em;
+}

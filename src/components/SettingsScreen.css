@@ -1,0 +1,106 @@
+/**
+ * Settings Screen Styles
+ * 참조: prd/Azrael-PRD-Design.md §7.5
+ */
+
+.settings-screen {
+  min-height: 100vh;
+  background: var(--azrael-gray-50);
+}
+
+.settings-header {
+  background: white;
+  border-bottom: 2px solid var(--azrael-gray-200);
+  padding: 1.5rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.settings-header h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  color: var(--azrael-gray-900);
+}
+
+.settings-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 80px);
+}
+
+.settings-sidebar {
+  background: var(--azrael-gray-50);
+  border-right: 1px solid var(--azrael-gray-200);
+  padding: 1.5rem 0;
+}
+
+.settings-nav-item {
+  padding: 0.875rem 1.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border-left: 3px solid transparent;
+  color: var(--azrael-gray-700);
+  font-weight: var(--weight-regular);
+}
+
+.settings-nav-item:hover {
+  background: white;
+  color: var(--azrael-orange-600);
+}
+
+.settings-nav-item.active {
+  background: white;
+  color: var(--azrael-orange-700);
+  font-weight: var(--weight-semibold);
+  border-left-color: var(--azrael-orange-500);
+}
+
+.settings-content {
+  padding: 2rem;
+  background: white;
+}
+
+.settings-content h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  color: var(--azrael-gray-900);
+  margin-bottom: 1.5rem;
+}
+
+.placeholder {
+  color: var(--azrael-gray-500);
+  font-style: italic;
+}
+
+.stages-table,
+.holidays-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.stages-table th,
+.holidays-table th {
+  background: var(--azrael-gray-50);
+  padding: 0.75rem 1rem;
+  text-align: center;
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-gray-800);
+  border-bottom: 2px solid var(--azrael-gray-300);
+}
+
+.stages-table td,
+.holidays-table td {
+  padding: 0.625rem 1rem;
+  text-align: center;
+  border-bottom: 1px solid var(--azrael-gray-200);
+  color: var(--azrael-gray-900);
+}
+
+.stages-table tr:hover,
+.holidays-table tr:hover {
+  background: var(--azrael-orange-50);
+}

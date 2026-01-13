@@ -1,0 +1,89 @@
+/**
+ * Button Styles
+ * 참조: prd/Azrael-PRD-Design.md §5.1
+ */
+
+.btn {
+  font-family: var(--font-body);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-base);
+  padding: 0.625rem 1.5rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s var(--ease-default);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background: var(--azrael-orange-500);
+  color: white;
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.2);
+}
+
+.btn-primary:hover {
+  background: var(--azrael-orange-600);
+  box-shadow: 0 4px 8px rgba(255, 152, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  background: var(--azrael-orange-700);
+  transform: translateY(0);
+}
+
+.btn-primary:disabled {
+  background: var(--azrael-gray-300);
+  color: var(--azrael-gray-600);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.btn-secondary {
+  background: white;
+  color: var(--azrael-gray-800);
+  border: 1.5px solid var(--azrael-gray-300);
+}
+
+.btn-secondary:hover {
+  border-color: var(--azrael-orange-500);
+  color: var(--azrael-orange-600);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+  transform: translateY(0);
+}
+
+.btn-danger {
+  background: var(--azrael-error);
+  color: white;
+  box-shadow: 0 2px 4px rgba(244, 67, 54, 0.2);
+}
+
+.btn-danger:hover {
+  background: #D32F2F;
+  box-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-danger:active {
+  background: #C62828;
+  transform: translateY(0);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--azrael-gray-700);
+  border: none;
+  padding: 0.5rem 1rem;
+}
+
+.btn-ghost:hover {
+  background: var(--azrael-orange-50);
+  color: var(--azrael-orange-600);
+}

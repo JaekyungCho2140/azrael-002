@@ -1,0 +1,89 @@
+/**
+ * Onboarding Screen Styles
+ * 참조: prd/Azrael-PRD-Design.md §7.2
+ */
+
+.onboarding {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #FFF8E1 0%, #FFF4E6 50%, #FFFFFF 100%);
+  padding: 2rem;
+}
+
+.onboarding-card {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  border-radius: 20px;
+  padding: 3rem;
+  box-shadow: 0 8px 32px rgba(255, 152, 0, 0.15);
+  border: 2px solid var(--azrael-orange-100);
+}
+
+.onboarding-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h1);
+  color: var(--azrael-orange-900);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.onboarding-subtitle {
+  font-size: var(--text-base);
+  color: var(--azrael-gray-700);
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.radio-item {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border: 1.5px solid var(--azrael-gray-300);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.radio-item:hover {
+  border-color: var(--azrael-orange-400);
+  background: var(--azrael-orange-50);
+}
+
+.radio-item input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--azrael-orange-500);
+  margin-right: 1rem;
+  cursor: pointer;
+}
+
+.radio-item label {
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  color: var(--azrael-gray-900);
+  cursor: pointer;
+  flex: 1;
+}
+
+.radio-item.selected {
+  border-color: var(--azrael-orange-500);
+  background: var(--azrael-orange-50);
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.onboarding-note {
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-500);
+  text-align: center;
+  margin-top: 1.5rem;
+}

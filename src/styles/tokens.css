@@ -1,0 +1,104 @@
+/**
+ * Azrael Design Tokens
+ * 참조: prd/Azrael-PRD-Design.md §2 색상 시스템
+ */
+
+:root {
+  /* Primary - Azrael Orange */
+  --azrael-orange-50: #FFF4E6;
+  --azrael-orange-100: #FFE0B2;
+  --azrael-orange-300: #FFB74D;
+  --azrael-orange-500: #FF9800;
+  --azrael-orange-600: #FB8C00;
+  --azrael-orange-700: #F57C00;
+  --azrael-orange-900: #E65100;
+
+  /* Neutral - White Background */
+  --azrael-white: #FFFFFF;
+  --azrael-gray-50: #FAFAFA;
+  --azrael-gray-100: #F5F5F5;
+  --azrael-gray-200: #EEEEEE;
+  --azrael-gray-300: #E0E0E0;
+  --azrael-gray-400: #BDBDBD;
+  --azrael-gray-600: #757575;
+  --azrael-gray-800: #424242;
+  --azrael-gray-900: #212121;
+
+  /* Semantic Colors */
+  --azrael-success: #4CAF50;
+  --azrael-success-light: #E8F5E9;
+  --azrael-error: #F44336;
+  --azrael-error-light: #FFEBEE;
+  --azrael-warning: #FFC107;
+  --azrael-warning-light: #FFF8E1;
+  --azrael-info: #2196F3;
+  --azrael-info-light: #E3F2FD;
+
+  /* Chart Colors */
+  --chart-table1: #FF9800;
+  --chart-table1-light: #FFE0B2;
+  --chart-table2: #009688;
+  --chart-table2-light: #B2DFDB;
+  --chart-table3: #673AB7;
+  --chart-table3-light: #D1C4E9;
+
+  /* Typography */
+  --font-display: 'Nunito', 'Noto Sans KR', sans-serif;
+  --font-body: 'Inter', 'Noto Sans KR', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+
+  --text-display: 3rem;
+  --text-h1: 2rem;
+  --text-h2: 1.5rem;
+  --text-h3: 1.25rem;
+  --text-base: 0.875rem;
+  --text-sm: 0.75rem;
+  --text-xs: 0.625rem;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* Spacing (8px 기반) */
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: 1.5rem;
+  --space-4: 2rem;
+  --space-5: 2.5rem;
+  --space-6: 3rem;
+  --space-8: 4rem;
+  --space-10: 5rem;
+
+  /* Border Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --shadow-orange: 0 4px 16px rgba(255, 152, 0, 0.2);
+
+  /* Transitions */
+  --ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-in: cubic-bezier(0.4, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+
+  /* Aliases */
+  --color-primary: var(--azrael-orange-500);
+  --color-primary-hover: var(--azrael-orange-600);
+  --color-primary-active: var(--azrael-orange-700);
+  --color-bg: var(--azrael-white);
+  --color-surface: var(--azrael-gray-50);
+  --color-border: var(--azrael-gray-300);
+  --color-text: var(--azrael-gray-900);
+  --color-text-muted: var(--azrael-gray-600);
+}

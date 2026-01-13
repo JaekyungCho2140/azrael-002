@@ -1,0 +1,128 @@
+/**
+ * Azrael TypeScript Type Definitions
+ * 참조: prd/Azrael-PRD-Shared.md §2 공통 데이터 구조
+ */
+
+/**
+ * Project (프로젝트)
+ * 참조: Azrael-PRD-Shared.md §2.1
+ */
+export interface Project {
+  id: string;                    // 고유 ID (예: "M4_GL", "NC_GL_1week")
+  name: string;                  // 표시 이름 (예: "M4/GL", "NC/GL (1주)")
+  headsUpOffset: number;         // 헤즈업 Offset (영업일)
+  iosReviewOffset?: number;      // iOS 심사일 Offset (영업일, 선택적)
+  showIosReviewDate: boolean;    // iOS 심사일 표시 여부
+  templateId: string;            // 업무 단계 템플릿 ID
+  disclaimer: string;            // 테이블 하단 Disclaimer 메모 (최대 6줄/600자, HTML)
+  // isDeletable는 런타임 계산 필드 (저장 안 함)
+}
+
+/**
+ * WorkTemplate (업무 단계 템플릿)
+ * 참조: Azrael-PRD-Shared.md §2.2
+ */
+export interface WorkTemplate {
+  id: string;                    // 템플릿 ID (프로젝트별)
+  projectId: string;             // 연결된 프로젝트 ID
+  stages: WorkStage[];           // 업무 단계 배열
+}
+
+/**
+ * WorkStage (업무 단계)
+ * 참조: Azrael-PRD-Shared.md §2.2
+ * 수정: 마감과 테이블 전달에 각각 다른 Offset 사용
+ */
+export interface WorkStage {
+  id: string;                    // 업무 단계 ID
+  name: string;                  // 배치 이름 (예: "정기", "REGULAR", "번역", "검수")
+  startOffsetDays: number;       // 마감(시작일시) 역산 영업일
+  endOffsetDays: number;         // 테이블 전달(종료일시) 역산 영업일
+  startTime: string;             // 기본 시작 시각 (HH:MM, 24시간제)
+  endTime: string;               // 기본 종료 시각 (HH:MM, 24시간제)
+  order: number;                 // 표시 순서
+  parentStageId?: string;        // 하위 일감의 경우 부모 Stage ID
+  depth: number;                 // 0=부모, 1=자식 (최대 1)
+  tableTargets: ('table1' | 'table2' | 'table3')[]; // 표시할 테이블 위치
+}
+
+/**
+ * ScheduleEntry (일정 엔트리)
+ * 참조: Azrael-PRD-Shared.md §2.3
+ */
+export interface ScheduleEntry {
+  id: string;                    // 엔트리 ID
+  index: number;                 // 인덱스 (자동 계산)
+  stageId: string;               // WorkStage ID
+  stageName: string;             // 배치 이름
+  startDateTime: Date;           // 계산된 시작일시
+  endDateTime: Date;             // 계산된 종료일시
+  description: string;           // 모든 테이블 공통 - "설명" 컬럼 (편집 가능)
+  assignee?: string;             // 테이블 1 전용 - "담당자" 컬럼 (편집 가능)
+  jiraDescription?: string;      // 테이블 2/3 전용 - "JIRA 설명" 컬럼 (편집 가능)
+  parentId?: string;             // 부모 엔트리 ID (하위 일감)
+  children?: ScheduleEntry[];    // 하위 일감 배열
+  isManualEdit: boolean;         // 수동 편집 여부 (Phase 0에서는 false)
+}
+
+/**
+ * CalculationResult (계산 결과)
+ * 참조: Azrael-PRD-Shared.md §2.4
+ */
+export interface CalculationResult {
+  projectId: string;             // 프로젝트 ID (타입 정보 포함)
+  updateDate: Date;              // 업데이트일
+  headsUpDate: Date;             // 계산된 헤즈업 날짜
+  iosReviewDate?: Date;          // 계산된 iOS 심사일
+  table1Entries: ScheduleEntry[]; // 테이블 1 엔트리
+  table2Entries: ScheduleEntry[]; // 테이블 2 (Ext.) 엔트리
+  table3Entries: ScheduleEntry[]; // 테이블 3 (Int.) 엔트리
+  calculatedAt: Date;            // 계산 시각
+}
+
+/**
+ * Holiday (공휴일)
+ * 참조: Azrael-PRD-Shared.md §2.5
+ */
+export interface Holiday {
+  date: Date;                    // 공휴일 날짜
+  name: string;                  // 공휴일 이름 (예: "신정", "설날")
+  isManual: boolean;             // 수동 추가 여부 (API vs 수동)
+}
+
+/**
+ * UserState (사용자 상태)
+ * 참조: Azrael-PRD-Shared.md §2.6
+ */
+export interface UserState {
+  email: string;                 // 사용자 이메일
+  lastProjectId: string;         // 마지막 사용 프로젝트 ID
+  hasCompletedOnboarding: boolean; // 온보딩 완료 여부
+}
+
+/**
+ * LocalStorage 키 상수
+ */
+export const STORAGE_KEYS = {
+  PROJECTS: 'azrael:projects',
+  TEMPLATES: 'azrael:templates',
+  HOLIDAYS: 'azrael:holidays',
+  USER_STATE: 'azrael:userState',
+  CALCULATION: (projectId: string) => `azrael:calculation:${projectId}`,
+} as const;
+
+/**
+ * 기본 프로젝트 목록
+ * 참조: Azrael-PRD-Shared.md §5.3
+ */
+export const DEFAULT_PROJECTS: Project[] = [
+  { id: "M4_GL", name: "M4/GL", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_M4_GL", disclaimer: "" },
+  { id: "NC_GL_1week", name: "NC/GL (1주)", headsUpOffset: 7, showIosReviewDate: false, templateId: "template_NC_GL_1week", disclaimer: "" },
+  { id: "NC_GL_2week", name: "NC/GL (2주)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_NC_GL_2week", disclaimer: "" },
+  { id: "FB_GL_CDN", name: "FB/GL (CDN)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_GL_CDN", disclaimer: "" },
+  { id: "FB_GL_APP", name: "FB/GL (APP)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_GL_APP", disclaimer: "" },
+  { id: "FB_JP_CDN", name: "FB/JP (CDN)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_JP_CDN", disclaimer: "" },
+  { id: "FB_JP_APP", name: "FB/JP (APP)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_JP_APP", disclaimer: "" },
+  { id: "LY_GL", name: "LY/GL", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_LY_GL", disclaimer: "" },
+  { id: "MONTHLY", name: "월말정산", headsUpOffset: 5, showIosReviewDate: false, templateId: "template_MONTHLY", disclaimer: "" }
+];

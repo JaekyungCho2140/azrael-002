@@ -1,0 +1,172 @@
+/**
+ * Calendar View Styles
+ * 참조: prd/Azrael-PRD-Design.md §7.4
+ */
+
+/* FullCalendar 기본 스타일 (v6 inline) */
+.fc {
+  display: flex;
+  flex-direction: column;
+}
+
+.fc table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  font-size: 1em;
+}
+
+.fc th, .fc td {
+  vertical-align: top;
+  padding: 0;
+}
+
+.fc-theme-standard td, .fc-theme-standard th {
+  border: 1px solid var(--fc-border-color, #ddd);
+}
+
+.fc-scrollgrid {
+  border-collapse: separate;
+  border-right-width: 1px;
+  border-bottom-width: 1px;
+}
+
+.fc-daygrid-day-frame {
+  min-height: 100%;
+  position: relative;
+}
+
+.fc-daygrid-day-top {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.fc-daygrid-day-number {
+  padding: 0.5rem;
+  min-width: 1.5em;
+  text-align: center;
+}
+
+.fc-daygrid-event {
+  position: relative;
+  white-space: nowrap;
+  border-radius: 3px;
+  font-size: 0.85em;
+  margin: 0.25rem 0.25rem 0 0.25rem;
+  padding: 0.125rem 0.375rem;
+}
+
+.fc-event {
+  cursor: default;
+}
+
+.fc-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.fc-toolbar-chunk {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.fc-button {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.fc-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.fc-col-header-cell {
+  font-weight: 600;
+  padding: 0.75rem 0.5rem;
+  background: var(--azrael-gray-50);
+}
+
+.calendar-container {
+  background: white;
+  border: 2px solid var(--azrael-gray-200);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  margin-bottom: 2rem;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.calendar-header h3 {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-gray-900);
+}
+
+.fullcalendar-wrapper {
+  font-family: var(--font-body);
+}
+
+/* FullCalendar 커스터마이징 */
+.fc {
+  font-family: var(--font-body);
+}
+
+.fc .fc-toolbar-title {
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-gray-900);
+}
+
+.fc .fc-button {
+  background: var(--azrael-orange-500);
+  border-color: var(--azrael-orange-600);
+  color: white;
+  font-weight: var(--weight-medium);
+}
+
+.fc .fc-button:hover {
+  background: var(--azrael-orange-600);
+  border-color: var(--azrael-orange-700);
+}
+
+.fc .fc-button:disabled {
+  background: var(--azrael-gray-300);
+  border-color: var(--azrael-gray-400);
+}
+
+.fc-daygrid-day:hover {
+  background: var(--azrael-orange-50);
+}
+
+.fc-event {
+  border-radius: 4px;
+  font-size: var(--text-xs);
+  font-weight: var(--weight-medium);
+  padding: 0.125rem 0.375rem;
+  cursor: default;
+}
+
+.fc-event-main-custom {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.fc-event-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

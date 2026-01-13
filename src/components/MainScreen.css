@@ -1,0 +1,179 @@
+/**
+ * Main Screen Styles
+ * 참조: prd/Azrael-PRD-Design.md §7.3
+ */
+
+.main-screen {
+  min-height: 100vh;
+  background: var(--azrael-gray-50);
+}
+
+.main-header {
+  background: white;
+  border-bottom: 2px solid var(--azrael-gray-200);
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon {
+  font-size: 2rem;
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: var(--text-h2);
+  font-weight: var(--weight-bold);
+  color: var(--azrael-orange-600);
+  letter-spacing: -0.02em;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.project-dropdown {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  padding: 0.625rem 1rem;
+  border: 1.5px solid var(--azrael-gray-300);
+  border-radius: 6px;
+  background: white;
+  color: var(--azrael-gray-900);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.project-dropdown:focus {
+  border-color: var(--azrael-orange-500);
+  box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+}
+
+.input-section {
+  background: white;
+  border: 2px solid var(--azrael-gray-200);
+  border-radius: 16px;
+  padding: 2rem;
+  margin: 2rem auto;
+  max-width: 800px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.input-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.input-label {
+  font-weight: var(--weight-medium);
+  color: var(--azrael-gray-800);
+  min-width: 100px;
+}
+
+.input-label::after {
+  content: ':';
+  margin-left: 0.25rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 2rem 0;
+  color: var(--azrael-gray-400);
+  font-size: var(--text-sm);
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--azrael-gray-300);
+}
+
+.divider::before {
+  margin-right: 1rem;
+}
+
+.divider::after {
+  margin-left: 1rem;
+}
+
+.last-result {
+  text-align: center;
+  color: var(--azrael-gray-700);
+}
+
+.last-result-time {
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-500);
+  margin-top: 0.25rem;
+}
+
+.results-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem 2rem;
+}
+
+.date-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  padding: 1.5rem;
+  background: linear-gradient(90deg, var(--azrael-orange-50) 0%, var(--azrael-gray-50) 100%);
+  border-radius: 12px;
+  border-left: 4px solid var(--azrael-orange-500);
+  margin-bottom: 2rem;
+}
+
+.date-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.date-item-right {
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.date-label {
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-600);
+  font-weight: var(--weight-medium);
+}
+
+.date-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-h3);
+  color: var(--azrael-orange-700);
+  font-weight: var(--weight-semibold);
+}
+
+.results-placeholder {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: var(--azrael-gray-500);
+  font-size: var(--text-base);
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed var(--azrael-gray-300);
+}

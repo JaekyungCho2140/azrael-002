@@ -1,0 +1,78 @@
+/**
+ * EditableCell Styles
+ * 참조: prd/Azrael-PRD-Phase0.md §9.3
+ */
+
+.editable-cell-wrapper {
+  position: relative;
+}
+
+.format-toolbar {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  display: flex;
+  gap: 0.25rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--azrael-gray-300);
+  z-index: 100;
+}
+
+.format-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: var(--weight-semibold);
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.format-btn:hover {
+  background: var(--azrael-gray-100);
+}
+
+.format-btn-red {
+  color: red;
+}
+
+.format-btn-blue {
+  color: blue;
+}
+
+.format-btn-black {
+  color: black;
+}
+
+.editable-cell {
+  min-height: 1.5rem;
+  padding: 0.5rem;
+  cursor: text;
+  transition: all 0.15s ease;
+  word-break: break-word;
+}
+
+.editable-cell:not(.editing):hover {
+  background: var(--azrael-orange-50);
+  outline: 1px dashed var(--azrael-orange-300);
+}
+
+.editable-cell.editing {
+  outline: 2px solid var(--azrael-orange-500);
+  background: var(--azrael-orange-50);
+  border-radius: 4px;
+}
+
+.editable-cell:empty:not(.editing)::before {
+  content: attr(placeholder);
+  color: var(--azrael-gray-400);
+  font-style: italic;
+}

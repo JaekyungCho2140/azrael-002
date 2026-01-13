@@ -1,0 +1,68 @@
+/**
+ * ResolutionWarning Styles
+ * 참조: prd/Azrael-PRD-Design.md §9.1
+ */
+
+.resolution-warning {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.95);
+  color: white;
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 1279px), (max-height: 719px) {
+  .resolution-warning {
+    display: flex !important;
+  }
+}
+
+.warning-content {
+  text-align: center;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+  border: 2px solid rgba(255, 152, 0, 0.3);
+}
+
+.warning-icon {
+  font-size: 6rem;
+  display: block;
+  margin-bottom: 1.5rem;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+.warning-content h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-h1);
+  color: var(--azrael-orange-400);
+  margin-bottom: 1rem;
+}
+
+.warning-content p {
+  font-size: var(--text-lg);
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0.5rem 0;
+}
+
+.warning-note {
+  font-size: var(--text-base);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 1.5rem !important;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
