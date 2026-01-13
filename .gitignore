@@ -35,3 +35,18 @@ nul
 
 # Playwright MCP
 .playwright-mcp/
+
+# 문서 및 내부 자료 (커밋 금지)
+docs/
+prd/
+plan.md
+talkwiththeuser/
+
+# CSV 데이터 파일
+*.csv
+
+# PDF 파일
+*.pdf
+
+# Supabase 폴더 (스키마는 코드로 관리)
+supabase/

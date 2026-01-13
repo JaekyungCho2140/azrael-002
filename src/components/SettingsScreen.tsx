@@ -5,12 +5,13 @@
  * Phase 3: Supabase 연동 리팩토링
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Project, WorkTemplate, WorkStage } from '../types';
 import { Button } from './Button';
 import { ProjectEditModal } from './ProjectEditModal';
 import { StageEditModal } from './StageEditModal';
 import { HolidayAddModal } from './HolidayAddModal';
+import { supabase } from '../lib/supabase';
 import {
   useProjects,
   useTemplates,
@@ -40,6 +41,19 @@ export function SettingsScreen({
   const [activeTab, setActiveTab] = useState<SettingsTab>('projects');
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId);
   const [isLoadingHolidays, setIsLoadingHolidays] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+
+  // 관리자 권한 확인 (jkcho@wemade.com만 CSV 기능 사용 가능)
+  const isAdmin = currentUserEmail === 'jkcho@wemade.com';
+
+  // 현재 사용자 이메일 가져오기
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setCurrentUserEmail(user.email);
+      }
+    });
+  }, []);
 
   // Supabase 데이터 조회
   const { data: projects } = useProjects();
@@ -280,6 +294,201 @@ export function SettingsScreen({
     }
   };
 
+  // CSV에서 프로젝트 불러오기 (관리자 전용)
+  const handleImportProjectsCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        let csvText = e.target?.result as string;
+        csvText = csvText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        const lines = csvText.split('\n').filter(line => line.trim());
+        let updateCount = 0;
+
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(',');
+          if (columns.length < 4) continue;
+
+          const name = columns[0].trim();
+          const headsUpOffset = parseInt(columns[1].trim());
+          const showIosReviewDate = columns[2].trim().toUpperCase() === 'TRUE';
+          const iosReviewOffset = parseInt(columns[3].trim());
+
+          const id = name.replace(/\//g, '_').replace(/\s*\(([^)]+)\)/, '_$1').replace(/\s+/g, '_');
+
+          updateProjectMutation.mutate({
+            id,
+            updates: {
+              headsUpOffset,
+              showIosReviewDate,
+              iosReviewOffset: showIosReviewDate ? iosReviewOffset : undefined,
+            }
+          });
+          updateCount++;
+        }
+
+        alert(`CSV 파일에서 ${updateCount}개 프로젝트를 업데이트했습니다.`);
+      } catch (err: any) {
+        alert(err.message || 'CSV 파일 읽기 실패');
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+    event.target.value = '';
+  };
+
+  // CSV에서 업무 단계 불러오기 (관리자 전용)
+  const handleImportStagesCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        let csvText = e.target?.result as string;
+        csvText = csvText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        const lines = csvText.split('\n').filter(line => line.trim());
+        const stagesByProject: Record<string, any[]> = {};
+
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(',');
+          if (columns.length < 7) continue;
+
+          const projectName = columns[0].trim();
+          const stageName = columns[1].trim();
+          const startOffset = parseInt(columns[2].trim());
+          const endOffset = parseInt(columns[3].trim());
+          const startTime = columns[4].trim();
+          const endTime = columns[5].trim();
+          const tableTargetsStr = columns[6].trim();
+
+          if (!projectName || !stageName || isNaN(startOffset) || isNaN(endOffset)) continue;
+
+          const projectId = projectName.replace(/\//g, '_').replace(/\s*\(([^)]+)\)/, '_$1').replace(/\s+/g, '_');
+          const templateId = `template_${projectId}`;
+
+          const tableTargets = tableTargetsStr
+            .split(/[,\s]+/)
+            .map(t => t.replace('T', 'table') as 'table1' | 'table2' | 'table3')
+            .filter(t => ['table1', 'table2', 'table3'].includes(t));
+
+          if (!stagesByProject[templateId]) {
+            stagesByProject[templateId] = [];
+          }
+
+          stagesByProject[templateId].push({
+            id: `${templateId}_stage_${stagesByProject[templateId].length}`,
+            name: stageName,
+            startOffsetDays: startOffset,
+            endOffsetDays: endOffset,
+            startTime,
+            endTime,
+            order: stagesByProject[templateId].length,
+            depth: 0,
+            tableTargets,
+            parentStageId: undefined,
+          });
+        }
+
+        // 각 템플릿 업데이트
+        for (const templateId of Object.keys(stagesByProject)) {
+          const projectId = templateId.replace('template_', '');
+          const stages = stagesByProject[templateId];
+
+          const template: WorkTemplate = {
+            id: templateId,
+            projectId,
+            stages,
+          };
+
+          saveTemplateMutation.mutate(template);
+        }
+
+        const importedCount = Object.keys(stagesByProject).length;
+        alert(`CSV 파일에서 ${importedCount}개 프로젝트의 업무 단계를 불러왔습니다.`);
+      } catch (err: any) {
+        alert(err.message || 'CSV 파일 읽기 실패');
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+    event.target.value = '';
+  };
+
+  // CSV에서 공휴일 불러오기 (관리자 전용)
+  const handleImportHolidaysCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        let csvText = e.target?.result as string;
+        csvText = csvText.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+        const lines = csvText.split('\n').filter(line => line.trim());
+        const newHolidays = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const columns = lines[i].split(',');
+          if (columns.length < 3) continue;
+
+          const name = columns[1].trim();
+          const dateStr = columns[2].trim();
+
+          try {
+            const [year, month, day] = dateStr.split('-').map(Number);
+            const date = new Date(year, month - 1, day, 12, 0, 0);
+
+            newHolidays.push({
+              date,
+              name,
+              isManual: true,
+            });
+          } catch (err) {
+            console.error(`CSV 라인 ${i} 파싱 실패`);
+          }
+        }
+
+        // 기존 수동 공휴일 삭제 후 추가
+        for (const holiday of newHolidays) {
+          createHolidayMutation.mutate(holiday);
+        }
+
+        alert(`CSV 파일에서 ${newHolidays.length}개 공휴일을 불러왔습니다.`);
+      } catch (err: any) {
+        alert(err.message || 'CSV 파일 읽기 실패');
+      }
+    };
+    reader.readAsText(file, 'UTF-8');
+    event.target.value = '';
+  };
+
+  // 모든 공휴일 삭제 (관리자 전용)
+  const handleClearAllHolidays = async () => {
+    if (!confirm('모든 공휴일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
+      return;
+    }
+
+    try {
+      // Supabase에서 모든 공휴일 삭제
+      const { error } = await supabase
+        .from('holidays')
+        .delete()
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // 모든 행 삭제
+
+      if (error) {
+        throw error;
+      }
+
+      alert('모든 공휴일이 삭제되었습니다.');
+    } catch (err: any) {
+      alert(`삭제 실패: ${err.message}`);
+    }
+  };
+
   return (
     <div className="settings-screen">
       <div className="settings-header">
@@ -357,10 +566,28 @@ export function SettingsScreen({
                 </tbody>
               </table>
 
-              <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                 <Button onClick={handleAddProject}>
                   + 새 프로젝트 추가
                 </Button>
+
+                {isAdmin && (
+                  <>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleImportProjectsCSV}
+                      style={{ display: 'none' }}
+                      id="projects-csv-upload"
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={() => document.getElementById('projects-csv-upload')?.click()}
+                    >
+                      📁 프로젝트 불러오기 (CSV)
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -441,20 +668,38 @@ export function SettingsScreen({
                       + 업무 단계 추가
                     </Button>
 
-                    <Button
-                      variant="ghost"
-                      onClick={() => {
-                        if (!selectedTemplate) return;
-                        if (confirm('이 프로젝트의 모든 업무 단계를 삭제하시겠습니까?')) {
-                          saveTemplateMutation.mutate({
-                            ...selectedTemplate,
-                            stages: []
-                          });
-                        }
-                      }}
-                    >
-                      🗑️ 모두 제거
-                    </Button>
+                    {isAdmin && (
+                      <>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          onChange={handleImportStagesCSV}
+                          style={{ display: 'none' }}
+                          id="stages-csv-upload"
+                        />
+                        <Button
+                          variant="secondary"
+                          onClick={() => document.getElementById('stages-csv-upload')?.click()}
+                        >
+                          📁 업무 단계 불러오기 (CSV)
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          onClick={() => {
+                            if (!selectedTemplate) return;
+                            if (confirm('이 프로젝트의 모든 업무 단계를 삭제하시겠습니까?')) {
+                              saveTemplateMutation.mutate({
+                                ...selectedTemplate,
+                                stages: []
+                              });
+                            }
+                          }}
+                        >
+                          🗑️ 모두 제거
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </>
               ) : (
@@ -462,10 +707,28 @@ export function SettingsScreen({
                   <p style={{ color: 'var(--azrael-gray-500)', fontStyle: 'italic', margin: '1rem 0' }}>
                     이 프로젝트에 템플릿이 없습니다. 업무 단계를 추가하면 자동으로 생성됩니다.
                   </p>
-                  <div style={{ marginTop: '1rem' }}>
+                  <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                     <Button onClick={handleAddStage}>
                       + 업무 단계 추가
                     </Button>
+
+                    {isAdmin && (
+                      <>
+                        <input
+                          type="file"
+                          accept=".csv"
+                          onChange={handleImportStagesCSV}
+                          style={{ display: 'none' }}
+                          id="stages-csv-upload-2"
+                        />
+                        <Button
+                          variant="secondary"
+                          onClick={() => document.getElementById('stages-csv-upload-2')?.click()}
+                        >
+                          📁 업무 단계 불러오기 (CSV)
+                        </Button>
+                      </>
+                    )}
                   </div>
                 </>
               )}
@@ -522,10 +785,35 @@ export function SettingsScreen({
                 </tbody>
               </table>
 
-              <div style={{ marginTop: '1rem' }}>
+              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
                 <Button onClick={() => setHolidayModalOpen(true)}>
                   + 공휴일 수동 추가
                 </Button>
+
+                {isAdmin && (
+                  <>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleImportHolidaysCSV}
+                      style={{ display: 'none' }}
+                      id="holidays-csv-upload"
+                    />
+                    <Button
+                      variant="secondary"
+                      onClick={() => document.getElementById('holidays-csv-upload')?.click()}
+                    >
+                      📁 공휴일 불러오기 (CSV)
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      onClick={handleClearAllHolidays}
+                    >
+                      🗑️ 모두 제거
+                    </Button>
+                  </>
+                )}
               </div>
             </div>
           )}

@@ -26,9 +26,9 @@ function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
 
-  // Supabase 데이터 조회
-  const { data: projects, isLoading: projectsLoading, error: projectsError } = useProjects();
-  const { data: templates, isLoading: templatesLoading, error: templatesError } = useTemplates();
+  // Supabase 데이터 조회 (세션이 있을 때만 실행!)
+  const { data: projects, isLoading: projectsLoading, error: projectsError } = useProjects(!!session);
+  const { data: templates, isLoading: templatesLoading, error: templatesError } = useTemplates(!!session);
 
   const { toasts, removeToast } = useToast();
 

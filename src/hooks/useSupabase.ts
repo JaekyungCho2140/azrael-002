@@ -32,12 +32,14 @@ import {
 
 /**
  * 모든 프로젝트 조회
+ * @param enabled - 쿼리 실행 여부 (기본값: true)
  */
-export function useProjects() {
+export function useProjects(enabled = true) {
   return useQuery({
     queryKey: ['projects'],
     queryFn: fetchProjects,
     staleTime: 5 * 60 * 1000, // 5분 캐시
+    enabled, // 세션이 있을 때만 실행
   });
 }
 
@@ -92,11 +94,12 @@ export function useDeleteProject() {
 /**
  * 모든 템플릿 조회
  */
-export function useTemplates() {
+export function useTemplates(enabled = true) {
   return useQuery({
     queryKey: ['templates'],
     queryFn: fetchTemplates,
     staleTime: 5 * 60 * 1000, // 5분 캐시
+    enabled,
   });
 }
 
@@ -162,11 +165,12 @@ export function useSaveTemplate() {
 /**
  * 모든 공휴일 조회
  */
-export function useHolidays() {
+export function useHolidays(enabled = true) {
   return useQuery({
     queryKey: ['holidays'],
     queryFn: fetchHolidays,
     staleTime: 10 * 60 * 1000, // 10분 캐시
+    enabled,
   });
 }
 
