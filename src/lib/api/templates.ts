@@ -200,6 +200,22 @@ export async function deleteStage(id: string): Promise<void> {
  * 기존 stages 모두 삭제 후 새로 생성
  */
 export async function saveTemplate(template: WorkTemplate): Promise<void> {
+  // 0. work_templates 레코드 생성 (없으면 생성, 있으면 무시)
+  const { error: templateError } = await supabase
+    .from('work_templates')
+    .upsert(
+      {
+        id: template.id,
+        project_id: template.projectId,
+      },
+      { onConflict: 'id', ignoreDuplicates: true }
+    );
+
+  if (templateError) {
+    console.error('Failed to upsert template:', templateError);
+    throw new Error(`템플릿 생성 실패: ${templateError.message}`);
+  }
+
   // 1. 기존 stages 삭제
   const { error: deleteError } = await supabase
     .from('work_stages')
