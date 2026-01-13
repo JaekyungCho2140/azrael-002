@@ -25,10 +25,6 @@ interface MainScreenProps {
   projects: Project[];
   templates: WorkTemplate[];
   onProjectChange: (projectId: string) => void;
-  onAddProject: (project: Project) => void;
-  onUpdateProject: (projectId: string, updates: Partial<Project>) => void;
-  onDeleteProject: (projectId: string) => void;
-  onUpdateTemplates: (templates: WorkTemplate[]) => void;
   onLogout: () => void;
 }
 
@@ -37,10 +33,6 @@ export function MainScreen({
   projects,
   templates,
   onProjectChange,
-  onAddProject,
-  onUpdateProject,
-  onDeleteProject,
-  onUpdateTemplates,
   onLogout
 }: MainScreenProps) {
   const [updateDate, setUpdateDate] = useState<string>('');
@@ -356,13 +348,7 @@ export function MainScreen({
   if (showSettings) {
     return (
       <SettingsScreen
-        projects={projects}
-        templates={templates}
         currentProjectId={currentProject.id}
-        onAddProject={onAddProject}
-        onUpdateProject={onUpdateProject}
-        onDeleteProject={onDeleteProject}
-        onUpdateTemplates={onUpdateTemplates}
         onClose={() => setShowSettings(false)}
       />
     );
