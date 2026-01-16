@@ -18,6 +18,9 @@ function mapToProject(row: any): Project {
     showIosReviewDate: row.show_ios_review_date,
     templateId: row.template_id,
     disclaimer: row.disclaimer || '',
+    jiraProjectKey: row.jira_project_key || undefined,
+    jiraEpicTemplate: row.jira_epic_template || undefined,
+    jiraHeadsupTemplate: row.jira_headsup_template || undefined,
   };
 }
 
@@ -60,6 +63,9 @@ export async function createProject(project: Omit<Project, 'id'>): Promise<Proje
       show_ios_review_date: project.showIosReviewDate,
       template_id: project.templateId,
       disclaimer: project.disclaimer,
+      jira_project_key: project.jiraProjectKey || null,
+      jira_epic_template: project.jiraEpicTemplate || null,
+      jira_headsup_template: project.jiraHeadsupTemplate || null,
       created_by: userEmail,
     })
     .select()
@@ -89,6 +95,9 @@ export async function updateProject(
       show_ios_review_date: updates.showIosReviewDate,
       template_id: updates.templateId,
       disclaimer: updates.disclaimer,
+      jira_project_key: updates.jiraProjectKey !== undefined ? updates.jiraProjectKey : undefined,
+      jira_epic_template: updates.jiraEpicTemplate !== undefined ? updates.jiraEpicTemplate : undefined,
+      jira_headsup_template: updates.jiraHeadsupTemplate !== undefined ? updates.jiraHeadsupTemplate : undefined,
     })
     .eq('id', id);
 

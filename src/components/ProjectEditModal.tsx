@@ -23,6 +23,11 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const [iosReviewOffset, setIosReviewOffset] = useState(7);
   const [disclaimer, setDisclaimer] = useState('');
 
+  // JIRA 관련 필드 (Phase 0.5 + Phase 1)
+  const [jiraProjectKey, setJiraProjectKey] = useState('');
+  const [jiraEpicTemplate, setJiraEpicTemplate] = useState('');
+  const [jiraHeadsupTemplate, setJiraHeadsupTemplate] = useState('');
+
   useEffect(() => {
     if (project) {
       setName(project.name);
@@ -30,12 +35,18 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setShowIosReviewDate(project.showIosReviewDate);
       setIosReviewOffset(project.iosReviewOffset || 7);
       setDisclaimer(project.disclaimer);
+      setJiraProjectKey(project.jiraProjectKey || '');
+      setJiraEpicTemplate(project.jiraEpicTemplate || '');
+      setJiraHeadsupTemplate(project.jiraHeadsupTemplate || '');
     } else {
       setName('');
       setHeadsUpOffset(10);
       setShowIosReviewDate(false);
       setIosReviewOffset(7);
       setDisclaimer('');
+      setJiraProjectKey('');
+      setJiraEpicTemplate('');
+      setJiraHeadsupTemplate('');
     }
   }, [project, isOpen]);
 
@@ -52,7 +63,10 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       iosReviewOffset: showIosReviewDate ? iosReviewOffset : undefined,
       showIosReviewDate,
       templateId: project?.templateId || `template_${Date.now()}`,
-      disclaimer
+      disclaimer,
+      jiraProjectKey: jiraProjectKey.trim() || undefined,
+      jiraEpicTemplate: jiraEpicTemplate.trim() || undefined,
+      jiraHeadsupTemplate: jiraHeadsupTemplate.trim() || undefined
     };
 
     onSave(updatedProject);
@@ -129,6 +143,69 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
         />
         <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
           {disclaimer.length}/600자
+        </small>
+      </div>
+
+      {/* JIRA 프로젝트 키 (Phase 1) */}
+      <div className="form-group">
+        <label className="form-label">JIRA 프로젝트 키 (선택)</label>
+        <input
+          type="text"
+          className="form-input"
+          value={jiraProjectKey}
+          onChange={(e) => setJiraProjectKey(e.target.value)}
+          placeholder="예: M4L10N, NCL10N"
+        />
+        <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+          JIRA 연동 시 사용할 프로젝트 키
+        </small>
+      </div>
+
+      {/* Epic Summary 템플릿 (Phase 0.5) */}
+      <div className="form-group">
+        <label className="form-label">
+          Epic Summary 템플릿 (선택)
+          <span
+            className="info-icon"
+            title="사용 가능한 변수: {date}, {headsUp}, {projectName}"
+            style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
+          >
+            ?
+          </span>
+        </label>
+        <input
+          type="text"
+          className="form-input"
+          value={jiraEpicTemplate}
+          onChange={(e) => setJiraEpicTemplate(e.target.value)}
+          placeholder="{date} 업데이트"
+        />
+        <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+          비워두면 기본 형식 사용
+        </small>
+      </div>
+
+      {/* 헤즈업 Task Summary 템플릿 (Phase 0.5) */}
+      <div className="form-group">
+        <label className="form-label">
+          헤즈업 Task Summary 템플릿 (선택)
+          <span
+            className="info-icon"
+            title="사용 가능한 변수: {date}, {headsUp}, {projectName}"
+            style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
+          >
+            ?
+          </span>
+        </label>
+        <input
+          type="text"
+          className="form-input"
+          value={jiraHeadsupTemplate}
+          onChange={(e) => setJiraHeadsupTemplate(e.target.value)}
+          placeholder="{date} 업데이트 일정 헤즈업"
+        />
+        <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+          비워두면 기본 형식 사용
         </small>
       </div>
     </Modal>

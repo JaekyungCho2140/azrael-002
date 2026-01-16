@@ -127,6 +127,34 @@ export function ScheduleTable({
             </td>
           )}
 
+          {/* JIRA 담당자 (테이블 2/3) */}
+          {type !== 'table1' && (
+            <td
+              className="editable jira-assignee"
+              onClick={() => startEdit(entry.id, 'jiraAssignee', entry.jiraAssignee || '')}
+            >
+              {editingCell?.entryId === entry.id && editingCell.field === 'jiraAssignee' ? (
+                <input
+                  type="text"
+                  value={editValue}
+                  onChange={(e) => setEditValue(e.target.value)}
+                  onBlur={saveEdit}
+                  onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+                  autoFocus
+                  placeholder="Account ID"
+                />
+              ) : (
+                <span className="truncate" title={entry.jiraAssignee || ''}>
+                  {entry.jiraAssignee ? (
+                    entry.jiraAssignee.length > 8
+                      ? `${entry.jiraAssignee.substring(0, 8)}...`
+                      : entry.jiraAssignee
+                  ) : ''}
+                </span>
+              )}
+            </td>
+          )}
+
           {/* 액션 버튼 (테이블 2/3) */}
           {type !== 'table1' && (
             <td>
@@ -176,6 +204,7 @@ export function ScheduleTable({
             <th>{type === 'table1' ? '테이블 전달' : 'HB'}</th>
             <th>설명</th>
             <th>{type === 'table1' ? '담당자' : 'JIRA 설명'}</th>
+            {type !== 'table1' && <th>JIRA 담당자</th>}
             {type !== 'table1' && <th>액션</th>}
           </tr>
         </thead>

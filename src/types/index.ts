@@ -15,6 +15,9 @@ export interface Project {
   showIosReviewDate: boolean;    // iOS 심사일 표시 여부
   templateId: string;            // 업무 단계 템플릿 ID
   disclaimer: string;            // 테이블 하단 Disclaimer 메모 (최대 6줄/600자, HTML)
+  jiraProjectKey?: string;       // JIRA 프로젝트 키 (Phase 1, 예: "M4L10N")
+  jiraEpicTemplate?: string;     // JIRA Epic Summary 템플릿 (Phase 0.5)
+  jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿 (Phase 0.5)
   // isDeletable는 런타임 계산 필드 (저장 안 함)
 }
 
@@ -40,10 +43,11 @@ export interface WorkStage {
   endOffsetDays: number;         // 테이블 전달(종료일시) 역산 영업일
   startTime: string;             // 기본 시작 시각 (HH:MM, 24시간제)
   endTime: string;               // 기본 종료 시각 (HH:MM, 24시간제)
-  order: number;                 // 표시 순서
+  order: number;                 // 표시 순서 (DECIMAL 5,1: 1.0, 1.1, 1.2...)
   parentStageId?: string;        // 하위 일감의 경우 부모 Stage ID
   depth: number;                 // 0=부모, 1=자식 (최대 1)
   tableTargets: ('table1' | 'table2' | 'table3')[]; // 표시할 테이블 위치
+  jiraSummaryTemplate?: string;  // JIRA Summary 템플릿 (Phase 0.5, 예: "{date} 업데이트 {taskName}")
 }
 
 /**
@@ -60,6 +64,7 @@ export interface ScheduleEntry {
   description: string;           // 모든 테이블 공통 - "설명" 컬럼 (편집 가능)
   assignee?: string;             // 테이블 1 전용 - "담당자" 컬럼 (편집 가능)
   jiraDescription?: string;      // 테이블 2/3 전용 - "JIRA 설명" 컬럼 (편집 가능)
+  jiraAssignee?: string;         // 테이블 2/3 전용 - "JIRA 담당자" (Phase 0.5, JIRA Account ID)
   parentId?: string;             // 부모 엔트리 ID (하위 일감)
   children?: ScheduleEntry[];    // 하위 일감 배열
   isManualEdit: boolean;         // 수동 편집 여부 (Phase 0에서는 false)
@@ -101,6 +106,15 @@ export interface UserState {
 }
 
 /**
+ * JiraConfig (JIRA 연동 설정)
+ * Phase 1: LocalStorage에 저장 (개인 데이터)
+ */
+export interface JiraConfig {
+  apiToken: string;              // JIRA API Token (평문 저장)
+  accountId: string;             // 현재 사용자 JIRA Account ID (자동 조회)
+}
+
+/**
  * LocalStorage 키 상수
  */
 export const STORAGE_KEYS = {
@@ -108,6 +122,7 @@ export const STORAGE_KEYS = {
   TEMPLATES: 'azrael:templates',
   HOLIDAYS: 'azrael:holidays',
   USER_STATE: 'azrael:userState',
+  JIRA_CONFIG: 'azrael:jiraConfig',  // Phase 1
   CALCULATION: (projectId: string) => `azrael:calculation:${projectId}`,
 } as const;
 

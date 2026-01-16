@@ -32,7 +32,7 @@ interface SettingsScreenProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'projects' | 'stages' | 'holidays';
+type SettingsTab = 'projects' | 'stages' | 'holidays' | 'jira';
 
 export function SettingsScreen({
   currentProjectId,
@@ -46,13 +46,28 @@ export function SettingsScreen({
   // 관리자 권한 확인 (jkcho@wemade.com만 CSV 기능 사용 가능)
   const isAdmin = currentUserEmail === 'jkcho@wemade.com';
 
-  // 현재 사용자 이메일 가져오기
+  // 현재 사용자 이메일 및 JIRA 설정 가져오기
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user?.email) {
         setCurrentUserEmail(user.email);
       }
     });
+
+    // JIRA 설정 로드 (Phase 1)
+    const savedJiraConfig = localStorage.getItem('azrael:jiraConfig');
+    if (savedJiraConfig) {
+      try {
+        const config = JSON.parse(savedJiraConfig);
+        setJiraApiToken(config.apiToken || '');
+        setJiraAccountId(config.accountId || '');
+        if (config.accountId) {
+          setJiraConnectionStatus('success');
+        }
+      } catch (err) {
+        console.error('Failed to load JIRA config:', err);
+      }
+    }
   }, []);
 
   // Supabase 데이터 조회
@@ -75,6 +90,13 @@ export function SettingsScreen({
   const [stageModalOpen, setStageModalOpen] = useState(false);
   const [editingStage, setEditingStage] = useState<WorkStage | undefined>();
   const [holidayModalOpen, setHolidayModalOpen] = useState(false);
+
+  // JIRA 설정 상태 (Phase 1)
+  const [jiraApiToken, setJiraApiToken] = useState('');
+  const [jiraAccountId, setJiraAccountId] = useState('');
+  const [showJiraToken, setShowJiraToken] = useState(false);
+  const [jiraConnectionStatus, setJiraConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [jiraErrorMessage, setJiraErrorMessage] = useState('');
 
   const selectedTemplate = templates?.find(t => t.projectId === selectedProjectId);
 
@@ -155,8 +177,8 @@ export function SettingsScreen({
     setStageModalOpen(true);
   };
 
-  // 업무 단계 저장
-  const handleSaveStage = (stage: WorkStage) => {
+  // 업무 단계 저장 (Phase 0.5: 하위 일감 포함)
+  const handleSaveStage = (stage: WorkStage, subtasks: WorkStage[]) => {
     if (!selectedTemplate) {
       // 템플릿이 없으면 새로 생성
       const selectedProject = projects?.find(p => p.id === selectedProjectId);
@@ -165,7 +187,7 @@ export function SettingsScreen({
       const newTemplate: WorkTemplate = {
         id: selectedProject.templateId,
         projectId: selectedProject.id,
-        stages: [{ ...stage, order: 0 }]
+        stages: [{ ...stage, order: 1.0 }, ...subtasks]  // 부모 + 하위 일감
       };
 
       saveTemplateMutation.mutate(newTemplate, {
@@ -182,15 +204,40 @@ export function SettingsScreen({
     let updatedStages: WorkStage[];
 
     if (editingStage) {
-      // 편집
-      updatedStages = selectedTemplate.stages.map(s =>
-        s.id === stage.id ? { ...stage, order: s.order } : s
-      );
+      // 편집: 기존 하위 일감 삭제 후 새로 추가
+      updatedStages = selectedTemplate.stages
+        .filter(s => s.id !== stage.id && s.parentStageId !== stage.id)  // 부모와 기존 하위 제거
+        .map(s => s);  // 다른 stage들 유지
+
+      // 편집된 부모 추가 (order 유지)
+      updatedStages.push({ ...stage, order: editingStage.order });
+
+      // 새 하위 일감 추가
+      updatedStages.push(...subtasks);
+
+      // order로 정렬
+      updatedStages.sort((a, b) => a.order - b.order);
     } else {
-      // 추가
+      // 추가: 기존 부모 stages의 최대 order 찾기
+      const parentStages = selectedTemplate.stages.filter(s => s.depth === 0);
+      const maxOrder = parentStages.length > 0
+        ? Math.max(...parentStages.map(s => Math.floor(s.order)))
+        : 0;
+
+      // 새 부모의 order 설정
+      const newParentOrder = maxOrder + 1.0;
+      const stageWithOrder = { ...stage, order: newParentOrder };
+
+      // 하위 일감 order 재계산
+      const subtasksWithOrder = subtasks.map((sub, idx) => ({
+        ...sub,
+        order: newParentOrder + (idx + 1) * 0.1
+      }));
+
       updatedStages = [
         ...selectedTemplate.stages,
-        { ...stage, order: selectedTemplate.stages.length }
+        stageWithOrder,
+        ...subtasksWithOrder
       ];
     }
 
@@ -417,6 +464,70 @@ export function SettingsScreen({
     event.target.value = '';
   };
 
+  // JIRA 연동 테스트 (Phase 1)
+  const handleTestJiraConnection = async () => {
+    if (!jiraApiToken.trim()) {
+      alert('JIRA API Token을 입력해주세요.');
+      return;
+    }
+
+    setJiraConnectionStatus('testing');
+    setJiraErrorMessage('');
+
+    try {
+      // JIRA API 호출: /rest/api/3/myself
+      const auth = btoa(`${currentUserEmail}:${jiraApiToken}`);
+      const response = await fetch('https://wemade.atlassian.net/rest/api/3/myself', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Basic ${auth}`,
+          'Accept': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`JIRA API 호출 실패 (${response.status}): ${errorText}`);
+      }
+
+      const userData = await response.json();
+      const accountId = userData.accountId;
+
+      if (!accountId) {
+        throw new Error('Account ID를 찾을 수 없습니다.');
+      }
+
+      // LocalStorage에 저장
+      localStorage.setItem('azrael:jiraConfig', JSON.stringify({
+        apiToken: jiraApiToken,
+        accountId: accountId,
+      }));
+
+      setJiraAccountId(accountId);
+      setJiraConnectionStatus('success');
+      alert(`JIRA 연동 성공!\n계정: ${currentUserEmail}\nAccount ID: ${accountId}`);
+    } catch (err: any) {
+      setJiraConnectionStatus('error');
+      setJiraErrorMessage(err.message || 'JIRA 연동 실패');
+      alert(`JIRA 연동 실패: ${err.message}`);
+    }
+  };
+
+  // JIRA 설정 저장 (Phase 1)
+  const handleSaveJiraConfig = () => {
+    if (!jiraAccountId) {
+      alert('먼저 [연동 테스트]를 실행하여 Account ID를 가져와주세요.');
+      return;
+    }
+
+    localStorage.setItem('azrael:jiraConfig', JSON.stringify({
+      apiToken: jiraApiToken,
+      accountId: jiraAccountId,
+    }));
+
+    alert('JIRA 설정이 저장되었습니다.');
+  };
+
   // CSV에서 공휴일 불러오기 (관리자 전용)
   const handleImportHolidaysCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -518,6 +629,12 @@ export function SettingsScreen({
             onClick={() => setActiveTab('holidays')}
           >
             공휴일
+          </div>
+          <div
+            className={`settings-nav-item ${activeTab === 'jira' ? 'active' : ''}`}
+            onClick={() => setActiveTab('jira')}
+          >
+            JIRA 연동
           </div>
         </div>
 
@@ -817,6 +934,91 @@ export function SettingsScreen({
               </div>
             </div>
           )}
+
+          {/* JIRA 연동 설정 (Phase 1) */}
+          {activeTab === 'jira' && (
+            <div>
+              <h3>JIRA 연동 설정</h3>
+
+              <div className="form-group" style={{ marginTop: '1.5rem', maxWidth: '500px' }}>
+                <label className="form-label">JIRA API Token</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type={showJiraToken ? 'text' : 'password'}
+                    className="form-input"
+                    value={jiraApiToken}
+                    onChange={(e) => setJiraApiToken(e.target.value)}
+                    placeholder="JIRA API Token 입력"
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    variant="ghost"
+                    onClick={() => setShowJiraToken(!showJiraToken)}
+                    style={{ padding: '0 1rem' }}
+                  >
+                    {showJiraToken ? '👁️ 숨김' : '👁️ 표시'}
+                  </Button>
+                </div>
+                <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)', display: 'block', marginTop: '0.5rem' }}>
+                  JIRA → 프로필 → 보안 → API 토큰에서 생성
+                </small>
+              </div>
+
+              <div style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+                <Button
+                  onClick={handleTestJiraConnection}
+                  disabled={jiraConnectionStatus === 'testing'}
+                >
+                  {jiraConnectionStatus === 'testing' ? '테스트 중...' : '🔗 연동 테스트'}
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={handleSaveJiraConfig}
+                  disabled={!jiraAccountId}
+                >
+                  💾 저장
+                </Button>
+              </div>
+
+              {/* 연동 상태 표시 */}
+              {jiraConnectionStatus === 'success' && (
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1rem',
+                  background: 'var(--azrael-success-light)',
+                  border: '1px solid var(--azrael-success)',
+                  borderRadius: '8px',
+                  color: 'var(--azrael-success-dark)'
+                }}>
+                  <div style={{ fontWeight: 'var(--weight-semibold)', marginBottom: '0.5rem' }}>
+                    ✅ JIRA 연동 성공!
+                  </div>
+                  <div style={{ fontSize: 'var(--text-sm)' }}>
+                    <div>계정: {currentUserEmail}</div>
+                    <div>Account ID: {jiraAccountId}</div>
+                  </div>
+                </div>
+              )}
+
+              {jiraConnectionStatus === 'error' && (
+                <div style={{
+                  marginTop: '1.5rem',
+                  padding: '1rem',
+                  background: 'var(--azrael-error-light)',
+                  border: '1px solid var(--azrael-error)',
+                  borderRadius: '8px',
+                  color: 'var(--azrael-error-dark)'
+                }}>
+                  <div style={{ fontWeight: 'var(--weight-semibold)', marginBottom: '0.5rem' }}>
+                    ❌ JIRA 연동 실패
+                  </div>
+                  <div style={{ fontSize: 'var(--text-sm)' }}>
+                    {jiraErrorMessage}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -832,6 +1034,7 @@ export function SettingsScreen({
         isOpen={stageModalOpen}
         onClose={() => setStageModalOpen(false)}
         stage={editingStage}
+        existingSubtasks={editingStage ? selectedTemplate?.stages.filter(s => s.parentStageId === editingStage.id) : undefined}
         onSave={handleSaveStage}
       />
 

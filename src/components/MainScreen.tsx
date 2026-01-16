@@ -10,7 +10,9 @@ import { ScheduleTable } from './ScheduleTable';
 import { GanttChart } from './GanttChart';
 import { CalendarView } from './CalendarView';
 import { SettingsScreen } from './SettingsScreen';
+import { JiraPreviewModal } from './JiraPreviewModal';
 import { loadCalculationResult, saveCalculationResult, loadHolidays } from '../lib/storage';
+import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
   calculateIosReviewDate,
@@ -18,6 +20,22 @@ import {
   formatUpdateDate,
   formatDateOnly
 } from '../lib/businessDays';
+import {
+  getSummary,
+  formatDateYYMMDD,
+  formatDateMMDD,
+  type TemplateVars
+} from '../lib/jira/templates';
+import {
+  fetchEpicMapping,
+  createEpicMappingPending,
+  updateEpicMapping,
+  deleteEpicMapping,
+  createTaskMappings,
+  fetchTaskMappings,
+  retryWithBackoff,
+  type TaskMapping
+} from '../lib/api/jira';
 import './MainScreen.css';
 
 interface MainScreenProps {
@@ -39,6 +57,23 @@ export function MainScreen({
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [showSettings, setShowSettings] = useState(false);
 
+  // JIRA 관련 상태 (Phase 1)
+  const [hasJiraConfig, setHasJiraConfig] = useState(false);
+  const [hasEpicMapping, setHasEpicMapping] = useState(false);
+  const [jiraPreviewOpen, setJiraPreviewOpen] = useState(false);
+  const [jiraPreviewData, setJiraPreviewData] = useState<any>(null);
+  const [isCreatingJira, setIsCreatingJira] = useState(false);
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+
+  // 사용자 이메일 가져오기
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user?.email) {
+        setCurrentUserEmail(user.email);
+      }
+    });
+  }, []);
+
   // 프로젝트 변경 시 해당 프로젝트의 계산 결과 로드
   useEffect(() => {
     const lastResult = loadCalculationResult(currentProject.id);
@@ -50,6 +85,28 @@ export function MainScreen({
       setCalculationResult(null);
       setUpdateDate('');
     }
+
+    // JIRA 설정 확인 (Phase 1)
+    const jiraConfig = localStorage.getItem('azrael:jiraConfig');
+    setHasJiraConfig(!!jiraConfig);
+
+    // Epic 매핑 확인 (Phase 1)
+    const checkEpicMapping = async () => {
+      if (!lastResult) {
+        setHasEpicMapping(false);
+        return;
+      }
+
+      try {
+        const epicMapping = await fetchEpicMapping(currentProject.id, lastResult.updateDate);
+        setHasEpicMapping(!!epicMapping && epicMapping.epicId !== 'PENDING');
+      } catch (err) {
+        console.error('Epic 매핑 확인 실패:', err);
+        setHasEpicMapping(false);
+      }
+    };
+
+    checkEpicMapping();
   }, [currentProject.id]);
 
   // 테이블 엔트리 업데이트
@@ -344,6 +401,452 @@ export function MainScreen({
     saveCalculationResult(result);
   };
 
+  // JIRA 생성 핸들러 (Phase 1)
+  const handleCreateJira = async () => {
+    if (!calculationResult) {
+      alert('먼저 일정을 계산해주세요.');
+      return;
+    }
+
+    // JIRA 설정 확인
+    const jiraConfigStr = localStorage.getItem('azrael:jiraConfig');
+    if (!jiraConfigStr) {
+      alert('JIRA 연동 설정이 필요합니다.\n설정 → JIRA 연동 탭에서 API Token을 설정해주세요.');
+      return;
+    }
+
+    // 프로젝트 키 확인
+    if (!currentProject.jiraProjectKey) {
+      alert('JIRA 프로젝트 키가 설정되지 않았습니다.\n설정 → 프로젝트 관리에서 프로젝트를 편집하여 JIRA 프로젝트 키를 입력해주세요.');
+      return;
+    }
+
+    // Epic 중복 체크
+    try {
+      const existingEpic = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
+      if (existingEpic && existingEpic.epicId !== 'PENDING') {
+        alert(`이미 생성된 Epic이 있습니다 (${existingEpic.epicKey}).\n\n[JIRA 업데이트] 버튼을 사용하여 일정을 변경하세요.`);
+        return;
+      }
+    } catch (err: any) {
+      alert(`Epic 확인 실패: ${err.message}`);
+      return;
+    }
+
+    // 미리보기 데이터 생성
+    try {
+      const template = templates.find(t => t.id === currentProject.templateId);
+      if (!template) return;
+
+      // 템플릿 변수 생성
+      const dateStr = formatDateYYMMDD(calculationResult.updateDate);
+      const headsUpStr = formatDateMMDD(calculationResult.headsUpDate);
+
+      // Epic Summary
+      const epicSummary = currentProject.jiraEpicTemplate
+        ? currentProject.jiraEpicTemplate.replace(/{date}/g, dateStr).replace(/{projectName}/g, currentProject.name).replace(/{headsUp}/g, headsUpStr)
+        : `${dateStr} 업데이트`;
+
+      // Tasks 미리보기 데이터 생성
+      const tasks: any[] = [];
+
+      // 헤즈업 Task
+      tasks.push({
+        type: 'Task',
+        summary: `${dateStr} 업데이트 일정 헤즈업`,
+        startDate: calculationResult.headsUpDate,
+        endDate: calculationResult.headsUpDate,
+        stageId: 'HEADSUP',
+      });
+
+      // Ext./Int. Tasks
+      [...calculationResult.table2Entries, ...calculationResult.table3Entries].forEach(entry => {
+        if (!entry.parentId) {
+          // 부모 Task
+          const vars: TemplateVars = {
+            date: dateStr,
+            headsUp: headsUpStr,
+            projectName: currentProject.name,
+            taskName: entry.stageName,
+            subtaskName: '',
+            stageName: entry.stageName,
+          };
+
+          const stage = template.stages.find(s => s.id === entry.stageId);
+          const summary = getSummary(stage?.jiraSummaryTemplate, vars, false);
+
+          const taskPreview: any = {
+            type: 'Task',
+            summary,
+            startDate: entry.startDateTime,
+            endDate: entry.endDateTime,
+            stageId: entry.stageId,
+            children: [],
+          };
+
+          // 하위 일감 (Subtasks)
+          if (entry.children) {
+            taskPreview.children = entry.children.map(child => {
+              const childStage = template.stages.find(s => s.id === child.stageId);
+              const childVars: TemplateVars = {
+                ...vars,
+                subtaskName: child.stageName,
+                stageName: child.stageName,
+              };
+              const childSummary = getSummary(childStage?.jiraSummaryTemplate, childVars, true);
+
+              return {
+                type: 'Sub-task',
+                summary: childSummary,
+                startDate: child.startDateTime,
+                endDate: child.endDateTime,
+                stageId: child.stageId,
+              };
+            });
+          }
+
+          tasks.push(taskPreview);
+        }
+      });
+
+      setJiraPreviewData({
+        epic: {
+          summary: epicSummary,
+          startDate: calculationResult.headsUpDate,
+          endDate: calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate,
+        },
+        tasks,
+      });
+
+      setJiraPreviewOpen(true);
+    } catch (err: any) {
+      alert(`미리보기 생성 실패: ${err.message}`);
+    }
+  };
+
+  // JIRA 생성 확인 (Phase 1)
+  const handleConfirmJiraCreate = async () => {
+    if (!calculationResult || !jiraPreviewData) return;
+
+    setIsCreatingJira(true);
+    let epicMappingId: string | null = null;
+
+    try {
+      // 1. Supabase 선삽입 (동시 생성 방지)
+      const pendingMapping = await createEpicMappingPending(
+        currentProject.id,
+        calculationResult.updateDate
+      );
+      epicMappingId = pendingMapping.id;
+
+      // 2. JIRA Config 로드
+      const jiraConfigStr = localStorage.getItem('azrael:jiraConfig');
+      if (!jiraConfigStr) {
+        throw new Error('JIRA 설정을 찾을 수 없습니다.');
+      }
+      const jiraConfig = JSON.parse(jiraConfigStr);
+
+      // 3. Edge Function 요청 데이터 생성
+      const template = templates.find(t => t.id === currentProject.templateId);
+      if (!template) throw new Error('템플릿을 찾을 수 없습니다.');
+
+      const requestData = {
+        projectKey: currentProject.jiraProjectKey!,
+        epic: jiraPreviewData.epic,
+        tasks: [] as any[],
+        jiraAuth: {
+          email: currentUserEmail,
+          apiToken: jiraConfig.apiToken,
+        },
+      };
+
+      // Tasks 데이터 생성 (미리보기 데이터 활용)
+      jiraPreviewData.tasks.forEach((task: any) => {
+        // 헤즈업 또는 부모 Task
+        requestData.tasks.push({
+          stageId: task.stageId,
+          type: task.type,
+          summary: task.summary,
+          description: '',
+          startDate: task.startDate.toISOString(),
+          endDate: task.endDate.toISOString(),
+          assignee: jiraConfig.accountId, // 현재 사용자
+          parentStageId: undefined,
+        });
+
+        // Subtasks
+        if (task.children) {
+          task.children.forEach((subtask: any) => {
+            requestData.tasks.push({
+              stageId: subtask.stageId,
+              type: 'Sub-task',
+              summary: subtask.summary,
+              description: '',
+              startDate: subtask.startDate.toISOString(),
+              endDate: subtask.endDate.toISOString(),
+              assignee: jiraConfig.accountId,
+              parentStageId: task.stageId, // 부모 Task stageId
+            });
+          });
+        }
+      });
+
+      // 4. Edge Function 호출
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/jira-create`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Edge Function 호출 실패 (${response.status})`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'JIRA 생성 실패');
+      }
+
+      // 5. Supabase 매핑 업데이트 (Exponential Backoff)
+      const epicIssue = result.createdIssues.find((i: any) => i.type === 'Epic');
+      if (!epicIssue) {
+        throw new Error('Epic 생성 결과를 찾을 수 없습니다.');
+      }
+
+      await retryWithBackoff(async () => {
+        await updateEpicMapping(
+          epicMappingId!,
+          epicIssue.id,
+          epicIssue.key,
+          `https://wemade.atlassian.net/browse/${epicIssue.key}`
+        );
+      });
+
+      // 6. Task 매핑 저장
+      const taskMappings: Omit<TaskMapping, 'id' | 'createdAt' | 'updatedAt'>[] = result.createdIssues
+        .filter((i: any) => i.type !== 'Epic')
+        .map((i: any) => ({
+          epicMappingId: epicMappingId!,
+          stageId: i.stageId,
+          isHeadsup: i.stageId === 'HEADSUP',
+          taskId: i.id,
+          taskKey: i.key,
+          taskUrl: `https://wemade.atlassian.net/browse/${i.key}`,
+          issueType: i.type as 'Task' | 'Sub-task',
+        }));
+
+      await retryWithBackoff(async () => {
+        await createTaskMappings(taskMappings);
+      });
+
+      // 7. Epic 존재 여부 업데이트
+      setHasEpicMapping(true);
+
+      // 8. 성공 메시지
+      alert(`JIRA 일감이 생성되었습니다!\n\nEpic: ${epicIssue.key}\n총 ${result.createdIssues.length}개 일감 생성\n\nJIRA에서 확인하세요: https://wemade.atlassian.net/browse/${epicIssue.key}`);
+      setJiraPreviewOpen(false);
+    } catch (err: any) {
+      console.error('JIRA 생성 실패:', err);
+
+      // 롤백: Supabase 임시 레코드 삭제
+      if (epicMappingId) {
+        try {
+          await deleteEpicMapping(epicMappingId);
+        } catch (rollbackErr) {
+          console.error('롤백 실패:', rollbackErr);
+        }
+      }
+
+      alert(`JIRA 생성 실패:\n${err.message}`);
+    } finally {
+      setIsCreatingJira(false);
+    }
+  };
+
+  // JIRA 업데이트 핸들러 (Phase 1)
+  const handleUpdateJira = async () => {
+    if (!calculationResult) {
+      alert('먼저 일정을 계산해주세요.');
+      return;
+    }
+
+    try {
+      // 1. Epic 매핑 조회
+      const epicMapping = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
+      if (!epicMapping || epicMapping.epicId === 'PENDING') {
+        alert('생성된 Epic이 없습니다.\n먼저 [JIRA 생성]을 실행하세요.');
+        return;
+      }
+
+      // 2. Task 매핑 조회
+      const existingTaskMappings = await fetchTaskMappings(epicMapping.id!);
+
+      // 3. JIRA Config 로드
+      const jiraConfigStr = localStorage.getItem('azrael:jiraConfig');
+      if (!jiraConfigStr) {
+        alert('JIRA 설정을 찾을 수 없습니다.');
+        return;
+      }
+      const jiraConfig = JSON.parse(jiraConfigStr);
+
+      // 4. 업데이트할 데이터 생성
+      const template = templates.find(t => t.id === currentProject.templateId);
+      if (!template) return;
+
+      const dateStr = formatDateYYMMDD(calculationResult.updateDate);
+      const headsUpStr = formatDateMMDD(calculationResult.headsUpDate);
+
+      const updates: any[] = [];
+      let updatedCount = 0;
+      let createdCount = 0;
+
+      // Epic 날짜 업데이트
+      const epicUpdate = {
+        startDate: calculationResult.headsUpDate.toISOString(),
+        endDate: (calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate).toISOString(),
+      };
+
+      // 헤즈업 Task
+      const headsupMapping = existingTaskMappings.find(m => m.stageId === 'HEADSUP');
+      updates.push({
+        issueId: headsupMapping?.taskId,
+        stageId: 'HEADSUP',
+        summary: `${dateStr} 업데이트 일정 헤즈업`,
+        startDate: calculationResult.headsUpDate.toISOString(),
+        endDate: calculationResult.headsUpDate.toISOString(),
+        assignee: jiraConfig.accountId,
+        issueType: 'Task' as const,
+      });
+
+      if (headsupMapping) updatedCount++;
+      else createdCount++;
+
+      // Ext./Int. Tasks
+      [...calculationResult.table2Entries, ...calculationResult.table3Entries].forEach(entry => {
+        if (!entry.parentId) {
+          // 부모 Task
+          const vars: TemplateVars = {
+            date: dateStr,
+            headsUp: headsUpStr,
+            projectName: currentProject.name,
+            taskName: entry.stageName,
+            subtaskName: '',
+            stageName: entry.stageName,
+          };
+
+          const stage = template.stages.find(s => s.id === entry.stageId);
+          const summary = getSummary(stage?.jiraSummaryTemplate, vars, false);
+          const taskMapping = existingTaskMappings.find(m => m.stageId === entry.stageId);
+
+          updates.push({
+            issueId: taskMapping?.taskId,
+            stageId: entry.stageId,
+            summary,
+            startDate: entry.startDateTime.toISOString(),
+            endDate: entry.endDateTime.toISOString(),
+            assignee: entry.jiraAssignee || jiraConfig.accountId,
+            issueType: 'Task' as const,
+          });
+
+          if (taskMapping) updatedCount++;
+          else createdCount++;
+
+          // Subtasks
+          if (entry.children) {
+            entry.children.forEach(child => {
+              const childStage = template.stages.find(s => s.id === child.stageId);
+              const childVars: TemplateVars = {
+                ...vars,
+                subtaskName: child.stageName,
+                stageName: child.stageName,
+              };
+              const childSummary = getSummary(childStage?.jiraSummaryTemplate, childVars, true);
+              const subtaskMapping = existingTaskMappings.find(m => m.stageId === child.stageId);
+
+              updates.push({
+                issueId: subtaskMapping?.taskId,
+                stageId: child.stageId,
+                summary: childSummary,
+                startDate: child.startDateTime.toISOString(),
+                endDate: child.endDateTime.toISOString(),
+                assignee: child.jiraAssignee || jiraConfig.accountId,
+                issueType: 'Sub-task' as const,
+                parentTaskId: taskMapping?.taskId, // 부모 Task ID
+              });
+
+              if (subtaskMapping) updatedCount++;
+              else createdCount++;
+            });
+          }
+        }
+      });
+
+      // 5. 확인 다이얼로그
+      if (!confirm(`JIRA 일감을 업데이트하시겠습니까?\n\n업데이트: ${updatedCount}개\n신규 생성: ${createdCount}개`)) {
+        return;
+      }
+
+      // 6. Edge Function 호출
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/jira-update`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          epicId: epicMapping.epicId,
+          epicUpdate,
+          updates,
+          jiraAuth: {
+            email: currentUserEmail,
+            apiToken: jiraConfig.apiToken,
+          },
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Edge Function 호출 실패 (${response.status})`);
+      }
+
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'JIRA 업데이트 실패');
+      }
+
+      // 7. 신규 생성된 Task 매핑 저장
+      if (result.createdIssues && result.createdIssues.length > 0) {
+        const newMappings: Omit<TaskMapping, 'id' | 'createdAt' | 'updatedAt'>[] = result.createdIssues.map((i: any) => ({
+          epicMappingId: epicMapping.id!,
+          stageId: i.stageId,
+          isHeadsup: i.stageId === 'HEADSUP',
+          taskId: i.id,
+          taskKey: i.key,
+          taskUrl: `https://wemade.atlassian.net/browse/${i.key}`,
+          issueType: i.type as 'Task' | 'Sub-task',
+        }));
+
+        await createTaskMappings(newMappings);
+      }
+
+      // 8. 성공 메시지
+      alert(`JIRA 일감이 업데이트되었습니다!\n\n업데이트: ${result.updatedCount}개\n신규 생성: ${result.createdCount}개`);
+    } catch (err: any) {
+      console.error('JIRA 업데이트 실패:', err);
+      alert(`JIRA 업데이트 실패:\n${err.message}`);
+    }
+  };
+
   // 설정 화면 표시
   if (showSettings) {
     return (
@@ -396,6 +899,21 @@ export function MainScreen({
             className="input date-input"
           />
           <Button onClick={handleCalculate}>계산</Button>
+          <Button
+            onClick={handleCreateJira}
+            disabled={!calculationResult || !hasJiraConfig}
+            title={!calculationResult ? '일정 계산 후 사용 가능' : !hasJiraConfig ? 'JIRA 설정 필요' : ''}
+          >
+            📋 JIRA 생성
+          </Button>
+          <Button
+            onClick={handleUpdateJira}
+            disabled={!hasEpicMapping}
+            variant="secondary"
+            title={!hasEpicMapping ? '먼저 JIRA 생성 필요' : ''}
+          >
+            🔄 JIRA 업데이트
+          </Button>
         </div>
       </div>
 
@@ -483,6 +1001,18 @@ export function MainScreen({
             updateDate={calculationResult.updateDate}
           />
         </div>
+      )}
+
+      {/* JIRA 미리보기 모달 (Phase 1) */}
+      {jiraPreviewData && (
+        <JiraPreviewModal
+          isOpen={jiraPreviewOpen}
+          onClose={() => setJiraPreviewOpen(false)}
+          onConfirm={handleConfirmJiraCreate}
+          epic={jiraPreviewData.epic}
+          tasks={jiraPreviewData.tasks}
+          isCreating={isCreatingJira}
+        />
       )}
     </div>
   );

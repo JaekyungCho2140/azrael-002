@@ -21,6 +21,7 @@ function mapToWorkStage(row: any): WorkStage {
     parentStageId: row.parent_stage_id || undefined,
     depth: row.depth,
     tableTargets: row.table_targets as ('table1' | 'table2' | 'table3')[],
+    jiraSummaryTemplate: row.jira_summary_template || undefined,
   };
 }
 
@@ -147,9 +148,10 @@ export async function createStage(stage: WorkStage): Promise<void> {
     start_time: stage.startTime,
     end_time: stage.endTime,
     order: stage.order,
-    parent_stage_id: stage.parentStageId,
+    parent_stage_id: stage.parentStageId || null,
     depth: stage.depth,
     table_targets: stage.tableTargets,
+    jira_summary_template: stage.jiraSummaryTemplate || null,
   });
 
   if (error) {
@@ -171,9 +173,10 @@ export async function updateStage(id: string, updates: Partial<WorkStage>): Prom
       start_time: updates.startTime,
       end_time: updates.endTime,
       order: updates.order,
-      parent_stage_id: updates.parentStageId,
+      parent_stage_id: updates.parentStageId || null,
       depth: updates.depth,
       table_targets: updates.tableTargets,
+      jira_summary_template: updates.jiraSummaryTemplate || null,
     })
     .eq('id', id);
 
@@ -227,7 +230,7 @@ export async function saveTemplate(template: WorkTemplate): Promise<void> {
     throw new Error(`기존 업무 단계 삭제 실패: ${deleteError.message}`);
   }
 
-  // 2. 새 stages 삽입
+  // 2. 새 stages 삽입 (Phase 0.5: jira_summary_template 포함)
   if (template.stages.length > 0) {
     const { error: insertError } = await supabase.from('work_stages').insert(
       template.stages.map((stage) => ({
@@ -239,9 +242,10 @@ export async function saveTemplate(template: WorkTemplate): Promise<void> {
         start_time: stage.startTime,
         end_time: stage.endTime,
         order: stage.order,
-        parent_stage_id: stage.parentStageId,
+        parent_stage_id: stage.parentStageId || null,
         depth: stage.depth,
         table_targets: stage.tableTargets,
+        jira_summary_template: stage.jiraSummaryTemplate || null,
       }))
     );
 

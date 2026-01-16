@@ -1,9 +1,12 @@
 # Azrael PRD - Design System
 
 **작성일**: 2026-01-09
-**버전**: 1.0
+**최종 업데이트**: 2026-01-14
+**버전**: 2.0
 **디자인 컨셉**: Azrael the Orange Cat (스머프의 가가멜 고양이)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md) | [Azrael-PRD-Phase0.md](./Azrael-PRD-Phase0.md)
+
+**구현 파일**: `src/styles/tokens.css` (모든 디자인 토큰 정의됨)
 
 ---
 

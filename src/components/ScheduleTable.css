@@ -127,3 +127,23 @@ tr.subtask td:nth-child(3) {
   margin-bottom: 0.5rem;
   color: var(--azrael-gray-900);
 }
+
+/* JIRA 담당자 컬럼 스타일 (Phase 0.5) */
+.jira-assignee {
+  width: 120px;
+  max-width: 120px;
+  text-align: center;
+}
+
+.jira-assignee .truncate {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jira-assignee input {
+  width: 100%;
+  min-width: 110px;
+}
