@@ -68,7 +68,7 @@ tr.subtask td:nth-child(3) {
   position: relative;
 }
 
-.editable:hover {
+.editable:hover:not(:has(input)) {
   background: var(--azrael-orange-50);
   outline: 1px dashed var(--azrael-orange-300);
 }
