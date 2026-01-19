@@ -464,7 +464,7 @@ export function SettingsScreen({
     event.target.value = '';
   };
 
-  // JIRA 연동 테스트 (Phase 1)
+  // JIRA 연동 테스트 (Phase 1) - Edge Function 사용 (CORS 우회)
   const handleTestJiraConnection = async () => {
     if (!jiraApiToken.trim()) {
       alert('JIRA API Token을 입력해주세요.');
@@ -475,23 +475,34 @@ export function SettingsScreen({
     setJiraErrorMessage('');
 
     try {
-      // JIRA API 호출: /rest/api/3/myself
-      const auth = btoa(`${currentUserEmail}:${jiraApiToken}`);
-      const response = await fetch('https://wemade.atlassian.net/rest/api/3/myself', {
-        method: 'GET',
+      // Edge Function 호출: jira-test-connection (CORS 우회)
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      const response = await fetch(`${supabaseUrl}/functions/v1/jira-test-connection`, {
+        method: 'POST',
         headers: {
-          'Authorization': `Basic ${auth}`,
-          'Accept': 'application/json',
+          'Authorization': `Bearer ${supabaseAnonKey}`,
+          'Content-Type': 'application/json',
         },
+        body: JSON.stringify({
+          email: currentUserEmail,
+          apiToken: jiraApiToken,
+        }),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`JIRA API 호출 실패 (${response.status}): ${errorText}`);
+        throw new Error(`Edge Function 호출 실패 (${response.status}): ${errorText}`);
       }
 
-      const userData = await response.json();
-      const accountId = userData.accountId;
+      const result = await response.json();
+
+      if (!result.success) {
+        throw new Error(result.error || 'JIRA 연동 실패');
+      }
+
+      const accountId = result.accountId;
 
       if (!accountId) {
         throw new Error('Account ID를 찾을 수 없습니다.');
@@ -505,7 +516,7 @@ export function SettingsScreen({
 
       setJiraAccountId(accountId);
       setJiraConnectionStatus('success');
-      alert(`JIRA 연동 성공!\n계정: ${currentUserEmail}\nAccount ID: ${accountId}`);
+      alert(`JIRA 연동 성공!\n계정: ${result.email || currentUserEmail}\nAccount ID: ${accountId}`);
     } catch (err: any) {
       setJiraConnectionStatus('error');
       setJiraErrorMessage(err.message || 'JIRA 연동 실패');

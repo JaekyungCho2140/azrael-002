@@ -101,10 +101,11 @@ ADD COLUMN jira_headsup_template TEXT;
   - Phase 0.5 + Phase 1 스키마 변경 통합
   - 참조: [prd/Azrael-PRD-Phase0.5.md §4.3](./prd/Azrael-PRD-Phase0.5.md)
 
-- [ ] **Supabase CLI로 마이그레이션 배포**
+- [x] **Supabase CLI로 마이그레이션 배포**
   ```bash
   supabase db push
   ```
+  ✅ 완료: Supabase MCP를 통해 7개 마이그레이션 배포 성공
 
 ---
 
@@ -667,17 +668,19 @@ function getSummary(stage: WorkStage, variables: TemplateVars): string {
 ### 13. Supabase Edge Functions 구현
 
 #### 13.1. Edge Function 프로젝트 설정
-- [ ] **Supabase CLI 설치**
+- [x] **Supabase CLI 설치**
   ```bash
   npm install -g supabase
   ```
+  ✅ 완료: 사용자가 설치 완료
 
-- [ ] **Supabase 프로젝트 링크**
+- [x] **Supabase 프로젝트 링크**
   ```bash
   supabase link --project-ref vgoqkyqqkieogrtnmsva
   ```
+  ✅ 완료: 인증 완료
 
-- [ ] **환경 변수 설정 (Supabase Dashboard)**
+- [ ] **환경 변수 설정 (Supabase Dashboard)** 🔴 사용자 수동 작업 필요
   - `JIRA_URL=https://wemade.atlassian.net`
   - `JIRA_CUSTOM_FIELD_START=customfield_10569`
   - `JIRA_CUSTOM_FIELD_END=customfield_10570`
@@ -803,7 +806,7 @@ function getSummary(stage: WorkStage, variables: TemplateVars): string {
   ```
 
 #### 13.4. Edge Functions 배포
-- [ ] **로컬 테스트**
+- [ ] **로컬 테스트** (선택적)
   ```bash
   # .env.local 파일 생성
   echo "JIRA_URL=https://wemade.atlassian.net" > supabase/functions/.env.local
@@ -820,11 +823,14 @@ function getSummary(stage: WorkStage, variables: TemplateVars): string {
     --data '{"projectKey":"TEST",...}'
   ```
 
-- [ ] **프로덕션 배포**
+- [x] **프로덕션 배포**
   ```bash
   supabase functions deploy jira-create
   supabase functions deploy jira-update
   ```
+  ✅ 완료: Supabase MCP를 통해 배포 성공
+  - jira-create: ID 6df1117b..., 상태 ACTIVE
+  - jira-update: ID 45d01e2d..., 상태 ACTIVE
 
 ---
 
@@ -1010,17 +1016,17 @@ function getSummary(stage: WorkStage, variables: TemplateVars): string {
 - [ ] **통합 테스트 성공** (Supabase 배포 후)
 
 ### Phase 1 완료 기준
-- [x] **Supabase jira_epic_mappings, jira_task_mappings 테이블 생성 및 RLS 설정** (마이그레이션 파일 작성)
-- [x] **설정 → JIRA 연동 설정 탭 구현 및 연동 테스트 기능**
-- [x] **메인 화면 [JIRA 생성] / [JIRA 업데이트] 버튼 추가**
-- [x] **JIRA Summary 템플릿 시스템 구현 (변수 치환 엔진)**
-- [x] **JIRA 미리보기 모달 구현**
-- [x] **Supabase Edge Functions (jira-create, jira-update) 코드 작성 완료**
-- [x] **JIRA 일감 생성 플로우 완성** (Epic 중복 체크, Edge Function 호출, Supabase 저장)
-- [x] **JIRA 일감 업데이트 플로우 구현** (Task 매칭, Edge Function 호출)
-- [ ] **Edge Functions 배포** (사용자 지원 필요)
-- [ ] **E2E 테스트** (배포 후)
-- [ ] **고급 에러 처리** (Epic 수동 삭제, 타임아웃, Rate Limit - 선택적)
+- [x] **Supabase jira_epic_mappings, jira_task_mappings 테이블 생성 및 RLS 설정** ✅ 배포 완료
+- [x] **설정 → JIRA 연동 설정 탭 구현 및 연동 테스트 기능** ✅ 구현 완료
+- [x] **메인 화면 [JIRA 생성] / [JIRA 업데이트] 버튼 추가** ✅ 구현 완료
+- [x] **JIRA Summary 템플릿 시스템 구현 (변수 치환 엔진)** ✅ 구현 완료
+- [x] **JIRA 미리보기 모달 구현** ✅ 구현 완료
+- [x] **Supabase Edge Functions (jira-create, jira-update) 배포** ✅ 배포 완료
+- [x] **JIRA 일감 생성 플로우 완성** ✅ 구현 완료 (Epic 중복 체크, Edge Function 호출, Supabase 저장)
+- [x] **JIRA 일감 업데이트 플로우 구현** ✅ 구현 완료 (Task 매칭, Edge Function 호출)
+- [ ] **Edge Functions 환경 변수 설정** 🔴 사용자 수동 작업 필요 (2분)
+- [ ] **E2E 테스트** (환경 변수 설정 후)
+- [ ] **고급 에러 처리** (Epic 수동 삭제, 타임아웃 - 선택적, Phase 1.5+)
 
 ---
 
