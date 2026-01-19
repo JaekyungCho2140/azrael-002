@@ -68,9 +68,14 @@ tr.subtask td:nth-child(3) {
   position: relative;
 }
 
-.editable:hover:not(:has(input)) {
+.editable:hover:not(.editing) {
   background: var(--azrael-orange-50);
   outline: 1px dashed var(--azrael-orange-300);
+}
+
+.editable.editing {
+  background: transparent;
+  outline: none;
 }
 
 .editable input {

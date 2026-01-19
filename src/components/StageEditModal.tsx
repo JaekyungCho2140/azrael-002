@@ -117,7 +117,8 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       depth: 1,
       parentStageId: stage?.id,
       tableTargets: [...tableTargets],
-      jiraSummaryTemplate: '{date} 업데이트 {taskName} {subtaskName}'
+      jiraSummaryTemplate: '{date} 업데이트 {taskName} {subtaskName}',
+      jiraSubtaskIssueType: ''  // 기본값: 배치명 사용
     };
     setSubtasks([...subtasks, newSubtask]);
   };
@@ -443,6 +444,31 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
                       placeholder="{date} 업데이트 {taskName} {subtaskName}"
                       style={{ fontSize: 'var(--text-sm)' }}
                     />
+                  </div>
+
+                  {/* Subtask 이슈 타입 (Phase 1.5) */}
+                  <div className="form-group" style={{ marginBottom: 0, marginTop: '0.5rem' }}>
+                    <label className="form-label" style={{ fontSize: 'var(--text-xs)' }}>
+                      Subtask 이슈 타입
+                      <span
+                        className="info-icon"
+                        title="JIRA에서 생성할 Subtask 이슈 타입. 예: 번역, 검수, PM(하위)"
+                        style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
+                      >
+                        ?
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      className="form-input"
+                      value={subtask.jiraSubtaskIssueType || ''}
+                      onChange={(e) => updateSubtask(index, 'jiraSubtaskIssueType', e.target.value)}
+                      placeholder={subtask.name || '배치명과 동일'}
+                      style={{ fontSize: 'var(--text-sm)' }}
+                    />
+                    <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)', marginTop: '0.25rem', display: 'block' }}>
+                      비워두면 배치명 사용
+                    </small>
                   </div>
                 </div>
               ))}

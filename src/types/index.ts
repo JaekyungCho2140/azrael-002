@@ -15,9 +15,10 @@ export interface Project {
   showIosReviewDate: boolean;    // iOS 심사일 표시 여부
   templateId: string;            // 업무 단계 템플릿 ID
   disclaimer: string;            // 테이블 하단 Disclaimer 메모 (최대 6줄/600자, HTML)
-  jiraProjectKey?: string;       // JIRA 프로젝트 키 (Phase 1, 예: "M4L10N")
+  jiraProjectKey?: string;       // JIRA 프로젝트 키 (Phase 1, 예: "L10NM4")
   jiraEpicTemplate?: string;     // JIRA Epic Summary 템플릿 (Phase 0.5)
   jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿 (Phase 0.5)
+  jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (Phase 1.5, 기본값: "PM(표준)")
   // isDeletable는 런타임 계산 필드 (저장 안 함)
 }
 
@@ -48,6 +49,7 @@ export interface WorkStage {
   depth: number;                 // 0=부모, 1=자식 (최대 1)
   tableTargets: ('table1' | 'table2' | 'table3')[]; // 표시할 테이블 위치
   jiraSummaryTemplate?: string;  // JIRA Summary 템플릿 (Phase 0.5, 예: "{date} 업데이트 {taskName}")
+  jiraSubtaskIssueType?: string; // JIRA Subtask 이슈 타입 (Phase 1.5, 하위 일감만, 기본값: name)
 }
 
 /**

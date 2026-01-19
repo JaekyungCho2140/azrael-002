@@ -456,8 +456,9 @@ export function MainScreen({
       const tasks: any[] = [];
 
       // 헤즈업 Task
+      const taskIssueType = currentProject.jiraTaskIssueType || 'PM(표준)';
       tasks.push({
-        type: 'Task',
+        type: taskIssueType,
         summary: `${dateStr} 업데이트 일정 헤즈업`,
         startDate: calculationResult.headsUpDate,
         endDate: calculationResult.headsUpDate,
@@ -481,7 +482,7 @@ export function MainScreen({
           const summary = getSummary(stage?.jiraSummaryTemplate, vars, false);
 
           const taskPreview: any = {
-            type: 'Task',
+            type: taskIssueType,  // 설정된 Task 이슈 타입 사용
             summary,
             startDate: entry.startDateTime,
             endDate: entry.endDateTime,
@@ -499,9 +500,11 @@ export function MainScreen({
                 stageName: child.stageName,
               };
               const childSummary = getSummary(childStage?.jiraSummaryTemplate, childVars, true);
+              // Subtask 이슈 타입: 설정값 또는 배치명 사용
+              const subtaskIssueType = childStage?.jiraSubtaskIssueType || child.stageName;
 
               return {
-                type: 'Sub-task',
+                type: subtaskIssueType,
                 summary: childSummary,
                 startDate: child.startDateTime,
                 endDate: child.endDateTime,

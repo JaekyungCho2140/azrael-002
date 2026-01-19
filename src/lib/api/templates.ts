@@ -22,6 +22,7 @@ function mapToWorkStage(row: any): WorkStage {
     depth: row.depth,
     tableTargets: row.table_targets as ('table1' | 'table2' | 'table3')[],
     jiraSummaryTemplate: row.jira_summary_template || undefined,
+    jiraSubtaskIssueType: row.jira_subtask_issue_type || undefined,
   };
 }
 
@@ -152,6 +153,7 @@ export async function createStage(stage: WorkStage): Promise<void> {
     depth: stage.depth,
     table_targets: stage.tableTargets,
     jira_summary_template: stage.jiraSummaryTemplate || null,
+    jira_subtask_issue_type: stage.jiraSubtaskIssueType || null,
   });
 
   if (error) {
@@ -177,6 +179,7 @@ export async function updateStage(id: string, updates: Partial<WorkStage>): Prom
       depth: updates.depth,
       table_targets: updates.tableTargets,
       jira_summary_template: updates.jiraSummaryTemplate || null,
+      jira_subtask_issue_type: updates.jiraSubtaskIssueType || null,
     })
     .eq('id', id);
 
@@ -246,6 +249,7 @@ export async function saveTemplate(template: WorkTemplate): Promise<void> {
         depth: stage.depth,
         table_targets: stage.tableTargets,
         jira_summary_template: stage.jiraSummaryTemplate || null,
+        jira_subtask_issue_type: stage.jiraSubtaskIssueType || null,
       }))
     );
 

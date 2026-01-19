@@ -23,10 +23,11 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const [iosReviewOffset, setIosReviewOffset] = useState(7);
   const [disclaimer, setDisclaimer] = useState('');
 
-  // JIRA 관련 필드 (Phase 0.5 + Phase 1)
+  // JIRA 관련 필드 (Phase 0.5 + Phase 1 + Phase 1.5)
   const [jiraProjectKey, setJiraProjectKey] = useState('');
   const [jiraEpicTemplate, setJiraEpicTemplate] = useState('');
   const [jiraHeadsupTemplate, setJiraHeadsupTemplate] = useState('');
+  const [jiraTaskIssueType, setJiraTaskIssueType] = useState('');
 
   useEffect(() => {
     if (project) {
@@ -38,6 +39,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraProjectKey(project.jiraProjectKey || '');
       setJiraEpicTemplate(project.jiraEpicTemplate || '');
       setJiraHeadsupTemplate(project.jiraHeadsupTemplate || '');
+      setJiraTaskIssueType(project.jiraTaskIssueType || '');
     } else {
       setName('');
       setHeadsUpOffset(10);
@@ -47,6 +49,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraProjectKey('');
       setJiraEpicTemplate('');
       setJiraHeadsupTemplate('');
+      setJiraTaskIssueType('');
     }
   }, [project, isOpen]);
 
@@ -66,7 +69,8 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       disclaimer,
       jiraProjectKey: jiraProjectKey.trim() || undefined,
       jiraEpicTemplate: jiraEpicTemplate.trim() || undefined,
-      jiraHeadsupTemplate: jiraHeadsupTemplate.trim() || undefined
+      jiraHeadsupTemplate: jiraHeadsupTemplate.trim() || undefined,
+      jiraTaskIssueType: jiraTaskIssueType.trim() || undefined
     };
 
     onSave(updatedProject);
@@ -206,6 +210,30 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
         />
         <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
           비워두면 기본 형식 사용
+        </small>
+      </div>
+
+      {/* Task 이슈 타입 (Phase 1.5) */}
+      <div className="form-group">
+        <label className="form-label">
+          Task 이슈 타입 (선택)
+          <span
+            className="info-icon"
+            title="JIRA에서 Epic 하위에 생성할 Task의 이슈 타입 이름. 예: PM(표준), Story, 작업"
+            style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
+          >
+            ?
+          </span>
+        </label>
+        <input
+          type="text"
+          className="form-input"
+          value={jiraTaskIssueType}
+          onChange={(e) => setJiraTaskIssueType(e.target.value)}
+          placeholder="PM(표준)"
+        />
+        <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+          비워두면 "PM(표준)" 사용
         </small>
       </div>
     </Modal>

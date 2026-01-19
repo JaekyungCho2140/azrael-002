@@ -71,7 +71,7 @@ export function ScheduleTable({
 
           {/* 설명 */}
           <td
-            className="editable"
+            className={`editable ${editingCell?.entryId === entry.id && editingCell.field === 'description' ? 'editing' : ''}`}
             onClick={() => startEdit(entry.id, 'description', entry.description)}
           >
             {editingCell?.entryId === entry.id && editingCell.field === 'description' ? (
@@ -91,7 +91,7 @@ export function ScheduleTable({
           {/* 담당자 (테이블 1) 또는 JIRA 설명 (테이블 2/3) */}
           {type === 'table1' ? (
             <td
-              className="editable"
+              className={`editable ${editingCell?.entryId === entry.id && (editingCell.field === 'assignee' || editingCell.field === 'jiraDescription' || editingCell.field === 'jiraAssignee') ? 'editing' : ''}`}
               onClick={() => startEdit(entry.id, 'assignee', entry.assignee || '')}
             >
               {editingCell?.entryId === entry.id && editingCell.field === 'assignee' ? (
@@ -109,7 +109,7 @@ export function ScheduleTable({
             </td>
           ) : (
             <td
-              className="editable"
+              className={`editable ${editingCell?.entryId === entry.id && (editingCell.field === 'assignee' || editingCell.field === 'jiraDescription' || editingCell.field === 'jiraAssignee') ? 'editing' : ''}`}
               onClick={() => startEdit(entry.id, 'jiraDescription', entry.jiraDescription || '')}
             >
               {editingCell?.entryId === entry.id && editingCell.field === 'jiraDescription' ? (
@@ -130,7 +130,7 @@ export function ScheduleTable({
           {/* JIRA 담당자 (테이블 2/3) */}
           {type !== 'table1' && (
             <td
-              className="editable jira-assignee"
+              className={`editable jira-assignee ${editingCell?.entryId === entry.id && editingCell.field === 'jiraAssignee' ? 'editing' : ''}`}
               onClick={() => startEdit(entry.id, 'jiraAssignee', entry.jiraAssignee || '')}
             >
               {editingCell?.entryId === entry.id && editingCell.field === 'jiraAssignee' ? (
