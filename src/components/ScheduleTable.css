@@ -76,10 +76,10 @@ tr.subtask td:nth-child(3) {
 .editable input {
   width: 100%;
   padding: 0.5rem;
-  border: 2px solid var(--azrael-orange-500);
+  border: 2px solid #2196F3;  /* 파란색 */
   border-radius: 4px;
   font-size: var(--text-sm);
-  box-shadow: 0 0 0 4px rgba(255, 152, 0, 0.1);
+  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
 }
 
 .action-buttons {

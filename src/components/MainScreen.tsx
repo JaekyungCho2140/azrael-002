@@ -616,7 +616,10 @@ export function MainScreen({
       const result = await response.json();
 
       if (!result.success) {
-        throw new Error(result.error || 'JIRA 생성 실패');
+        console.error('JIRA 생성 실패 상세:', result);
+        const errorMsg = result.error || 'JIRA 생성 실패';
+        const details = result.details ? `\n\n상세: ${result.details}` : '';
+        throw new Error(errorMsg + details);
       }
 
       // 5. Supabase 매핑 업데이트 (Exponential Backoff)
