@@ -104,3 +104,12 @@
 .holidays-table tr:hover {
   background: var(--azrael-orange-50);
 }
+
+/* 하위 일감 행 스타일 */
+.subtask-row {
+  background: var(--azrael-gray-50);
+}
+
+.subtask-row:hover {
+  background: var(--azrael-gray-100) !important;
+}

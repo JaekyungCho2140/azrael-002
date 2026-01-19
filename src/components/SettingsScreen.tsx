@@ -758,33 +758,79 @@ export function SettingsScreen({
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedTemplate.stages.map((stage, index) => (
-                          <tr key={stage.id}>
-                            <td>{index + 1}</td>
-                            <td>{stage.name}</td>
-                            <td>{stage.startOffsetDays}</td>
-                            <td>{stage.endOffsetDays}</td>
-                            <td>{stage.startTime}</td>
-                            <td>{stage.endTime}</td>
-                            <td>{stage.tableTargets.join(', ').replace(/table/g, 'T')}</td>
-                            <td>
-                              <button
-                                className="btn-icon"
-                                onClick={() => handleEditStage(stage)}
-                              >
-                                ✎
-                              </button>
-                            </td>
-                            <td>
-                              <button
-                                className="btn-icon btn-danger"
-                                onClick={() => handleDeleteStage(stage.id)}
-                              >
-                                ✕
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {selectedTemplate.stages
+                          .filter(s => s.depth === 0)  // 부모만
+                          .map((parentStage, parentIndex) => {
+                            const children = selectedTemplate.stages.filter(s => s.parentStageId === parentStage.id);
+                            return (
+                              <>
+                                {/* 부모 행 */}
+                                <tr key={parentStage.id}>
+                                  <td>{parentIndex + 1}</td>
+                                  <td>{parentStage.name}</td>
+                                  <td>{parentStage.startOffsetDays}</td>
+                                  <td>{parentStage.endOffsetDays}</td>
+                                  <td>{parentStage.startTime}</td>
+                                  <td>{parentStage.endTime}</td>
+                                  <td>{parentStage.tableTargets.join(', ').replace(/table/g, 'T')}</td>
+                                  <td>
+                                    <button
+                                      className="btn-icon"
+                                      onClick={() => handleEditStage(parentStage)}
+                                    >
+                                      ✎
+                                    </button>
+                                  </td>
+                                  <td>
+                                    <button
+                                      className="btn-icon btn-danger"
+                                      onClick={() => handleDeleteStage(parentStage.id)}
+                                    >
+                                      ✕
+                                    </button>
+                                  </td>
+                                </tr>
+                                {/* 하위 일감 행 */}
+                                {children.map((child, childIndex) => (
+                                  <tr key={child.id} className="subtask-row">
+                                    <td style={{ color: 'var(--azrael-gray-500)' }}>
+                                      {parentIndex + 1}.{childIndex + 1}
+                                    </td>
+                                    <td style={{ paddingLeft: '2rem', color: 'var(--azrael-gray-700)' }}>
+                                      ㄴ {child.name}
+                                    </td>
+                                    <td>{child.startOffsetDays}</td>
+                                    <td>{child.endOffsetDays}</td>
+                                    <td>{child.startTime}</td>
+                                    <td>{child.endTime}</td>
+                                    <td>{child.tableTargets.join(', ').replace(/table/g, 'T')}</td>
+                                    <td>
+                                      <button
+                                        className="btn-icon"
+                                        onClick={() => handleEditStage(child)}
+                                        disabled
+                                        title="하위 일감은 부모 편집에서 수정"
+                                        style={{ opacity: 0.3, cursor: 'not-allowed' }}
+                                      >
+                                        ✎
+                                      </button>
+                                    </td>
+                                    <td>
+                                      <button
+                                        className="btn-icon btn-danger"
+                                        onClick={() => handleDeleteStage(child.id)}
+                                        disabled
+                                        title="하위 일감은 부모 편집에서 삭제"
+                                        style={{ opacity: 0.3, cursor: 'not-allowed' }}
+                                      >
+                                        ✕
+                                      </button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </>
+                            );
+                          })}
                       </tbody>
                     </table>
                   ) : (
