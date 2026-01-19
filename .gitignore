@@ -48,7 +48,10 @@ talkwiththeuser/
 # PDF 파일
 *.pdf
 
-# Supabase 폴더 (스키마는 코드로 관리)
-supabase/
+# Supabase 폴더 (Edge Functions와 Migrations는 버전 관리)
+supabase/*
+!supabase/functions/
+!supabase/migrations/
+!supabase/config.toml
 .vercel
 .env*.local
