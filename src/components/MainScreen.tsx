@@ -74,6 +74,12 @@ export function MainScreen({
     });
   }, []);
 
+  // JIRA 설정 확인 (Phase 1) - 독립적으로 항상 체크
+  useEffect(() => {
+    const jiraConfig = localStorage.getItem('azrael:jiraConfig');
+    setHasJiraConfig(!!jiraConfig);
+  }, [calculationResult, showSettings]); // 계산 후 또는 설정 화면 닫을 때 체크
+
   // 프로젝트 변경 시 해당 프로젝트의 계산 결과 로드
   useEffect(() => {
     const lastResult = loadCalculationResult(currentProject.id);
@@ -85,10 +91,6 @@ export function MainScreen({
       setCalculationResult(null);
       setUpdateDate('');
     }
-
-    // JIRA 설정 확인 (Phase 1)
-    const jiraConfig = localStorage.getItem('azrael:jiraConfig');
-    setHasJiraConfig(!!jiraConfig);
 
     // Epic 매핑 확인 (Phase 1)
     const checkEpicMapping = async () => {
@@ -353,8 +355,11 @@ export function MainScreen({
             isManualEdit: false
           };
 
-          // 하위 일감 추가
-          const childStages = stages.filter(s => s.parentStageId === stage.id);
+          // 하위 일감 추가 (해당 테이블에 표시되는 것만)
+          const childStages = stages.filter(s =>
+            s.parentStageId === stage.id &&
+            s.tableTargets.includes(tableTarget)
+          );
           if (childStages.length > 0) {
             entry.children = childStages.map((childStage, childIndex) => {
               const { startDateTime: childStart, endDateTime: childEnd } = calculateDateTimeFromStage(

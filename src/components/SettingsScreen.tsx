@@ -192,6 +192,7 @@ export function SettingsScreen({
 
       saveTemplateMutation.mutate(newTemplate, {
         onSuccess: () => {
+          alert('저장되었습니다');
           setStageModalOpen(false);
         },
         onError: (err: any) => {
@@ -248,6 +249,7 @@ export function SettingsScreen({
 
     saveTemplateMutation.mutate(updatedTemplate, {
       onSuccess: () => {
+        alert('저장되었습니다');
         setStageModalOpen(false);
       },
       onError: (err: any) => {
