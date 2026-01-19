@@ -333,9 +333,28 @@ export function MainScreen({
 
     // 테이블 엔트리 생성 (테이블별 필터링)
     const createEntries = (stages: any[], tableTarget: 'table1' | 'table2' | 'table3'): ScheduleEntry[] => {
-      return stages
-        .filter(s => s.depth === 0 && s.tableTargets.includes(tableTarget)) // 부모만 + 해당 테이블에 표시되는 것만
-        .map((stage, index) => {
+      // 1. 본인이 tableTarget을 체크한 부모
+      const directParents = stages.filter(s => s.depth === 0 && s.tableTargets.includes(tableTarget));
+
+      // 2. 본인은 체크 안 했지만 하위가 tableTarget을 체크한 부모 (복제용)
+      const parentsWithTargetedChildren = stages.filter(s =>
+        s.depth === 0 &&
+        !s.tableTargets.includes(tableTarget) &&
+        stages.some(child =>
+          child.parentStageId === s.id &&
+          child.tableTargets.includes(tableTarget)
+        )
+      );
+
+      // 3. 병합 (중복 제거)
+      const uniqueParentIds = new Set([
+        ...directParents.map(p => p.id),
+        ...parentsWithTargetedChildren.map(p => p.id)
+      ]);
+
+      const allParents = stages.filter(s => uniqueParentIds.has(s.id));
+
+      return allParents.map((stage, index) => {
           const { startDateTime, endDateTime } = calculateDateTimeFromStage(
             updateDateObj,
             stage,
