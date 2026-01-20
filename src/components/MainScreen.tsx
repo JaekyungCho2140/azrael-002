@@ -326,6 +326,7 @@ export function MainScreen({
             endDate: endDateTime,
             stageId: stage.id,
             jiraAssigneeId: stage.jiraAssigneeId || null,  // Phase 1.7: WorkStage 담당자
+            jiraDescription: stage.jiraDescription || '',  // Phase 1.7: JIRA 설명
             children: [],
           };
 
@@ -357,6 +358,7 @@ export function MainScreen({
                 endDate: childEnd,
                 stageId: childStage.id,
                 jiraAssigneeId: childStage.jiraAssigneeId || null,  // Phase 1.7: 하위 일감 담당자
+                jiraDescription: childStage.jiraDescription || '',  // Phase 1.7: JIRA 설명
               };
             });
           }
@@ -427,7 +429,7 @@ export function MainScreen({
           type: 'Task',  // 표준화: 'Task'로 통일
           issueTypeName: task.issueTypeName,  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)")
           summary: task.summary,
-          description: '',
+          description: task.jiraDescription || '',  // Phase 1.7: WorkStage JIRA 설명
           startDate: task.startDate.toISOString(),
           endDate: task.endDate.toISOString(),
           assignee: task.jiraAssigneeId || jiraConfig.accountId, // Phase 1.7: WorkStage 담당자 또는 현재 사용자
@@ -442,7 +444,7 @@ export function MainScreen({
               type: 'Sub-task',  // 표준화: 'Sub-task'로 통일
               issueTypeName: subtask.issueTypeName,  // 실제 JIRA 이슈 타입 이름
               summary: subtask.summary,
-              description: '',
+              description: subtask.jiraDescription || '',  // Phase 1.7: WorkStage JIRA 설명
               startDate: subtask.startDate.toISOString(),
               endDate: subtask.endDate.toISOString(),
               assignee: subtask.jiraAssigneeId || jiraConfig.accountId,  // Phase 1.7: WorkStage 담당자
