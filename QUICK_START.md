@@ -1,148 +1,157 @@
-# Azrael Phase 0.5 & Phase 1 즉시 시작 가이드
+# Azrael 빠른 시작 가이드
 
-**상태**: 🟢 Supabase 배포 완료, 로컬 테스트 가능!
+**최종 업데이트**: 2026-01-20 (Phase 1.7)
+**배포**: https://azrael-002.vercel.app
 **소요 시간**: 5분
 
 ---
 
-## 🚀 즉시 시작 (Edge Functions 환경 변수만 설정하면 모든 기능 사용 가능)
+## ✅ 사전 준비 완료 상태
 
-### Step 1: Edge Functions 환경 변수 설정 (2분) 🔴 필수
+### Supabase
+- ✅ 마이그레이션 4개 실행 완료
+- ✅ Edge Functions v11 배포 완료
+- ✅ jira_assignees 데이터 (5명) 저장 완료
 
-1. **Supabase Dashboard 접속**:
-   https://supabase.com/dashboard/project/vgoqkyqqkieogrtnmsva/functions
+### 프론트엔드
+- ✅ Vercel 배포 완료 (커밋: 43aee9d)
 
-2. **Settings/Secrets 클릭**
-
-3. **환경 변수 3개 추가**:
-   - Name: `JIRA_URL`
-     Value: `https://wemade.atlassian.net`
-   
-   - Name: `JIRA_CUSTOM_FIELD_START`
-     Value: `customfield_10569`
-   
-   - Name: `JIRA_CUSTOM_FIELD_END`
-     Value: `customfield_10570`
-
-4. **저장** (각 변수마다)
+**모든 기능 즉시 사용 가능!**
 
 ---
 
-### Step 2: 개발 서버 시작 (1분)
+## 🚀 즉시 시작
+
+### 1. 라이브 환경 접속 (1분)
+
+https://azrael-002.vercel.app
+
+**로그인**: L10n팀 Google 계정
+- jkcho@wemade.com
+- mine@wemade.com
+- srpark@wemade.com
+- garden0130@wemade.com
+- hkkim@wemade.com
+
+### 2. JIRA 연동 설정 (2분)
+
+1. **설정** → **JIRA 연동** 탭
+2. **JIRA API Token 생성**:
+   - https://id.atlassian.com/manage-profile/security/api-tokens
+   - "Create API token" → Label: "Azrael" → 복사
+3. Azrael에 Token 붙여넣기
+4. **[연동 테스트]** 클릭
+5. ✅ "JIRA 연동 성공!" 확인
+
+### 3. 프로젝트 JIRA 키 설정 (1분)
+
+1. **설정** → **프로젝트 관리**
+2. 프로젝트 선택 (예: M4/GL) → **[편집]**
+3. **JIRA 프로젝트 키** 입력 (예: L10NM4)
+4. **[저장]**
+
+### 4. 일정 계산 및 JIRA 생성 (1분)
+
+1. **메인 화면** 이동
+2. 프로젝트: **M4/GL** 선택
+3. 업데이트일: **2026-02-10** 입력
+4. **[계산]** 클릭 → ✅ 테이블 3개 표시
+5. **[📋 JIRA 생성]** 클릭 → 미리보기 확인
+6. **[생성]** 클릭 → ⏳ 3-5초 대기
+7. ✅ "JIRA 일감이 생성되었습니다!"
+
+---
+
+## 🎯 Phase 1.7 신규 기능 사용
+
+### 부가 정보 설정 (설정 > 업무 단계)
+
+1. **설정** → **업무 단계** 탭
+2. "REGULAR" **[편집]** 클릭
+3. **새 입력 필드**:
+   - **설명**: "정기 업데이트 번역 작업"
+   - **JIRA 설명**: "Regular update translation task"
+   - **JIRA 담당자**: 드롭다운에서 선택 (조재경, 김민혜 등)
+4. **[저장]**
+
+### 하위 일감 JIRA 담당자 설정
+
+1. **하위 일감 템플릿** 아코디언 펼치기
+2. "번역" 하위 일감:
+   - **JIRA 설명**: "Translation review"
+   - **JIRA 담당자**: 김민혜
+3. **[저장]**
+
+### 계산 및 확인
+
+1. 메인 화면 → 계산
+2. T2/T3 테이블 확인:
+   - JIRA 담당자 열에 **"조재경"**, **"김민혜"** 등 이름 표시 ✅
+   - 하위 일감도 담당자 표시 ✅
+
+---
+
+## 📸 이미지 복사
+
+### T1 테이블
+- **복사 범위**: 모든 열 (#, 배치, 마감, 테이블 전달, 설명, 담당자)
+
+### T2/T3 테이블
+- **복사 범위**: #, 배치, HO, HB, 설명만
+- **제외**: JIRA 설명, JIRA 담당자
+
+---
+
+## 🔧 개발 환경 (로컬)
+
+### 1. Repository 클론
 
 ```bash
-cd /Users/jaekyungcho/Repository/azrael-002
+git clone https://github.com/JaekyungCho2140/azrael-002.git
+cd azrael-002
+npm install
+```
+
+### 2. 개발 서버
+
+```bash
 npm run dev
 ```
 
-브라우저 자동 열림: http://localhost:3000
+### 3. Edge Functions 로컬 테스트 (선택)
 
----
-
-### Step 3: JIRA 연동 테스트 (2분)
-
-1. 로그인 (Google OAuth)
-2. **설정** 클릭
-3. **JIRA 연동** 탭 선택
-4. **JIRA API Token 생성**:
-   - https://id.atlassian.com/manage-profile/security/api-tokens
-   - "Create API token" → Label: "Azrael" → 복사
-5. Azrael에 Token 붙여넣기
-6. **[연동 테스트]** 클릭
-7. ✅ "JIRA 연동 성공!" 메시지 확인
-
----
-
-## 🎯 사용 가능한 모든 기능
-
-### Phase 0.5 기능 (즉시 사용 가능)
-
-1. **하위 일감 템플릿 설정**:
-   - 설정 → 업무 단계 관리
-   - REGULAR [편집] → ▶ 하위 일감 템플릿
-   - [+ 하위 일감 추가] → 번역, 검수 등 추가
-   - 각 하위 일감마다 Offset, 시각, JIRA Summary 템플릿 설정
-   - **최대 9개** 하위 일감
-
-2. **테이블 "JIRA 담당자" 컬럼**:
-   - 테이블 2/3에 새 컬럼 표시
-   - 셀 클릭 → Account ID 입력
-   - Enter → 저장
-
-3. **JIRA Summary 템플릿**:
-   - 프로젝트 편집 → Epic, 헤즈업 템플릿
-   - 업무 단계 편집 → Task, Subtask 템플릿
-   - 변수 사용: {date}, {taskName}, {subtaskName}
-
----
-
-### Phase 1 기능 (환경 변수 설정 후 사용 가능)
-
-4. **JIRA 일감 자동 생성**:
-   - 메인 화면 → 업데이트일 입력 → [계산]
-   - [📋 JIRA 생성] 클릭
-   - 미리보기 확인 (Epic, Tasks, Subtasks)
-   - [JIRA 생성] → 자동 생성 (3-5초)
-   - JIRA에서 확인
-
-5. **JIRA 일감 자동 업데이트**:
-   - 업데이트일 변경 → [계산]
-   - [🔄 JIRA 업데이트] 클릭 (Epic 생성 후 활성화)
-   - 확인 → 자동 업데이트 (2-3초)
-   - 신규 Task도 자동 추가
-
----
-
-## 📱 테스트 시나리오 (5분)
-
-### 시나리오 1: 하위 일감 템플릿 (2분)
-
-```
-설정 → 업무 단계 관리 → M4/GL 선택
-→ REGULAR [편집]
-→ ▶ 하위 일감 템플릿 (펼침)
-→ [+ 하위 일감 추가]
-→ 배치명: "번역", Offset: 10/9, 시각: 09:00-12:00
-→ [저장]
-→ ✅ "저장되었습니다"
+```bash
+supabase functions serve jira-create
 ```
 
 ---
 
-### 시나리오 2: JIRA 생성 (3분)
+## 📊 배포 정보
 
-```
-메인 화면
-→ 프로젝트: M4/GL
-→ 업데이트일: 2026-02-10
-→ [계산]
-→ ✅ 테이블 3개 표시
-→ [📋 JIRA 생성]
-→ ✅ 미리보기: Epic + Tasks + Subtasks
-→ [JIRA 생성]
-→ ⏳ 3-5초 대기
-→ ✅ "JIRA 일감이 생성되었습니다! Epic: M4L10N-XX"
-→ JIRA 확인: https://wemade.atlassian.net/browse/M4L10N-XX
-```
+**프로덕션**: https://azrael-002.vercel.app
+**Git**: https://github.com/JaekyungCho2140/azrael-002
+
+**최신 버전**:
+- 프론트엔드: 43aee9d (2026-01-20)
+- Edge Functions: v11 (2026-01-20)
+- DB: 4개 마이그레이션 완료
 
 ---
 
-## 🎊 완료!
+## ✅ 완료 체크리스트
 
-**배포 완료 항목**:
-- ✅ Supabase 마이그레이션 (7개 적용)
-- ✅ Edge Functions 배포 (jira-create, jira-update)
-- ✅ Git 커밋 (902e4b6)
+### 사용자
+- [ ] 라이브 환경 접속
+- [ ] JIRA API Token 설정
+- [ ] 프로젝트 JIRA 키 설정
+- [ ] 일정 계산 및 JIRA 생성 테스트
 
-**남은 작업**:
-- ⏳ Edge Functions 환경 변수 설정 (2분) 🔴
-- ⏳ Git 푸시 (수동, 1분)
-- ⏳ Vercel 배포 (자동 or 수동)
-
-**즉시 사용 가능**:
-- Phase 0.5 모든 기능 ✅
-- Phase 1 기능 (환경 변수 설정 후) ⏳
+### 개발자
+- [ ] Git 클론 및 의존성 설치
+- [ ] 환경 변수 설정
+- [ ] 개발 서버 실행
+- [ ] Supabase 마이그레이션 확인
 
 ---
 
-**다음 단계**: Edge Functions 환경 변수 3개 설정 → 모든 기능 사용 가능!
+**모든 기능 사용 가능!** 🎉
