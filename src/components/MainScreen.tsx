@@ -485,59 +485,78 @@ export function MainScreen({
         stageId: 'HEADSUP',
       });
 
-      // Ext./Int. Tasks
-      [...calculationResult.table2Entries, ...calculationResult.table3Entries].forEach(entry => {
-        if (!entry.parentId) {
-          // 부모 Task
+      // Ext./Int. Tasks - WorkStage 기준으로 직접 생성
+      const holidays = loadHolidays();
+
+      template.stages
+        .filter(stage => stage.depth === 0)  // 부모만
+        .filter(stage =>
+          stage.tableTargets.includes('table2') ||
+          stage.tableTargets.includes('table3')
+        )
+        .forEach(stage => {
+          // 날짜 계산: 업데이트일 + stage offset
+          const { startDateTime, endDateTime } = calculateDateTimeFromStage(
+            calculationResult.updateDate,
+            stage,
+            holidays
+          );
+
+          // 템플릿 변수
           const vars: TemplateVars = {
             date: dateStr,
             headsUp: headsUpStr,
             projectName: currentProject.name,
-            taskName: entry.stageName,
+            taskName: stage.name,
             subtaskName: '',
-            stageName: entry.stageName,
+            stageName: stage.name,
           };
 
-          const stage = template.stages.find(s => s.id === entry.stageId);
-          const summary = getSummary(stage?.jiraSummaryTemplate, vars, false);
+          const summary = getSummary(stage.jiraSummaryTemplate, vars, false);
 
           const taskPreview: any = {
-            type: 'Task',  // 표준화: 미리보기 카운팅용
-            issueTypeName: taskIssueType,  // 설정된 Task 이슈 타입 사용
+            type: 'Task',
+            issueTypeName: taskIssueType,
             summary,
-            startDate: entry.startDateTime,
-            endDate: entry.endDateTime,
-            stageId: entry.stageId,
+            startDate: startDateTime,
+            endDate: endDateTime,
+            stageId: stage.id,
             children: [],
           };
 
           // 하위 일감 (Subtasks)
-          if (entry.children) {
-            taskPreview.children = entry.children.map(child => {
-              const childStage = template.stages.find(s => s.id === child.stageId);
+          const childStages = template.stages.filter(s => s.parentStageId === stage.id);
+
+          if (childStages.length > 0) {
+            taskPreview.children = childStages.map(childStage => {
+              const { startDateTime: childStart, endDateTime: childEnd } = calculateDateTimeFromStage(
+                calculationResult.updateDate,
+                childStage,
+                holidays
+              );
+
               const childVars: TemplateVars = {
                 ...vars,
-                subtaskName: child.stageName,
-                stageName: child.stageName,
+                subtaskName: childStage.name,
+                stageName: childStage.name,
               };
-              const childSummary = getSummary(childStage?.jiraSummaryTemplate, childVars, true);
-              // Subtask 이슈 타입: 설정값 또는 배치명 사용
-              const subtaskIssueType = childStage?.jiraSubtaskIssueType || child.stageName;
+
+              const childSummary = getSummary(childStage.jiraSummaryTemplate, childVars, true);
+              const subtaskIssueType = childStage.jiraSubtaskIssueType || childStage.name;
 
               return {
-                type: 'Sub-task',  // 표준화: 미리보기 카운팅용
+                type: 'Sub-task',
                 issueTypeName: subtaskIssueType,
                 summary: childSummary,
-                startDate: child.startDateTime,
-                endDate: child.endDateTime,
-                stageId: child.stageId,
+                startDate: childStart,
+                endDate: childEnd,
+                stageId: childStage.id,
               };
             });
           }
 
           tasks.push(taskPreview);
-        }
-      });
+        });
 
       setJiraPreviewData({
         epic: {
@@ -785,30 +804,43 @@ export function MainScreen({
       if (headsupMapping) updatedCount++;
       else createdCount++;
 
-      // Ext./Int. Tasks
-      [...calculationResult.table2Entries, ...calculationResult.table3Entries].forEach(entry => {
-        if (!entry.parentId) {
-          // 부모 Task
+      // Ext./Int. Tasks - WorkStage 기준으로 직접 생성
+      const holidays = loadHolidays();
+
+      template.stages
+        .filter(stage => stage.depth === 0)  // 부모만
+        .filter(stage =>
+          stage.tableTargets.includes('table2') ||
+          stage.tableTargets.includes('table3')
+        )
+        .forEach(stage => {
+          // 날짜 계산: 업데이트일 + stage offset
+          const { startDateTime, endDateTime } = calculateDateTimeFromStage(
+            calculationResult.updateDate,
+            stage,
+            holidays
+          );
+
+          // 템플릿 변수
           const vars: TemplateVars = {
             date: dateStr,
             headsUp: headsUpStr,
             projectName: currentProject.name,
-            taskName: entry.stageName,
+            taskName: stage.name,
             subtaskName: '',
-            stageName: entry.stageName,
+            stageName: stage.name,
           };
 
-          const stage = template.stages.find(s => s.id === entry.stageId);
-          const summary = getSummary(stage?.jiraSummaryTemplate, vars, false);
-          const taskMapping = existingTaskMappings.find(m => m.stageId === entry.stageId);
+          const summary = getSummary(stage.jiraSummaryTemplate, vars, false);
+          const taskMapping = existingTaskMappings.find(m => m.stageId === stage.id);
 
           updates.push({
             issueId: taskMapping?.taskId,
-            stageId: entry.stageId,
+            stageId: stage.id,
             summary,
-            startDate: entry.startDateTime.toISOString(),
-            endDate: entry.endDateTime.toISOString(),
-            assignee: entry.jiraAssignee || jiraConfig.accountId,
+            startDate: startDateTime.toISOString(),
+            endDate: endDateTime.toISOString(),
+            assignee: jiraConfig.accountId,
             issueType: 'Task' as const,
           });
 
@@ -816,24 +848,32 @@ export function MainScreen({
           else createdCount++;
 
           // Subtasks
-          if (entry.children) {
-            entry.children.forEach(child => {
-              const childStage = template.stages.find(s => s.id === child.stageId);
+          const childStages = template.stages.filter(s => s.parentStageId === stage.id);
+
+          if (childStages.length > 0) {
+            childStages.forEach(childStage => {
+              const { startDateTime: childStart, endDateTime: childEnd } = calculateDateTimeFromStage(
+                calculationResult.updateDate,
+                childStage,
+                holidays
+              );
+
               const childVars: TemplateVars = {
                 ...vars,
-                subtaskName: child.stageName,
-                stageName: child.stageName,
+                subtaskName: childStage.name,
+                stageName: childStage.name,
               };
-              const childSummary = getSummary(childStage?.jiraSummaryTemplate, childVars, true);
-              const subtaskMapping = existingTaskMappings.find(m => m.stageId === child.stageId);
+
+              const childSummary = getSummary(childStage.jiraSummaryTemplate, childVars, true);
+              const subtaskMapping = existingTaskMappings.find(m => m.stageId === childStage.id);
 
               updates.push({
                 issueId: subtaskMapping?.taskId,
-                stageId: child.stageId,
+                stageId: childStage.id,
                 summary: childSummary,
-                startDate: child.startDateTime.toISOString(),
-                endDate: child.endDateTime.toISOString(),
-                assignee: child.jiraAssignee || jiraConfig.accountId,
+                startDate: childStart.toISOString(),
+                endDate: childEnd.toISOString(),
+                assignee: jiraConfig.accountId,
                 issueType: 'Sub-task' as const,
                 parentTaskId: taskMapping?.taskId, // 부모 Task ID
               });
@@ -842,8 +882,7 @@ export function MainScreen({
               else createdCount++;
             });
           }
-        }
-      });
+        });
 
       // 5. 확인 다이얼로그
       if (!confirm(`JIRA 일감을 업데이트하시겠습니까?\n\n업데이트: ${updatedCount}개\n신규 생성: ${createdCount}개`)) {
