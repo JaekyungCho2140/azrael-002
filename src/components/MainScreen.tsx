@@ -367,8 +367,8 @@ export function MainScreen({
       setJiraPreviewData({
         epic: {
           summary: epicSummary,
-          startDate: calculationResult.headsUpDate.toISOString(),  // ISO string (PRD 명세대로)
-          endDate: (calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate).toISOString(),  // ISO string
+          startDate: calculationResult.headsUpDate,  // Date 객체 (미리보기용)
+          endDate: calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate,  // Date 객체
         },
         tasks,
       });
@@ -407,7 +407,11 @@ export function MainScreen({
 
       const requestData = {
         projectKey: currentProject.jiraProjectKey!,
-        epic: jiraPreviewData.epic,
+        epic: {
+          summary: jiraPreviewData.epic.summary,
+          startDate: jiraPreviewData.epic.startDate.toISOString(),  // Date → ISO string
+          endDate: jiraPreviewData.epic.endDate.toISOString(),  // Date → ISO string
+        },
         tasks: [] as any[],
         jiraAuth: {
           email: currentUserEmail,
