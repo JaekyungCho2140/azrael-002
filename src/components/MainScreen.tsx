@@ -429,7 +429,7 @@ export function MainScreen({
           type: 'Task',  // 표준화: 'Task'로 통일
           issueTypeName: task.issueTypeName,  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)")
           summary: task.summary,
-          description: task.jiraDescription || '',  // Phase 1.7: WorkStage JIRA 설명
+          description: task.jiraDescription && task.jiraDescription.trim() !== '' ? task.jiraDescription : null,  // Phase 1.7: WorkStage JIRA 설명 (평문 → Edge Function에서 ADF 변환)
           startDate: task.startDate.toISOString(),
           endDate: task.endDate.toISOString(),
           assignee: task.jiraAssigneeId || jiraConfig.accountId, // Phase 1.7: WorkStage 담당자 또는 현재 사용자
@@ -444,7 +444,7 @@ export function MainScreen({
               type: 'Sub-task',  // 표준화: 'Sub-task'로 통일
               issueTypeName: subtask.issueTypeName,  // 실제 JIRA 이슈 타입 이름
               summary: subtask.summary,
-              description: subtask.jiraDescription || '',  // Phase 1.7: WorkStage JIRA 설명
+              description: subtask.jiraDescription && subtask.jiraDescription.trim() !== '' ? subtask.jiraDescription : null,  // Phase 1.7: WorkStage JIRA 설명 (평문 → Edge Function에서 ADF 변환)
               startDate: subtask.startDate.toISOString(),
               endDate: subtask.endDate.toISOString(),
               assignee: subtask.jiraAssigneeId || jiraConfig.accountId,  // Phase 1.7: WorkStage 담당자

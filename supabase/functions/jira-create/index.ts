@@ -45,6 +45,34 @@ const JIRA_URL = Deno.env.get('JIRA_URL') || 'https://wemade.atlassian.net';
 const CUSTOM_FIELD_START = Deno.env.get('JIRA_CUSTOM_FIELD_START') || 'customfield_10569';
 const CUSTOM_FIELD_END = Deno.env.get('JIRA_CUSTOM_FIELD_END') || 'customfield_10570';
 
+/**
+ * 평문 텍스트를 ADF (Atlassian Document Format)로 변환
+ * @param text 평문 텍스트 (줄바꿈 포함 가능)
+ * @returns ADF JSON 객체
+ */
+function textToADF(text: string) {
+  if (!text || text.trim() === '') {
+    return null;
+  }
+
+  const lines = text.split('\n');
+  const paragraphs = lines.map(line => ({
+    type: 'paragraph',
+    content: [
+      {
+        type: 'text',
+        text: line,
+      },
+    ],
+  }));
+
+  return {
+    type: 'doc',
+    version: 1,
+    content: paragraphs,
+  };
+}
+
 serve(async (req) => {
   // CORS 헤더
   const corsHeaders = {
@@ -135,8 +163,9 @@ serve(async (req) => {
       };
 
       // 선택 필드: description, assignee (값이 있고 유효할 때만 추가)
-      if (task.description) {
-        taskPayload.fields.description = task.description;
+      const descriptionADF = textToADF(task.description);
+      if (descriptionADF) {
+        taskPayload.fields.description = descriptionADF;
       }
       // Phase 1.7: assignee가 null이 아니고 빈 문자열이 아닐 때만 추가
       if (task.assignee && task.assignee.trim() !== '') {
@@ -211,8 +240,9 @@ serve(async (req) => {
       };
 
       // 선택 필드: description, assignee (값이 있고 유효할 때만 추가)
-      if (subtask.description) {
-        subtaskPayload.fields.description = subtask.description;
+      const subtaskDescriptionADF = textToADF(subtask.description);
+      if (subtaskDescriptionADF) {
+        subtaskPayload.fields.description = subtaskDescriptionADF;
       }
       // Phase 1.7: assignee가 null이 아니고 빈 문자열이 아닐 때만 추가
       if (subtask.assignee && subtask.assignee.trim() !== '') {
