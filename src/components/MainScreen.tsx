@@ -624,6 +624,18 @@ export function MainScreen({
       });
 
       // 4. Edge Function 호출
+      console.log('=== 프론트엔드: Edge Function 요청 데이터 ===');
+      console.log('프로젝트 키:', requestData.projectKey);
+      console.log('Epic:', requestData.epic);
+      console.log('Tasks 개수:', requestData.tasks.length);
+      console.log('Tasks 상세:', requestData.tasks.map((t: any) => ({
+        type: t.type,
+        issueTypeName: t.issueTypeName,
+        summary: t.summary,
+        stageId: t.stageId,
+        parentStageId: t.parentStageId
+      })));
+
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
