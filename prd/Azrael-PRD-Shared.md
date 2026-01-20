@@ -1,8 +1,8 @@
 # Azrael PRD - Shared Components
 
 **작성일**: 2026-01-09
-**최종 업데이트**: 2026-01-14
-**버전**: 2.0
+**최종 업데이트**: 2026-01-20
+**버전**: 3.0 (Phase 1.7 반영)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md)
 
 ---
@@ -115,7 +115,14 @@ interface WorkStage {
   order: number;                 // 표시 순서 (DECIMAL 5,1: 1.0, 1.1, 1.2...)
   parentStageId?: string;        // 하위 일감의 경우 부모 Stage ID
   depth: number;                 // 0=부모, 1=자식 (최대 1)
-  jiraSummaryTemplate?: string;  // JIRA Summary 템플릿 (Phase 0.5, 예: "{date} 업데이트 {taskName}")
+  jiraSummaryTemplate?: string;  // JIRA Summary 템플릿 (Phase 0.5)
+  jiraSubtaskIssueType?: string; // JIRA Subtask 이슈 타입 (Phase 1)
+
+  // Phase 1.7: 부가 정보 (모든 업데이트일 공통 적용)
+  description: string;           // 모든 테이블 공통 - "설명" 컬럼
+  assignee: string;              // T1 전용 - "담당자" 컬럼
+  jiraDescription: string;       // T2/T3 전용 - "JIRA 설명" 컬럼
+  jiraAssigneeId: string | null; // T2/T3 전용 - JIRA 담당자 Account ID
 }
 ```
 
@@ -149,8 +156,9 @@ interface ScheduleEntry {
 }
 ```
 
-**저장 위치**: LocalStorage (개인 데이터)
-- `azrael:calculation:{projectId}`에 CalculationResult의 일부로 저장
+**저장 위치**:
+- Phase 1.7 이전: LocalStorage (개인 데이터)
+- Phase 1.7 이후: Supabase (팀 공유 데이터) - 설정 > 업무 단계에서 수정
 
 ### 2.4. CalculationResult (계산 결과)
 
@@ -167,9 +175,11 @@ interface CalculationResult {
 }
 ```
 
-**저장 위치**: LocalStorage (개인 데이터)
-- 키: `azrael:calculation:{projectId}`
-- 최신 계산 결과만 유지
+**저장 위치**:
+- Phase 1.7 이전: LocalStorage (개인 데이터)
+- Phase 1.7 이후: **Supabase (팀 공유)** - calculation_results, schedule_entries 테이블
+  - 프로젝트 + 업데이트일 기준 UPSERT (덮어쓰기)
+  - 누구든 같은 조건 계산 → 같은 결과 조회
 
 ### 2.5. Holiday (공휴일)
 
@@ -207,12 +217,17 @@ interface UserState {
 **Supabase (팀 공유 데이터)**:
 - Projects: 프로젝트 설정
 - WorkTemplates: 업무 단계 템플릿
-- WorkStages: 업무 단계 상세
+- WorkStages: 업무 단계 상세 + 부가 정보 (Phase 1.7)
 - Holidays: 공휴일 목록
+- **CalculationResults**: 계산 결과 메타데이터 (Phase 1.7)
+- **ScheduleEntries**: 테이블 엔트리 데이터 (Phase 1.7)
+- **JiraAssignees**: JIRA 담당자 매핑 (Phase 1.7)
+- JiraEpicMappings: JIRA Epic 매핑 (Phase 1)
+- JiraTaskMappings: JIRA Task 매핑 (Phase 1)
 
 **LocalStorage (개인 데이터)**:
-- CalculationResult: 계산 결과 (최신만)
 - UserState: 사용자 상태 (온보딩, 마지막 프로젝트)
+- JiraConfig: JIRA API Token (Phase 1)
 
 ### 3.2. Supabase 스키마
 
@@ -643,6 +658,133 @@ CSV 임포트를 통해 Supabase에 저장됨:
 - **Phase 1**: [Azrael-PRD-Phase1.md](./Azrael-PRD-Phase1.md)
 - **Phase 2**: [Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)
 - **Phase 3**: [Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)
+
+---
+
+**문서 종료**
+
+---
+
+## 11. Phase 1.7 확장 데이터 구조
+
+### 11.1. JiraAssignee (JIRA 담당자 매핑)
+
+```typescript
+interface JiraAssignee {
+  id: string;                    // UUID
+  name: string;                  // 한글 이름 (드롭다운 표시용)
+  jiraAccountId: string;         // JIRA Account ID (API 호출용)
+  orderIndex: number;            // 드롭다운 정렬 순서
+  isActive: boolean;             // 활성 상태
+}
+```
+
+**Supabase 테이블**: `jira_assignees`
+- 초기 데이터 (5명):
+  - 조재경: 617f7523f485cd0068077192
+  - 김민혜: 62b57632f38b4dcf73daedb2
+  - 임정원: 712020:1a1a9943-9787-44e1-b2da-d4f558df471e
+  - 박선률: 6209c939bba9ca0070c94b16
+  - 김홍균: 712020:f337238b-f5a1-4c32-8b58-7b699889da3e
+
+### 11.2. CalculationResult (서버 저장)
+
+**Supabase 테이블**: `calculation_results`
+
+```sql
+CREATE TABLE calculation_results (
+  id UUID PRIMARY KEY,
+  project_id TEXT NOT NULL,
+  update_date DATE NOT NULL,
+  heads_up_date DATE NOT NULL,
+  ios_review_date DATE,
+  calculated_at TIMESTAMPTZ NOT NULL,
+  calculated_by TEXT NOT NULL,
+  UNIQUE(project_id, update_date)
+);
+```
+
+**특징**:
+- 복합 유니크 제약: 프로젝트 + 업데이트일
+- 계산 버튼 클릭 시 자동 UPSERT (덮어쓰기)
+- 팀 전체 공유
+
+### 11.3. ScheduleEntry (서버 저장)
+
+**Supabase 테이블**: `schedule_entries`
+
+```sql
+CREATE TABLE schedule_entries (
+  id UUID PRIMARY KEY,
+  calculation_id UUID NOT NULL,
+  table_type TEXT NOT NULL CHECK (table_type IN ('table1', 'table2', 'table3')),
+  entry_index INTEGER NOT NULL,
+  stage_id TEXT NOT NULL,
+  stage_name TEXT NOT NULL,
+  start_datetime TIMESTAMPTZ NOT NULL,
+  end_datetime TIMESTAMPTZ NOT NULL,
+  parent_id UUID,
+  FOREIGN KEY (calculation_id) REFERENCES calculation_results(id) ON DELETE CASCADE
+);
+```
+
+**특징**:
+- calculation_id로 계산 결과와 연결
+- parent_id로 하위 일감 계층 구조 유지
+- CASCADE DELETE: 계산 결과 삭제 시 자동 삭제
+
+---
+
+## 12. Phase 1.7 설계 원칙
+
+### 12.1. WorkStage = 단일 진실 공급원
+
+**원칙**:
+- WorkStage 1개 = JIRA Task 1개 (1:1 매핑)
+- 부가 정보는 WorkStage 템플릿에 저장
+- 모든 업데이트일에 공통 적용
+
+**효과**:
+- 데이터 중복 제거
+- 유지보수성 향상
+- 명확한 데이터 흐름
+
+### 12.2. 읽기 전용 테이블
+
+**원칙**:
+- 계산 결과 테이블(T1/T2/T3)은 완전 읽기 전용
+- 편집은 설정 > 업무 단계에서만 가능
+- 계산 시 WorkStage → ScheduleEntry 자동 복사
+
+**효과**:
+- 데이터 일관성 보장
+- 실수로 인한 데이터 손실 방지
+- 명확한 편집 위치
+
+### 12.3. JIRA Description ADF 형식
+
+**배경**:
+- JIRA API v3는 평문 문자열 거부
+- ADF (Atlassian Document Format) JSON 필수
+
+**구현**:
+```typescript
+function textToADF(text: string) {
+  const lines = text.split('\n');
+  return {
+    type: 'doc',
+    version: 1,
+    content: lines.map(line => ({
+      type: 'paragraph',
+      content: [{ type: 'text', text: line }]
+    }))
+  };
+}
+```
+
+**효과**:
+- 줄바꿈 지원
+- 향후 표, 링크 등 고급 포맷 확장 가능
 
 ---
 

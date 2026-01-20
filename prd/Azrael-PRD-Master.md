@@ -2,8 +2,8 @@
 
 **프로젝트명**: Azrael
 **작성일**: 2026-01-09
-**최종 업데이트**: 2026-01-14
-**버전**: 2.0
+**최종 업데이트**: 2026-01-20
+**버전**: 3.0 (Phase 1.7 완료)
 **작성자**: L10n팀 (Claude Code 협업)
 
 ---
@@ -18,10 +18,12 @@
 
 - **[Azrael-PRD-Shared.md](./Azrael-PRD-Shared.md)**: 공통 데이터 구조, 용어집, 기술 스택
 - **[Azrael-PRD-Design.md](./Azrael-PRD-Design.md)**: 디자인 시스템 및 UI 가이드라인
-- **[Azrael-PRD-Phase0.md](./Azrael-PRD-Phase0.md)**: Phase 0 - 일정 계산 및 시각화 (완료)
-- **[Azrael-PRD-Phase1.md](./Azrael-PRD-Phase1.md)**: Phase 1 - JIRA 연동
-- **[Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)**: Phase 2 - 이메일 생성
-- **[Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)**: Phase 3 - 슬랙 연동
+- **[Azrael-PRD-Phase0.md](./Azrael-PRD-Phase0.md)**: Phase 0 - 일정 계산 및 시각화 (✅ 완료)
+- **[Azrael-PRD-Phase0.5.md](./Azrael-PRD-Phase0.5.md)**: Phase 0.5 - 하위 일감 템플릿 (✅ 완료)
+- **[Azrael-PRD-Phase1.md](./Azrael-PRD-Phase1.md)**: Phase 1 - JIRA 연동 (✅ 완료)
+- Phase 1.7 - 계산 결과 서버화 및 부가 정보 관리 (✅ 완료, 본 문서 참조)
+- **[Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)**: Phase 2 - 이메일 생성 (⏳ 예정)
+- **[Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)**: Phase 3 - 슬랙 연동 (⏳ 예정)
 
 ---
 
@@ -92,12 +94,17 @@
 [Supabase (팀 공유)]
     ├─ Projects (프로젝트 설정)
     ├─ WorkTemplates (업무 단계 템플릿)
-    ├─ WorkStages (업무 단계 상세)
-    └─ Holidays (공휴일 목록)
+    ├─ WorkStages (업무 단계 상세 + 부가 정보)
+    ├─ Holidays (공휴일 목록)
+    ├─ CalculationResults (계산 결과 - Phase 1.7)
+    ├─ ScheduleEntries (테이블 엔트리 - Phase 1.7)
+    ├─ JiraAssignees (JIRA 담당자 매핑 - Phase 1.7)
+    ├─ JiraEpicMappings (JIRA Epic 매핑)
+    └─ JiraTaskMappings (JIRA Task 매핑)
     ↓
 [LocalStorage (개인)]
-    ├─ CalculationResult (계산 결과)
-    └─ UserState (사용자 상태)
+    ├─ UserState (사용자 상태)
+    └─ JiraConfig (JIRA API Token)
 ```
 
 ### 2.3. 데이터 흐름
@@ -140,14 +147,27 @@
 
 자세한 내용은 **[Azrael-PRD-Phase0.md](./Azrael-PRD-Phase0.md)** 참조
 
-### 3.2. Phase 1: JIRA 연동 (계획)
+### 3.2. Phase 1: JIRA 연동 (✅ 완료)
 
 | 기능 | 설명 | 상태 |
 |------|------|------|
-| **JIRA 일감 생성** | Epic/Task/Subtask 계층 구조 생성 | 🟡 개요만 |
-| **일감 매핑** | 테이블 엔트리 → JIRA 이슈 매핑 | 🟡 개요만 |
+| **JIRA 일감 생성** | Epic/Task/Subtask 계층 구조 생성 | ✅ 완료 |
+| **JIRA 일감 업데이트** | 기존 일감 날짜/내용 업데이트 | ✅ 완료 |
+| **이슈 타입 설정** | 프로젝트별, 업무 단계별 커스텀 | ✅ 완료 |
+| **일감 매핑** | stageId → JIRA Issue ID 매핑 | ✅ 완료 |
 
 자세한 내용은 **[Azrael-PRD-Phase1.md](./Azrael-PRD-Phase1.md)** 참조
+
+### 3.2.1. Phase 1.7: 계산 결과 서버화 및 부가 정보 관리 (✅ 완료)
+
+| 기능 | 설명 | 상태 |
+|------|------|------|
+| **계산 결과 서버 저장** | 프로젝트 + 업데이트일별 팀 공유 | ✅ 완료 |
+| **부가 정보 템플릿 관리** | 설명, 담당자, JIRA 설명, JIRA 담당자 | ✅ 완료 |
+| **JIRA 담당자 시스템** | 5명 매핑, 드롭다운, 이름 표시 | ✅ 완료 |
+| **읽기 전용 테이블** | 완전 읽기 전용 일정표 | ✅ 완료 |
+| **이미지 복사 최적화** | 필요한 열만 선택적 복사 | ✅ 완료 |
+| **JIRA Description ADF 변환** | 평문 → Atlassian Document Format | ✅ 완료 |
 
 ### 3.3. Phase 2: 이메일 생성 (계획)
 
@@ -174,11 +194,15 @@
 ```
 Phase 0: 일정 계산 및 시각화 ✅ 완료 (2026-01-13)
     ↓
-Phase 1: JIRA 연동 (계획)
+Phase 0.5: 하위 일감 템플릿 ✅ 완료 (2026-01-16)
     ↓
-Phase 2: 이메일 생성 (계획)
+Phase 1: JIRA 연동 ✅ 완료 (2026-01-19)
     ↓
-Phase 3: 슬랙 연동 (계획)
+Phase 1.7: 계산 결과 서버화 ✅ 완료 (2026-01-20)
+    ↓
+Phase 2: 이메일 생성 (예정)
+    ↓
+Phase 3: 슬랙 연동 (예정)
 ```
 
 ### 4.2. Phase 0 완료 내역
@@ -210,10 +234,40 @@ Phase 3: 슬랙 연동 (계획)
    - 안정적 API
    - 커뮤니티 지원 우수
 
-### 4.3. Phase 1-3 개발 방향
+### 4.3. Phase 1.7 완료 내역 (2026-01-20)
 
-- **Phase 1-3**: Phase 0 사용자 피드백 후 상세 설계
-- **현재 상태**: 개요만 작성, 구체적인 API 명세/UI는 추후 정의
+**완료일**: 2026-01-20
+**Git Commit**: 43aee9d
+**Edge Functions**: v11
+**배포**: https://azrael-002.vercel.app
+
+**주요 구현**:
+1. ✅ 계산 결과 서버화
+   - DB 테이블: calculation_results, schedule_entries
+   - 프로젝트 + 업데이트일별 UPSERT (덮어쓰기)
+   - 팀 전체 공유 (RLS: 읽기/쓰기 모두 허용)
+
+2. ✅ 부가 정보 WorkStage 템플릿 관리
+   - work_stages 확장: description, assignee, jira_description, jira_assignee_id
+   - StageEditModal UI 확장 (부모 + 하위 일감)
+   - 모든 업데이트일에 공통 적용
+
+3. ✅ JIRA 담당자 시스템
+   - jira_assignees 테이블 (5명 매핑)
+   - 드롭다운 UI (한글 이름)
+   - 테이블 이름 표시 (Account ID → 조재경, 김민혜 등)
+
+4. ✅ 읽기 전용 테이블
+   - T1/T2/T3 모든 편집 기능 제거
+   - 설정 > 업무 단계에서만 수정 가능
+
+5. ✅ JIRA Description ADF 변환
+   - textToADF() 평문 → Atlassian Document Format
+   - 줄바꿈 지원
+
+### 4.4. Phase 2-3 개발 방향
+
+- **Phase 2-3**: 사용자 피드백 후 상세 설계
 
 ---
 
@@ -316,10 +370,11 @@ Phase 3: 슬랙 연동 (계획)
 
 ## 11. 배포 정보
 
-**배포 플랫폼**: Vercel
-**배포 URL**: https://azrael-002.vercel.app/
+**배포 플랫폼**: Vercel (프론트엔드), Supabase (Edge Functions)
+**배포 URL**: https://azrael-002.vercel.app
 **Git Repository**: https://github.com/JaekyungCho2140/azrael-002
-**배포일**: 2026-01-13
+**최초 배포**: 2026-01-13
+**최신 배포**: 2026-01-20 (Phase 1.7)
 
 **환경 변수** (Vercel 설정):
 ```env
@@ -340,15 +395,18 @@ VITE_HOLIDAY_API_KEY=*** (설정됨)
 |------|------|-----------|--------|
 | 2026-01-09 | 1.0 | 초안 작성 | L10n팀 + Claude |
 | 2026-01-13 | 1.5 | Phase 0 완료 반영, Supabase 마이그레이션 | L10n팀 + Claude |
-| 2026-01-14 | 2.0 | 코드베이스 기준 전면 업데이트, 과거 이력 제거 | L10n팀 + Claude |
+| 2026-01-14 | 2.0 | 코드베이스 기준 전면 업데이트 | L10n팀 + Claude |
+| 2026-01-20 | 3.0 | Phase 1.7 완료 반영, 부가 정보 관리, 계산 결과 서버화 | L10n팀 + Claude |
 
 ### 12.2. 승인 이력
 
 | 단계 | 승인자 | 날짜 | 서명 |
 |------|--------|------|------|
-| PRD 검토 | | | |
-| Phase 0 개발 승인 | | 2026-01-09 | ✅ |
+| PRD 검토 | | 2026-01-09 | ✅ |
 | Phase 0 배포 승인 | | 2026-01-13 | ✅ |
+| Phase 0.5 배포 승인 | | 2026-01-16 | ✅ |
+| Phase 1 배포 승인 | | 2026-01-19 | ✅ |
+| Phase 1.7 배포 승인 | | 2026-01-20 | ✅ |
 
 ---
 
