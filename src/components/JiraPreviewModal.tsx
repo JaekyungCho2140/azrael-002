@@ -11,6 +11,7 @@ import './JiraPreviewModal.css';
 
 interface JiraIssuePreview {
   type: 'Epic' | 'Task' | 'Sub-task';
+  issueTypeName?: string;  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)", "업무")
   summary: string;
   startDate?: Date;
   endDate?: Date;
@@ -53,7 +54,7 @@ export function JiraPreviewModal({
         <div className="jira-issue-item">
           <div className="issue-header">
             <span className="issue-icon">{icon}</span>
-            <span className="issue-type">[{issue.type}]</span>
+            <span className="issue-type">[{issue.issueTypeName || issue.type}]</span>
             <span className="issue-summary">{issue.summary}</span>
           </div>
           {issue.startDate && issue.endDate && (

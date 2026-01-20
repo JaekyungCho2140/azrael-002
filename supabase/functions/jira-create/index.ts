@@ -59,6 +59,12 @@ serve(async (req) => {
   try {
     const { projectKey, epic, tasks, jiraAuth }: CreateJiraRequest = await req.json();
 
+    console.log('=== JIRA 생성 요청 수신 ===');
+    console.log('프로젝트 키:', projectKey);
+    console.log('Epic:', epic.summary);
+    console.log('전체 tasks 배열:', tasks.length, '개');
+    console.log('Tasks 상세:', JSON.stringify(tasks.map(t => ({ type: t.type, issueTypeName: t.issueTypeName, summary: t.summary })), null, 2));
+
     // Basic Auth 헤더 생성
     const auth = btoa(`${jiraAuth.email}:${jiraAuth.apiToken}`);
     const headers = {
