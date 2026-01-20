@@ -596,7 +596,7 @@ export function MainScreen({
         requestData.tasks.push({
           stageId: task.stageId,
           type: 'Task',  // 표준화: 'Task'로 통일
-          issueTypeName: task.type,  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)")
+          issueTypeName: task.issueTypeName,  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)")
           summary: task.summary,
           description: '',
           startDate: task.startDate.toISOString(),
@@ -611,7 +611,7 @@ export function MainScreen({
             requestData.tasks.push({
               stageId: subtask.stageId,
               type: 'Sub-task',  // 표준화: 'Sub-task'로 통일
-              issueTypeName: subtask.type,  // 실제 JIRA 이슈 타입 이름
+              issueTypeName: subtask.issueTypeName,  // 실제 JIRA 이슈 타입 이름
               summary: subtask.summary,
               description: '',
               startDate: subtask.startDate.toISOString(),
