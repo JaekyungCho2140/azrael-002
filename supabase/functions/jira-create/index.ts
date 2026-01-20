@@ -103,7 +103,7 @@ serve(async (req) => {
       type: 'Epic',
       stageId: 'EPIC',
     });
-    console.log(`Epic 생성 성공: ${epicKey} (ID: ${epicId})`);
+    console.log(`Epic 생성 성공: ${epicKey} (key: ${epicKey}, id: ${epicId})`);
 
     await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -120,7 +120,7 @@ serve(async (req) => {
           summary: task.summary,
           description: task.description || '',
           issuetype: { name: 'Task' },
-          parent: { id: epicId },
+          parent: { key: epicKey },
           [CUSTOM_FIELD_START]: task.startDate,
           [CUSTOM_FIELD_END]: task.endDate,
           assignee: task.assignee ? { accountId: task.assignee } : undefined,
@@ -189,7 +189,7 @@ serve(async (req) => {
           summary: subtask.summary,
           description: subtask.description || '',
           issuetype: { name: 'Sub-task' },
-          parent: { id: parentTask.id },
+          parent: { key: parentTask.key },
           [CUSTOM_FIELD_START]: subtask.startDate,
           [CUSTOM_FIELD_END]: subtask.endDate,
           assignee: subtask.assignee ? { accountId: subtask.assignee } : undefined,
