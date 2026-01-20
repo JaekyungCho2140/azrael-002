@@ -30,7 +30,7 @@ INSERT INTO jira_assignees (name, jira_account_id, order_index) VALUES
 ('김민혜', '62b57632f38b4dcf73daedb2', 2),
 ('임정원', '712020:1a1a9943-9787-44e1-b2da-d4f558df471e', 3),
 ('박선률', '6209c939bba9ca0070c94b16', 4),
-('김홍균', '0b7fa452-0cf3-494f-9a37-2f0ef3e9c934', 5)
+('김홍균', '712020:f337238b-f5a1-4c32-8b58-7b699889da3e', 5)
 ON CONFLICT (name) DO NOTHING;
 
 -- ============================================================
