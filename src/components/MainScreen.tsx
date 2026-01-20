@@ -676,9 +676,19 @@ export function MainScreen({
         );
       });
 
-      // 6. Task 매핑 저장
+      // 6. Task 매핑 저장 (stageId 중복 제거)
+      const seenStageIds = new Set<string>();
       const taskMappings: Omit<TaskMapping, 'id' | 'createdAt' | 'updatedAt'>[] = result.createdIssues
         .filter((i: any) => i.type !== 'Epic')
+        .filter((i: any) => {
+          // 중복된 stageId는 첫 번째만 저장
+          if (seenStageIds.has(i.stageId)) {
+            console.log(`중복 stageId 스킵: ${i.stageId} (${i.key})`);
+            return false;
+          }
+          seenStageIds.add(i.stageId);
+          return true;
+        })
         .map((i: any) => ({
           epicMappingId: epicMappingId!,
           stageId: i.stageId,
