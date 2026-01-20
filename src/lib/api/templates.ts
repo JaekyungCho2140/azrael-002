@@ -238,7 +238,7 @@ export async function saveTemplate(template: WorkTemplate): Promise<void> {
     throw new Error(`기존 업무 단계 삭제 실패: ${deleteError.message}`);
   }
 
-  // 2. 새 stages 삽입 (Phase 0.5: jira_summary_template 포함)
+  // 2. 새 stages 삽입 (Phase 1.7: 부가 정보 필드 포함)
   if (template.stages.length > 0) {
     const { error: insertError } = await supabase.from('work_stages').insert(
       template.stages.map((stage) => ({
@@ -255,6 +255,11 @@ export async function saveTemplate(template: WorkTemplate): Promise<void> {
         table_targets: stage.tableTargets,
         jira_summary_template: stage.jiraSummaryTemplate || null,
         jira_subtask_issue_type: stage.jiraSubtaskIssueType || null,
+        // Phase 1.7: 부가 정보 필드
+        description: stage.description || '',
+        assignee: stage.assignee || '',
+        jira_description: stage.jiraDescription || '',
+        jira_assignee_id: stage.jiraAssigneeId || null,
       }))
     );
 

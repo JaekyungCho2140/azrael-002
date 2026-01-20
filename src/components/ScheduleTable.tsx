@@ -13,15 +13,13 @@ interface ScheduleTableProps {
   entries: ScheduleEntry[];
   type: 'table1' | 'table2' | 'table3';
   disclaimer?: string;
-  onDelete?: (entryId: string) => void;
 }
 
 export function ScheduleTable({
   title,
   entries,
   type,
-  disclaimer,
-  onDelete
+  disclaimer
 }: ScheduleTableProps) {
   // Phase 4: 편집 기능 제거 (읽기 전용 테이블)
 
@@ -77,16 +75,6 @@ export function ScheduleTable({
             </td>
           )}
 
-          {/* 삭제 버튼 (테이블 2/3) - Phase 4: + 버튼, ↓ 버튼 제거 */}
-          {type !== 'table1' && (
-            <td className="copy-exclude">
-              <div className="action-buttons">
-                <button className="btn-icon btn-danger" onClick={() => onDelete?.(entry.id)} title="삭제">
-                  ✕
-                </button>
-              </div>
-            </td>
-          )}
         </tr>
     );
 
@@ -117,9 +105,8 @@ export function ScheduleTable({
             <th className="copy-include">{type === 'table1' ? '마감' : 'HO'}</th>
             <th className="copy-include">{type === 'table1' ? '테이블 전달' : 'HB'}</th>
             <th className="copy-include">설명</th>
-            <th className={type === 'table1' ? 'copy-include' : 'copy-exclude'}>{type === 'table1' ? '담당자' : 'JIRA 설명'}</th>
-            {type !== 'table1' && <th className="copy-exclude">JIRA 담당자</th>}
-            {type !== 'table1' && <th className="copy-exclude">삭제</th>}
+            <th className="copy-include">{type === 'table1' ? '담당자' : 'JIRA 설명'}</th>
+            {type !== 'table1' && <th className="copy-include">JIRA 담당자</th>}
           </tr>
         </thead>
         <tbody>

@@ -92,44 +92,7 @@ export function MainScreen({
     setHasEpicMapping(false);
   }, [currentProject.id]);
 
-  // Phase 4: handleUpdateEntry, handleAddSibling, handleAddChild, reindexEntries 함수 제거됨
-  // 읽기 전용 테이블로 변경
-
-  // 엔트리 삭제 (✕ 버튼)
-  const handleDeleteEntry = (entryId: string) => {
-    if (!calculationResult) return;
-
-    if (!confirm('정말 삭제하시겠습니까?')) return;
-
-    const deleteFromList = (entries: ScheduleEntry[]): ScheduleEntry[] => {
-      return entries
-        .filter(entry => entry.id !== entryId)
-        .map(entry => {
-          if (entry.children) {
-            // 자식도 삭제 확인
-            const hasTargetChild = entry.children.some(c => c.id === entryId);
-            if (hasTargetChild) {
-              return {
-                ...entry,
-                children: entry.children.filter(c => c.id !== entryId)
-              };
-            }
-            return { ...entry, children: deleteFromList(entry.children) };
-          }
-          return entry;
-        });
-    };
-
-    const updated: CalculationResult = {
-      ...calculationResult,
-      table1Entries: deleteFromList(calculationResult.table1Entries),
-      table2Entries: deleteFromList(calculationResult.table2Entries),
-      table3Entries: deleteFromList(calculationResult.table3Entries)
-    };
-
-    setCalculationResult(updated);
-    // Phase 1.7: 편집 기능은 Phase 3에서 제거 예정 (임시로 로컬만 업데이트)
-  };
+  // Phase 4: 모든 편집 기능 제거 (읽기 전용 테이블)
 
   const handleCalculate = () => {
     if (!updateDate) {
@@ -353,6 +316,7 @@ export function MainScreen({
             startDate: startDateTime,
             endDate: endDateTime,
             stageId: stage.id,
+            jiraAssigneeId: stage.jiraAssigneeId || null,  // Phase 1.7: WorkStage 담당자
             children: [],
           };
 
@@ -383,6 +347,7 @@ export function MainScreen({
                 startDate: childStart,
                 endDate: childEnd,
                 stageId: childStage.id,
+                jiraAssigneeId: childStage.jiraAssigneeId || null,  // Phase 1.7: 하위 일감 담당자
               };
             });
           }
@@ -452,7 +417,7 @@ export function MainScreen({
           description: '',
           startDate: task.startDate.toISOString(),
           endDate: task.endDate.toISOString(),
-          assignee: jiraConfig.accountId, // 현재 사용자
+          assignee: task.jiraAssigneeId || jiraConfig.accountId, // Phase 1.7: WorkStage 담당자 또는 현재 사용자
           parentStageId: undefined,
         });
 
@@ -467,7 +432,7 @@ export function MainScreen({
               description: '',
               startDate: subtask.startDate.toISOString(),
               endDate: subtask.endDate.toISOString(),
-              assignee: jiraConfig.accountId,
+              assignee: subtask.jiraAssigneeId || jiraConfig.accountId,  // Phase 1.7: WorkStage 담당자
               parentStageId: task.stageId, // 부모 Task stageId
             });
           });
@@ -886,7 +851,6 @@ export function MainScreen({
             title={`Ext. ${calculationResult.updateDate.getFullYear().toString().substring(2)}-${String(calculationResult.updateDate.getMonth() + 1).padStart(2, '0')}-${String(calculationResult.updateDate.getDate()).padStart(2, '0')} 업데이트 일정표`}
             entries={calculationResult.table2Entries}
             type="table2"
-            onDelete={handleDeleteEntry}
           />
 
           {/* 간트 차트 2 */}
@@ -901,7 +865,6 @@ export function MainScreen({
             title={`Int. ${calculationResult.updateDate.getFullYear().toString().substring(2)}-${String(calculationResult.updateDate.getMonth() + 1).padStart(2, '0')}-${String(calculationResult.updateDate.getDate()).padStart(2, '0')} 업데이트 일정표`}
             entries={calculationResult.table3Entries}
             type="table3"
-            onDelete={handleDeleteEntry}
           />
 
           {/* 간트 차트 3 */}
