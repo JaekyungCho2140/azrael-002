@@ -16,6 +16,7 @@ interface CreateJiraRequest {
   tasks: {
     stageId: string;
     type: 'Task' | 'Sub-task';
+    issueTypeName: string;  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)", "업무")
     summary: string;
     description?: string;
     startDate: string;
@@ -119,7 +120,7 @@ serve(async (req) => {
           project: { key: projectKey },
           summary: task.summary,
           description: task.description || '',
-          issuetype: { name: 'Task' },
+          issuetype: { name: task.issueTypeName },
           parent: { key: epicKey },
           [CUSTOM_FIELD_START]: task.startDate,
           [CUSTOM_FIELD_END]: task.endDate,
@@ -188,7 +189,7 @@ serve(async (req) => {
           project: { key: projectKey },
           summary: subtask.summary,
           description: subtask.description || '',
-          issuetype: { name: 'Sub-task' },
+          issuetype: { name: subtask.issueTypeName },
           parent: { key: parentTask.key },
           [CUSTOM_FIELD_START]: subtask.startDate,
           [CUSTOM_FIELD_END]: subtask.endDate,

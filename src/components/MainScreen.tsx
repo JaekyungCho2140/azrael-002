@@ -592,7 +592,8 @@ export function MainScreen({
         // 헤즈업 또는 부모 Task
         requestData.tasks.push({
           stageId: task.stageId,
-          type: task.type,
+          type: 'Task',  // 표준화: 'Task'로 통일
+          issueTypeName: task.type,  // 실제 JIRA 이슈 타입 이름 (예: "PM(표준)")
           summary: task.summary,
           description: '',
           startDate: task.startDate.toISOString(),
@@ -606,7 +607,8 @@ export function MainScreen({
           task.children.forEach((subtask: any) => {
             requestData.tasks.push({
               stageId: subtask.stageId,
-              type: 'Sub-task',
+              type: 'Sub-task',  // 표준화: 'Sub-task'로 통일
+              issueTypeName: subtask.type,  // 실제 JIRA 이슈 타입 이름
               summary: subtask.summary,
               description: '',
               startDate: subtask.startDate.toISOString(),
