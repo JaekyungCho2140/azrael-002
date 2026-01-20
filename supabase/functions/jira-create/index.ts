@@ -83,8 +83,8 @@ serve(async (req) => {
       fields: {
         project: { key: projectKey },
         summary: epic.summary,
-        description: '',
         issuetype: { name: 'Epic' },
+        // description은 선택사항이므로 제거 (빈 문자열은 ADF 형식 오류 발생)
       },
     };
 
@@ -121,18 +121,24 @@ serve(async (req) => {
     console.log(`[2/3] Task 생성 시작 (총 ${taskItems.length}개)`);
 
     for (const task of taskItems) {
-      const taskPayload = {
+      const taskPayload: any = {
         fields: {
           project: { key: projectKey },
           summary: task.summary,
-          description: task.description || '',
           issuetype: { name: task.issueTypeName },
           parent: { key: epicKey },
           [CUSTOM_FIELD_START]: task.startDate,
           [CUSTOM_FIELD_END]: task.endDate,
-          assignee: task.assignee ? { accountId: task.assignee } : undefined,
         },
       };
+
+      // 선택 필드: description, assignee (값이 있을 때만 추가)
+      if (task.description) {
+        taskPayload.fields.description = task.description;
+      }
+      if (task.assignee) {
+        taskPayload.fields.assignee = { accountId: task.assignee };
+      }
 
       console.log(`Task 생성 중: ${task.summary} (stageId: ${task.stageId})`);
 
@@ -190,18 +196,24 @@ serve(async (req) => {
         );
       }
 
-      const subtaskPayload = {
+      const subtaskPayload: any = {
         fields: {
           project: { key: projectKey },
           summary: subtask.summary,
-          description: subtask.description || '',
           issuetype: { name: subtask.issueTypeName },
           parent: { key: parentTask.key },
           [CUSTOM_FIELD_START]: subtask.startDate,
           [CUSTOM_FIELD_END]: subtask.endDate,
-          assignee: subtask.assignee ? { accountId: subtask.assignee } : undefined,
         },
       };
+
+      // 선택 필드: description, assignee (값이 있을 때만 추가)
+      if (subtask.description) {
+        subtaskPayload.fields.description = subtask.description;
+      }
+      if (subtask.assignee) {
+        subtaskPayload.fields.assignee = { accountId: subtask.assignee };
+      }
 
       console.log(`Subtask 생성 중: ${subtask.summary} (부모: ${parentTask.key})`);
 
