@@ -249,12 +249,16 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error: any) {
-    console.error('JIRA Create Error:', error);
+    console.error('=== JIRA Create Error ===');
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
+    console.error('Error object:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
 
     const response: CreateJiraResponse = {
       success: false,
       createdIssues: [],
-      error: error.message || 'Unknown error',
+      error: `${error.name || 'Error'}: ${error.message || 'Unknown error'}\n\nStack: ${error.stack || 'No stack trace'}`,
     };
 
     return new Response(JSON.stringify(response), {
