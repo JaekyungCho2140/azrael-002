@@ -11,7 +11,8 @@ import { GanttChart } from './GanttChart';
 import { CalendarView } from './CalendarView';
 import { SettingsScreen } from './SettingsScreen';
 import { JiraPreviewModal } from './JiraPreviewModal';
-import { loadCalculationResult, saveCalculationResult, loadHolidays } from '../lib/storage';
+import { loadHolidays } from '../lib/storage';
+import { useSaveCalculationResult } from '../hooks/useSupabase';
 import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
@@ -65,6 +66,9 @@ export function MainScreen({
   const [isCreatingJira, setIsCreatingJira] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
 
+  // Phase 1.7: 계산 결과 Supabase 연동
+  const saveMutation = useSaveCalculationResult();
+
   // 사용자 이메일 가져오기
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -80,194 +84,16 @@ export function MainScreen({
     setHasJiraConfig(!!jiraConfig);
   }, [calculationResult, showSettings]); // 계산 후 또는 설정 화면 닫을 때 체크
 
-  // 프로젝트 변경 시 해당 프로젝트의 계산 결과 로드
+  // 프로젝트 변경 시 초기화
   useEffect(() => {
-    const lastResult = loadCalculationResult(currentProject.id);
-    if (lastResult) {
-      setCalculationResult(lastResult);
-      setUpdateDate(formatUpdateDate(lastResult.updateDate));
-    } else {
-      // 저장된 결과가 없으면 초기화
-      setCalculationResult(null);
-      setUpdateDate('');
-    }
-
-    // Epic 매핑 확인 (Phase 1)
-    const checkEpicMapping = async () => {
-      if (!lastResult) {
-        setHasEpicMapping(false);
-        return;
-      }
-
-      try {
-        const epicMapping = await fetchEpicMapping(currentProject.id, lastResult.updateDate);
-        setHasEpicMapping(!!epicMapping && epicMapping.epicId !== 'PENDING');
-      } catch (err) {
-        console.error('Epic 매핑 확인 실패:', err);
-        setHasEpicMapping(false);
-      }
-    };
-
-    checkEpicMapping();
+    // Phase 1.7: Supabase 연동으로 변경 - 업데이트일 입력 시 서버에서 로드
+    setCalculationResult(null);
+    setUpdateDate('');
+    setHasEpicMapping(false);
   }, [currentProject.id]);
 
-  // 테이블 엔트리 업데이트
-  const handleUpdateEntry = (entryId: string, field: string, value: string) => {
-    if (!calculationResult) return;
-
-    const updateEntryInList = (entries: ScheduleEntry[]): ScheduleEntry[] => {
-      return entries.map(entry => {
-        if (entry.id === entryId) {
-          return { ...entry, [field]: value };
-        }
-        if (entry.children) {
-          return { ...entry, children: updateEntryInList(entry.children) };
-        }
-        return entry;
-      });
-    };
-
-    const updated: CalculationResult = {
-      ...calculationResult,
-      table1Entries: updateEntryInList(calculationResult.table1Entries),
-      table2Entries: updateEntryInList(calculationResult.table2Entries),
-      table3Entries: updateEntryInList(calculationResult.table3Entries)
-    };
-
-    setCalculationResult(updated);
-    saveCalculationResult(updated);
-  };
-
-  // 인덱스 재계산 함수
-  const reindexEntries = (entries: ScheduleEntry[]): ScheduleEntry[] => {
-    let parentIndex = 1;
-    
-    return entries.map(entry => {
-      if (entry.parentId) {
-        // 하위 일감: 부모의 인덱스.자식번호
-        return entry;
-      } else {
-        // 부모 엔트리
-        const reindexedEntry = { ...entry, index: parentIndex };
-        
-        if (entry.children && entry.children.length > 0) {
-          reindexedEntry.children = entry.children.map((child, childIdx) => ({
-            ...child,
-            index: parseFloat(`${parentIndex}.${childIdx + 1}`)
-          }));
-        }
-        
-        parentIndex++;
-        return reindexedEntry;
-      }
-    });
-  };
-
-  // 같은 레벨 엔트리 추가 (+ 버튼)
-  const handleAddSibling = (entryId: string) => {
-    if (!calculationResult) return;
-
-    const addSiblingInList = (entries: ScheduleEntry[]): ScheduleEntry[] => {
-      const result: ScheduleEntry[] = [];
-
-      for (let i = 0; i < entries.length; i++) {
-        const entry = entries[i];
-        result.push(entry);
-
-        if (entry.id === entryId) {
-          // 현재 엔트리 다음에 새 엔트리 추가
-          const newEntry: ScheduleEntry = {
-            id: `entry-new-${Date.now()}`,
-            index: 0, // 나중에 재정렬
-            stageId: entry.stageId,
-            stageName: '새 업무',
-            startDateTime: new Date(entry.startDateTime),
-            endDateTime: new Date(entry.endDateTime),
-            description: '',
-            assignee: '',
-            jiraDescription: '',
-            parentId: entry.parentId,
-            isManualEdit: false
-          };
-          result.push(newEntry);
-        }
-
-        // 하위 일감 재귀
-        if (entry.children) {
-          entry.children = addSiblingInList(entry.children);
-        }
-      }
-
-      return result;
-    };
-
-    const updated: CalculationResult = {
-      ...calculationResult,
-      table1Entries: reindexEntries(addSiblingInList(calculationResult.table1Entries)),
-      table2Entries: reindexEntries(addSiblingInList(calculationResult.table2Entries)),
-      table3Entries: reindexEntries(addSiblingInList(calculationResult.table3Entries))
-    };
-
-    setCalculationResult(updated);
-    saveCalculationResult(updated);
-  };
-
-  // 하위 일감 추가 (↓ 버튼)
-  const handleAddChild = (entryId: string) => {
-    if (!calculationResult) return;
-
-    const addChildInList = (entries: ScheduleEntry[]): ScheduleEntry[] => {
-      return entries.map(entry => {
-        if (entry.id === entryId) {
-          // 검증: 이미 자식이면 에러
-          if (entry.parentId) {
-            alert('최대 2단계까지만 지원합니다');
-            return entry;
-          }
-
-          // 검증: 최대 20개 체크
-          if (entry.children && entry.children.length >= 20) {
-            alert('하위 일감은 최대 20개까지 추가할 수 있습니다');
-            return entry;
-          }
-
-          const newChild: ScheduleEntry = {
-            id: `entry-child-${Date.now()}`,
-            index: 0,
-            stageId: entry.stageId,
-            stageName: '하위 업무',
-            startDateTime: new Date(entry.startDateTime),
-            endDateTime: new Date(entry.endDateTime),
-            description: '',
-            jiraDescription: '',
-            parentId: entry.id,
-            isManualEdit: false
-          };
-
-          return {
-            ...entry,
-            children: [...(entry.children || []), newChild]
-          };
-        }
-
-        if (entry.children) {
-          return { ...entry, children: addChildInList(entry.children) };
-        }
-
-        return entry;
-      });
-    };
-
-    const updated: CalculationResult = {
-      ...calculationResult,
-      table1Entries: reindexEntries(addChildInList(calculationResult.table1Entries)),
-      table2Entries: reindexEntries(addChildInList(calculationResult.table2Entries)),
-      table3Entries: reindexEntries(addChildInList(calculationResult.table3Entries))
-    };
-
-    setCalculationResult(updated);
-    saveCalculationResult(updated);
-  };
+  // Phase 4: handleUpdateEntry, handleAddSibling, handleAddChild, reindexEntries 함수 제거됨
+  // 읽기 전용 테이블로 변경
 
   // 엔트리 삭제 (✕ 버튼)
   const handleDeleteEntry = (entryId: string) => {
@@ -296,13 +122,13 @@ export function MainScreen({
 
     const updated: CalculationResult = {
       ...calculationResult,
-      table1Entries: reindexEntries(deleteFromList(calculationResult.table1Entries)),
-      table2Entries: reindexEntries(deleteFromList(calculationResult.table2Entries)),
-      table3Entries: reindexEntries(deleteFromList(calculationResult.table3Entries))
+      table1Entries: deleteFromList(calculationResult.table1Entries),
+      table2Entries: deleteFromList(calculationResult.table2Entries),
+      table3Entries: deleteFromList(calculationResult.table3Entries)
     };
 
     setCalculationResult(updated);
-    saveCalculationResult(updated);
+    // Phase 1.7: 편집 기능은 Phase 3에서 제거 예정 (임시로 로컬만 업데이트)
   };
 
   const handleCalculate = () => {
@@ -368,9 +194,11 @@ export function MainScreen({
             stageName: stage.name,
             startDateTime,
             endDateTime,
-            description: '',
-            assignee: '',
-            jiraDescription: '',
+            // Phase 1.7: WorkStage에서 부가 정보 가져오기
+            description: stage.description || '',
+            assignee: stage.assignee || '',
+            jiraDescription: stage.jiraDescription || '',
+            jiraAssignee: stage.jiraAssigneeId || '',
             isManualEdit: false
           };
 
@@ -394,8 +222,10 @@ export function MainScreen({
                 stageName: childStage.name,
                 startDateTime: childStart,
                 endDateTime: childEnd,
-                description: '',
-                jiraDescription: '',
+                // Phase 1.7: WorkStage에서 부가 정보 가져오기
+                description: childStage.description || '',
+                jiraDescription: childStage.jiraDescription || '',
+                jiraAssignee: childStage.jiraAssigneeId || '',
                 parentId: entry.id,
                 isManualEdit: false
               };
@@ -422,7 +252,9 @@ export function MainScreen({
     };
 
     setCalculationResult(result);
-    saveCalculationResult(result);
+
+    // Phase 1.7: Supabase에 저장
+    saveMutation.mutate({ result, userEmail: currentUserEmail });
   };
 
   // JIRA 생성 핸들러 (Phase 1)
@@ -1040,10 +872,6 @@ export function MainScreen({
             entries={calculationResult.table1Entries}
             type="table1"
             disclaimer={currentProject.disclaimer}
-            onUpdateEntry={handleUpdateEntry}
-            onAddSibling={handleAddSibling}
-            onAddChild={handleAddChild}
-            onDelete={handleDeleteEntry}
           />
 
           {/* 간트 차트 1 */}
@@ -1058,9 +886,6 @@ export function MainScreen({
             title={`Ext. ${calculationResult.updateDate.getFullYear().toString().substring(2)}-${String(calculationResult.updateDate.getMonth() + 1).padStart(2, '0')}-${String(calculationResult.updateDate.getDate()).padStart(2, '0')} 업데이트 일정표`}
             entries={calculationResult.table2Entries}
             type="table2"
-            onUpdateEntry={handleUpdateEntry}
-            onAddSibling={handleAddSibling}
-            onAddChild={handleAddChild}
             onDelete={handleDeleteEntry}
           />
 
@@ -1076,9 +901,6 @@ export function MainScreen({
             title={`Int. ${calculationResult.updateDate.getFullYear().toString().substring(2)}-${String(calculationResult.updateDate.getMonth() + 1).padStart(2, '0')}-${String(calculationResult.updateDate.getDate()).padStart(2, '0')} 업데이트 일정표`}
             entries={calculationResult.table3Entries}
             type="table3"
-            onUpdateEntry={handleUpdateEntry}
-            onAddSibling={handleAddSibling}
-            onAddChild={handleAddChild}
             onDelete={handleDeleteEntry}
           />
 

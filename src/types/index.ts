@@ -50,6 +50,12 @@ export interface WorkStage {
   tableTargets: ('table1' | 'table2' | 'table3')[]; // 표시할 테이블 위치
   jiraSummaryTemplate?: string;  // JIRA Summary 템플릿 (Phase 0.5, 예: "{date} 업데이트 {taskName}")
   jiraSubtaskIssueType?: string; // JIRA Subtask 이슈 타입 (Phase 1.5, 하위 일감만, 기본값: name)
+  
+  // Phase 1.7: 부가 정보 (모든 업데이트일 공통 적용)
+  description: string;           // 모든 테이블 공통 - "설명" 컬럼
+  assignee: string;              // T1 전용 - "담당자" 컬럼
+  jiraDescription: string;       // T2/T3 전용 - "JIRA 설명" 컬럼
+  jiraAssigneeId: string | null; // T2/T3 전용 - JIRA 담당자 Account ID
 }
 
 /**
@@ -114,6 +120,18 @@ export interface UserState {
 export interface JiraConfig {
   apiToken: string;              // JIRA API Token (평문 저장)
   accountId: string;             // 현재 사용자 JIRA Account ID (자동 조회)
+}
+
+/**
+ * JiraAssignee (JIRA 담당자 매핑)
+ * Phase 1.7: Supabase 테이블로 관리
+ */
+export interface JiraAssignee {
+  id: string;                    // UUID
+  name: string;                  // 한글 이름 (드롭다운 표시용)
+  jiraAccountId: string;         // JIRA Account ID (API 호출용)
+  orderIndex: number;            // 드롭다운 정렬 순서
+  isActive: boolean;             // 활성 상태
 }
 
 /**

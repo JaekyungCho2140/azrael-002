@@ -25,6 +25,12 @@ import {
   deleteHoliday,
   syncApiHolidays,
 } from '../lib/api/holidays';
+import {
+  fetchCalculationResult,
+  saveCalculationResult,
+} from '../lib/api/calculations';
+import { fetchJiraAssignees } from '../lib/api/jira';
+import { formatDateLocal } from '../lib/businessDays';
 
 // ============================================================
 // Projects Hooks
@@ -227,5 +233,64 @@ export function useSyncApiHolidays() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['holidays'] });
     },
+  });
+}
+
+// ============================================================
+// Calculation Results Hooks (Phase 1.7)
+// ============================================================
+
+/**
+ * 계산 결과 조회
+ * @param projectId 프로젝트 ID
+ * @param updateDate 업데이트일
+ * @param enabled 쿼리 실행 여부
+ */
+export function useCalculationResult(
+  projectId: string,
+  updateDate: Date | null,
+  enabled = true
+) {
+  return useQuery({
+    queryKey: ['calculation', projectId, updateDate ? formatDateLocal(updateDate) : null],
+    queryFn: () => {
+      if (!updateDate) return null;
+      return fetchCalculationResult(projectId, updateDate);
+    },
+    staleTime: 1 * 60 * 1000, // 1분 캐시 (자주 변경될 수 있으므로)
+    enabled: enabled && !!updateDate,
+  });
+}
+
+/**
+ * 계산 결과 저장
+ */
+export function useSaveCalculationResult() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ result, userEmail }: { result: any; userEmail: string }) =>
+      saveCalculationResult(result, userEmail),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['calculation', variables.result.projectId],
+      });
+    },
+  });
+}
+
+// ============================================================
+// JIRA Assignees Hooks (Phase 1.7)
+// ============================================================
+
+/**
+ * JIRA 담당자 목록 조회
+ */
+export function useJiraAssignees(enabled = true) {
+  return useQuery({
+    queryKey: ['jiraAssignees'],
+    queryFn: fetchJiraAssignees,
+    staleTime: 10 * 60 * 1000, // 10분 캐시 (자주 변경 안 됨)
+    enabled,
   });
 }

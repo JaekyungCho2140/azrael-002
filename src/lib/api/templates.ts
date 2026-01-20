@@ -23,6 +23,11 @@ function mapToWorkStage(row: any): WorkStage {
     tableTargets: row.table_targets as ('table1' | 'table2' | 'table3')[],
     jiraSummaryTemplate: row.jira_summary_template || undefined,
     jiraSubtaskIssueType: row.jira_subtask_issue_type || undefined,
+    // Phase 1.7: 부가 정보 필드
+    description: row.description || '',
+    assignee: row.assignee || '',
+    jiraDescription: row.jira_description || '',
+    jiraAssigneeId: row.jira_assignee_id || null,
   };
 }
 

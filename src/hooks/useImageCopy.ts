@@ -39,12 +39,27 @@ export function useImageCopy() {
       const originalOverflow = element.style.overflow;
       element.style.overflow = 'visible';
 
+      // Phase 5: 복사 제외 열 숨기기
+      const excludeCols = element.querySelectorAll('.copy-exclude');
+      const originalDisplays: string[] = [];
+      excludeCols.forEach((col) => {
+        const htmlCol = col as HTMLElement;
+        originalDisplays.push(htmlCol.style.display);
+        htmlCol.style.display = 'none';
+      });
+
       // html2canvas로 캡처 (scale: 2 for Retina)
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff'
+      });
+
+      // 복사 제외 열 복원
+      excludeCols.forEach((col, index) => {
+        const htmlCol = col as HTMLElement;
+        htmlCol.style.display = originalDisplays[index];
       });
 
       // 원래 overflow 복원

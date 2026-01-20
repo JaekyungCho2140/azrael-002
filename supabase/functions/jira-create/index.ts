@@ -84,6 +84,8 @@ serve(async (req) => {
         project: { key: projectKey },
         summary: epic.summary,
         issuetype: { name: 'Epic' },
+        [CUSTOM_FIELD_START]: epic.startDate,
+        [CUSTOM_FIELD_END]: epic.endDate,
         // description은 선택사항이므로 제거 (빈 문자열은 ADF 형식 오류 발생)
       },
     };

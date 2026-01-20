@@ -87,7 +87,11 @@ describe('calculateDateTimeFromStage', () => {
       endTime: '18:00',
       order: 1,
       depth: 0,
-      tableTargets: ['table1']
+      tableTargets: ['table1'],
+      description: '',
+      assignee: '',
+      jiraDescription: '',
+      jiraAssigneeId: null,
     };
 
     const result = calculateDateTimeFromStage(updateDate, stage, holidays);

@@ -254,3 +254,28 @@ export async function retryWithBackoff<T>(
 
   throw lastError || new Error('재시도 실패');
 }
+
+/**
+ * JIRA 담당자 목록 조회
+ * Phase 1.7: jira_assignees 테이블에서 활성화된 담당자 조회
+ */
+export async function fetchJiraAssignees() {
+  const { data, error } = await (supabase as any)
+    .from('jira_assignees')
+    .select('*')
+    .eq('is_active', true)
+    .order('order_index');
+
+  if (error) {
+    console.error('Failed to fetch jira assignees:', error);
+    throw new Error(`JIRA 담당자 조회 실패: ${error.message}`);
+  }
+
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    jiraAccountId: row.jira_account_id,
+    orderIndex: row.order_index,
+    isActive: row.is_active,
+  }));
+}

@@ -44,18 +44,18 @@ export function initializeDefaultData(): void {
         id: 'template_M4_GL',
         projectId: 'M4_GL',
         stages: [
-          { id: 'stage_m4_1', name: '정기', startOffsetDays: 13, endOffsetDays: 10, startTime: '09:00', endTime: '18:00', order: 0, depth: 0, tableTargets: ['table1', 'table2', 'table3'] },
-          { id: 'stage_m4_2', name: '1차', startOffsetDays: 7, endOffsetDays: 5, startTime: '09:00', endTime: '18:00', order: 1, depth: 0, tableTargets: ['table1', 'table2', 'table3'] },
-          { id: 'stage_m4_3', name: '2차', startOffsetDays: 4, endOffsetDays: 2, startTime: '09:00', endTime: '18:00', order: 2, depth: 0, tableTargets: ['table1', 'table2', 'table3'] }
+          { id: 'stage_m4_1', name: '정기', startOffsetDays: 13, endOffsetDays: 10, startTime: '09:00', endTime: '18:00', order: 0, depth: 0, tableTargets: ['table1', 'table2', 'table3'], description: '', assignee: '', jiraDescription: '', jiraAssigneeId: null },
+          { id: 'stage_m4_2', name: '1차', startOffsetDays: 7, endOffsetDays: 5, startTime: '09:00', endTime: '18:00', order: 1, depth: 0, tableTargets: ['table1', 'table2', 'table3'], description: '', assignee: '', jiraDescription: '', jiraAssigneeId: null },
+          { id: 'stage_m4_3', name: '2차', startOffsetDays: 4, endOffsetDays: 2, startTime: '09:00', endTime: '18:00', order: 2, depth: 0, tableTargets: ['table1', 'table2', 'table3'], description: '', assignee: '', jiraDescription: '', jiraAssigneeId: null }
         ]
       },
       {
         id: 'template_MONTHLY',
         projectId: 'MONTHLY',
         stages: [
-          { id: 'stage_monthly_1', name: '마감', startOffsetDays: 7, endOffsetDays: 5, startTime: '09:00', endTime: '18:00', order: 0, depth: 0, tableTargets: ['table1', 'table2', 'table3'] },
-          { id: 'stage_monthly_2', name: '검토', startOffsetDays: 5, endOffsetDays: 3, startTime: '09:00', endTime: '18:00', order: 1, depth: 0, tableTargets: ['table1', 'table2', 'table3'] },
-          { id: 'stage_monthly_3', name: '정산', startOffsetDays: 3, endOffsetDays: 1, startTime: '09:00', endTime: '18:00', order: 2, depth: 0, tableTargets: ['table1', 'table2', 'table3'] }
+          { id: 'stage_monthly_1', name: '마감', startOffsetDays: 7, endOffsetDays: 5, startTime: '09:00', endTime: '18:00', order: 0, depth: 0, tableTargets: ['table1', 'table2', 'table3'], description: '', assignee: '', jiraDescription: '', jiraAssigneeId: null },
+          { id: 'stage_monthly_2', name: '검토', startOffsetDays: 5, endOffsetDays: 3, startTime: '09:00', endTime: '18:00', order: 1, depth: 0, tableTargets: ['table1', 'table2', 'table3'], description: '', assignee: '', jiraDescription: '', jiraAssigneeId: null },
+          { id: 'stage_monthly_3', name: '정산', startOffsetDays: 3, endOffsetDays: 1, startTime: '09:00', endTime: '18:00', order: 2, depth: 0, tableTargets: ['table1', 'table2', 'table3'], description: '', assignee: '', jiraDescription: '', jiraAssigneeId: null }
         ]
       }
     ];

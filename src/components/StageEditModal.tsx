@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { WorkStage } from '../types';
+import { useJiraAssignees } from '../hooks/useSupabase';
 
 interface StageEditModalProps {
   isOpen: boolean;
@@ -26,9 +27,18 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
   const [tableTargets, setTableTargets] = useState<('table1' | 'table2' | 'table3')[]>(['table1', 'table2', 'table3']);
   const [jiraSummaryTemplate, setJiraSummaryTemplate] = useState('');
 
+  // Phase 1.7: 부가 정보 상태
+  const [description, setDescription] = useState('');
+  const [assignee, setAssignee] = useState('');
+  const [jiraDescription, setJiraDescription] = useState('');
+  const [jiraAssigneeId, setJiraAssigneeId] = useState<string | null>(null);
+
   // 하위 일감 템플릿 상태
   const [showSubtaskAccordion, setShowSubtaskAccordion] = useState(false);
   const [subtasks, setSubtasks] = useState<WorkStage[]>([]);
+
+  // JIRA 담당자 목록 조회
+  const { data: jiraAssignees = [] } = useJiraAssignees();
 
   useEffect(() => {
     if (stage) {
@@ -39,6 +49,11 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       setEndTime(stage.endTime);
       setTableTargets(stage.tableTargets);
       setJiraSummaryTemplate(stage.jiraSummaryTemplate || '');
+      // Phase 1.7: 부가 정보 로드
+      setDescription(stage.description || '');
+      setAssignee(stage.assignee || '');
+      setJiraDescription(stage.jiraDescription || '');
+      setJiraAssigneeId(stage.jiraAssigneeId || null);
       // 기존 하위 일감 로드
       setSubtasks(existingSubtasks || []);
     } else {
@@ -49,6 +64,11 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       setEndTime('18:00');
       setTableTargets(['table1', 'table2', 'table3']);
       setJiraSummaryTemplate('');
+      // Phase 1.7: 부가 정보 초기화
+      setDescription('');
+      setAssignee('');
+      setJiraDescription('');
+      setJiraAssigneeId(null);
       setSubtasks([]);
     }
     setShowSubtaskAccordion(false);
@@ -90,7 +110,12 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       order: stage?.order ?? 0,
       depth: stage?.depth ?? 0,
       tableTargets,
-      jiraSummaryTemplate: jiraSummaryTemplate.trim() || undefined
+      jiraSummaryTemplate: jiraSummaryTemplate.trim() || undefined,
+      // Phase 1.7: 부가 정보 필드
+      description: description.trim(),
+      assignee: assignee.trim(),
+      jiraDescription: jiraDescription.trim(),
+      jiraAssigneeId,
     };
 
     // 하위 일감 검증 및 order 설정
@@ -118,7 +143,12 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       parentStageId: stage?.id,
       tableTargets: [...tableTargets],
       jiraSummaryTemplate: '{date} 업데이트 {taskName} {subtaskName}',
-      jiraSubtaskIssueType: ''  // 기본값: 배치명 사용
+      jiraSubtaskIssueType: '',  // 기본값: 배치명 사용
+      // Phase 1.7: 부가 정보 필드 (기본값)
+      description: '',
+      assignee: '',
+      jiraDescription: '',
+      jiraAssigneeId: null,
     };
     setSubtasks([...subtasks, newSubtask]);
   };
@@ -299,6 +329,66 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
           선택적 - 비워두면 기본 형식 사용
         </small>
       </div>
+
+      {/* Phase 1.7: 부가 정보 입력 필드 */}
+      <div className="form-group">
+        <label className="form-label">설명 (모든 테이블 공통)</label>
+        <textarea
+          className="form-input"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="업무 설명을 입력하세요"
+          rows={3}
+          style={{ resize: 'vertical', fontFamily: 'inherit' }}
+        />
+      </div>
+
+      {/* T1 전용 필드 */}
+      {tableTargets.includes('table1') && (
+        <div className="form-group">
+          <label className="form-label">담당자 (테이블 1 전용)</label>
+          <input
+            type="text"
+            className="form-input"
+            value={assignee}
+            onChange={(e) => setAssignee(e.target.value)}
+            placeholder="담당자 이름"
+          />
+        </div>
+      )}
+
+      {/* T2/T3 전용 필드 */}
+      {(tableTargets.includes('table2') || tableTargets.includes('table3')) && (
+        <>
+          <div className="form-group">
+            <label className="form-label">JIRA 설명 (테이블 2/3 전용)</label>
+            <textarea
+              className="form-input"
+              value={jiraDescription}
+              onChange={(e) => setJiraDescription(e.target.value)}
+              placeholder="JIRA 일감 설명"
+              rows={3}
+              style={{ resize: 'vertical', fontFamily: 'inherit' }}
+            />
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">JIRA 담당자 (테이블 2/3 전용)</label>
+            <select
+              className="form-input"
+              value={jiraAssigneeId || ''}
+              onChange={(e) => setJiraAssigneeId(e.target.value || null)}
+            >
+              <option value="">선택 안 함</option>
+              {jiraAssignees.map((assignee: any) => (
+                <option key={assignee.id} value={assignee.jiraAccountId}>
+                  {assignee.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </>
+      )}
 
       {/* 하위 일감 템플릿 아코디언 (depth=0인 경우만) */}
       {(stage?.depth === 0 || !stage) && (
