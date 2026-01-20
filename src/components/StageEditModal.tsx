@@ -560,6 +560,52 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
                       비워두면 배치명 사용
                     </small>
                   </div>
+
+                  {/* Phase 1.7: 하위 일감 부가 정보 */}
+                  <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                    <label className="form-label" style={{ fontSize: 'var(--text-xs)' }}>설명</label>
+                    <textarea
+                      className="form-input"
+                      value={subtask.description || ''}
+                      onChange={(e) => updateSubtask(index, 'description', e.target.value)}
+                      placeholder="하위 일감 설명"
+                      rows={2}
+                      style={{ fontSize: 'var(--text-sm)', resize: 'vertical', fontFamily: 'inherit' }}
+                    />
+                  </div>
+
+                  {(subtask.tableTargets.includes('table2') || subtask.tableTargets.includes('table3')) && (
+                    <>
+                      <div className="form-group" style={{ marginTop: '0.5rem' }}>
+                        <label className="form-label" style={{ fontSize: 'var(--text-xs)' }}>JIRA 설명</label>
+                        <textarea
+                          className="form-input"
+                          value={subtask.jiraDescription || ''}
+                          onChange={(e) => updateSubtask(index, 'jiraDescription', e.target.value)}
+                          placeholder="JIRA Subtask 설명"
+                          rows={2}
+                          style={{ fontSize: 'var(--text-sm)', resize: 'vertical', fontFamily: 'inherit' }}
+                        />
+                      </div>
+
+                      <div className="form-group" style={{ marginTop: '0.5rem', marginBottom: 0 }}>
+                        <label className="form-label" style={{ fontSize: 'var(--text-xs)' }}>JIRA 담당자</label>
+                        <select
+                          className="form-input"
+                          value={subtask.jiraAssigneeId || ''}
+                          onChange={(e) => updateSubtask(index, 'jiraAssigneeId', e.target.value || null)}
+                          style={{ fontSize: 'var(--text-sm)' }}
+                        >
+                          <option value="">선택 안 함</option>
+                          {jiraAssignees.map((assignee: any) => (
+                            <option key={assignee.id} value={assignee.jiraAccountId}>
+                              {assignee.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </>
+                  )}
                 </div>
               ))}
 

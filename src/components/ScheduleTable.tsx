@@ -105,8 +105,8 @@ export function ScheduleTable({
             <th className="copy-include">{type === 'table1' ? '마감' : 'HO'}</th>
             <th className="copy-include">{type === 'table1' ? '테이블 전달' : 'HB'}</th>
             <th className="copy-include">설명</th>
-            <th className="copy-include">{type === 'table1' ? '담당자' : 'JIRA 설명'}</th>
-            {type !== 'table1' && <th className="copy-include">JIRA 담당자</th>}
+            <th className={type === 'table1' ? 'copy-include' : 'copy-exclude'}>{type === 'table1' ? '담당자' : 'JIRA 설명'}</th>
+            {type !== 'table1' && <th className="copy-exclude">JIRA 담당자</th>}
           </tr>
         </thead>
         <tbody>
