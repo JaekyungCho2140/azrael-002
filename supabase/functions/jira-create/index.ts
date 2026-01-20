@@ -134,11 +134,12 @@ serve(async (req) => {
         },
       };
 
-      // 선택 필드: description, assignee (값이 있을 때만 추가)
+      // 선택 필드: description, assignee (값이 있고 유효할 때만 추가)
       if (task.description) {
         taskPayload.fields.description = task.description;
       }
-      if (task.assignee) {
+      // Phase 1.7: assignee가 null이 아니고 빈 문자열이 아닐 때만 추가
+      if (task.assignee && task.assignee.trim() !== '') {
         taskPayload.fields.assignee = { accountId: task.assignee };
       }
 
@@ -209,11 +210,12 @@ serve(async (req) => {
         },
       };
 
-      // 선택 필드: description, assignee (값이 있을 때만 추가)
+      // 선택 필드: description, assignee (값이 있고 유효할 때만 추가)
       if (subtask.description) {
         subtaskPayload.fields.description = subtask.description;
       }
-      if (subtask.assignee) {
+      // Phase 1.7: assignee가 null이 아니고 빈 문자열이 아닐 때만 추가
+      if (subtask.assignee && subtask.assignee.trim() !== '') {
         subtaskPayload.fields.assignee = { accountId: subtask.assignee };
       }
 
@@ -227,6 +229,38 @@ serve(async (req) => {
 
       if (!subtaskResponse.ok) {
         const errorText = await subtaskResponse.text();
+
+        // Phase 1.7: assignee 오류인 경우 assignee 없이 재시도
+        try {
+          const errorJson = JSON.parse(errorText);
+          if (errorJson.errors?.assignee) {
+            console.log(`Subtask assignee 오류 감지 (${subtask.summary}), assignee 없이 재시도...`);
+            delete subtaskPayload.fields.assignee;
+
+            const retryResponse = await fetch(`${JIRA_URL}/rest/api/3/issue`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify(subtaskPayload),
+            });
+
+            if (retryResponse.ok) {
+              const subtaskData = await retryResponse.json();
+              createdIssues.push({
+                id: subtaskData.id,
+                key: subtaskData.key,
+                type: 'Sub-task',
+                stageId: subtask.stageId,
+              });
+              console.log(`Subtask 생성 성공 (assignee 제외): ${subtaskData.key} (부모: ${parentTask.key})`);
+              await new Promise((resolve) => setTimeout(resolve, 100));
+              return; // 재시도 성공, 다음 Subtask로
+            }
+          }
+        } catch (parseError) {
+          // JSON 파싱 실패 시 원래 에러로 처리
+        }
+
+        // 재시도 실패 또는 다른 오류인 경우 롤백
         console.error(`Subtask 생성 실패:`, {
           summary: subtask.summary,
           stageId: subtask.stageId,
@@ -237,6 +271,8 @@ serve(async (req) => {
         await rollbackCreatedIssues(createdIssues, headers);
         throw new Error(`Subtask 생성 실패 (${subtask.summary}): ${errorText}`);
       }
+
+      // 정상 응답 처리 (위의 재시도로 return되지 않은 경우)
 
       const subtaskData = await subtaskResponse.json();
       createdIssues.push({

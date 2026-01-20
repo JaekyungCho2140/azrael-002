@@ -62,16 +62,10 @@ export function ScheduleTable({
             </td>
           )}
 
-          {/* JIRA 담당자 (테이블 2/3) - Phase 1.7: 읽기 전용 */}
+          {/* JIRA 담당자 (테이블 2/3) - Phase 1.7: 읽기 전용, 이름 표시 */}
           {type !== 'table1' && (
             <td className="copy-exclude readonly jira-assignee">
-              <span className="truncate" title={entry.jiraAssignee || ''}>
-                {entry.jiraAssignee ? (
-                  entry.jiraAssignee.length > 8
-                    ? `${entry.jiraAssignee.substring(0, 8)}...`
-                    : entry.jiraAssignee
-                ) : ''}
-              </span>
+              <span>{entry.jiraAssignee || ''}</span>
             </td>
           )}
 

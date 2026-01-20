@@ -12,7 +12,7 @@ import { CalendarView } from './CalendarView';
 import { SettingsScreen } from './SettingsScreen';
 import { JiraPreviewModal } from './JiraPreviewModal';
 import { loadHolidays } from '../lib/storage';
-import { useSaveCalculationResult } from '../hooks/useSupabase';
+import { useSaveCalculationResult, useJiraAssignees } from '../hooks/useSupabase';
 import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
@@ -68,6 +68,9 @@ export function MainScreen({
 
   // Phase 1.7: 계산 결과 Supabase 연동
   const saveMutation = useSaveCalculationResult();
+
+  // JIRA 담당자 목록 조회 (이름 매핑용)
+  const { data: jiraAssignees = [] } = useJiraAssignees();
 
   // 사용자 이메일 가져오기
   useEffect(() => {
@@ -161,7 +164,10 @@ export function MainScreen({
             description: stage.description || '',
             assignee: stage.assignee || '',
             jiraDescription: stage.jiraDescription || '',
-            jiraAssignee: stage.jiraAssigneeId || '',
+            // JIRA 담당자: Account ID → 이름 매핑
+            jiraAssignee: stage.jiraAssigneeId
+              ? jiraAssignees.find((a: any) => a.jiraAccountId === stage.jiraAssigneeId)?.name || stage.jiraAssigneeId
+              : '',
             isManualEdit: false
           };
 
@@ -188,7 +194,10 @@ export function MainScreen({
                 // Phase 1.7: WorkStage에서 부가 정보 가져오기
                 description: childStage.description || '',
                 jiraDescription: childStage.jiraDescription || '',
-                jiraAssignee: childStage.jiraAssigneeId || '',
+                // JIRA 담당자: Account ID → 이름 매핑
+                jiraAssignee: childStage.jiraAssigneeId
+                  ? jiraAssignees.find((a: any) => a.jiraAccountId === childStage.jiraAssigneeId)?.name || childStage.jiraAssigneeId
+                  : '',
                 parentId: entry.id,
                 isManualEdit: false
               };
@@ -358,8 +367,8 @@ export function MainScreen({
       setJiraPreviewData({
         epic: {
           summary: epicSummary,
-          startDate: calculationResult.headsUpDate,
-          endDate: calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate,
+          startDate: calculationResult.headsUpDate.toISOString(),  // ISO string (PRD 명세대로)
+          endDate: (calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate).toISOString(),  // ISO string
         },
         tasks,
       });
