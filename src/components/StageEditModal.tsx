@@ -366,13 +366,14 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       {tableTargets.includes('table1') && (
         <div className="form-group">
           <label className="form-label" htmlFor={assigneeId}>담당자 (테이블 1 전용)</label>
-          <input
+          <textarea
             id={assigneeId}
-            type="text"
             className="form-input"
             value={assignee}
             onChange={(e) => setAssignee(e.target.value)}
-            placeholder="담당자 이름"
+            placeholder="담당자 이름 (개행 가능)"
+            rows={2}
+            style={{ resize: 'vertical', fontFamily: 'inherit' }}
           />
         </div>
       )}

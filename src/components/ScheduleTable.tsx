@@ -51,20 +51,25 @@ export function ScheduleTable({
   // 테이블 타입별 클래스
   const tableClass = type === 'table1' ? 'table-t1' : type === 'table2' ? 'table-t2' : 'table-t3';
 
-  const renderRow = (entry: ScheduleEntry, depth: number = 0): JSX.Element[] => {
+  // parentIndex: 부모의 인덱스 (하위 일감 인덱스 표시용)
+  const renderRow = (entry: ScheduleEntry, parentIndex?: number, childIndex?: number): JSX.Element[] => {
     const hasChildren = entry.children && entry.children.length > 0;
+    const isChild = parentIndex !== undefined && childIndex !== undefined;
+
+    // 인덱스 표시: 부모는 숫자, 하위는 "부모.자식" 형태
+    const displayIndex = isChild ? `${parentIndex}.${childIndex}` : entry.index;
 
     const rows: JSX.Element[] = [];
 
     rows.push(
-      <tr key={entry.id} className={depth > 0 ? 'subtask' : ''}>
+      <tr key={entry.id} className={isChild ? 'subtask' : ''}>
 
-          {/* # */}
-          <td className="copy-include col-index">{entry.index}</td>
+          {/* # - 인덱스 종속성 표현 */}
+          <td className="copy-include col-index">{displayIndex}</td>
 
-          {/* 배치 */}
-          <td className="copy-include col-stage" style={{ paddingLeft: depth > 0 ? '2rem' : undefined, textAlign: 'left' }}>
-            {depth > 0 && 'ㄴ '}
+          {/* 배치 - 가운데 정렬, 들여쓰기 없음 */}
+          <td className="copy-include col-stage">
+            {isChild && 'ㄴ '}
             {entry.stageName}
           </td>
 
@@ -100,10 +105,10 @@ export function ScheduleTable({
         </tr>
     );
 
-    // 하위 일감 렌더링 (항상 표시)
+    // 하위 일감 렌더링 (부모 인덱스 전달)
     if (hasChildren) {
-      entry.children!.forEach(child => {
-        rows.push(...renderRow(child, depth + 1));
+      entry.children!.forEach((child, idx) => {
+        rows.push(...renderRow(child, entry.index, idx + 1));
       });
     }
 
