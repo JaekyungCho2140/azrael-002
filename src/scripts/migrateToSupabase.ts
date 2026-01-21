@@ -10,7 +10,27 @@
  */
 
 import { supabase, getCurrentUserEmail } from '../lib/supabase';
-import { getProjects, getTemplates, loadHolidays } from '../lib/storage';
+import { loadHolidays } from '../lib/storage';
+import { Project, WorkTemplate, STORAGE_KEYS } from '../types';
+
+/**
+ * LocalStorage에서 Projects 읽기 (인라인 구현)
+ * storage.ts에서 마이그레이션 함수 삭제 후 여기서 직접 구현
+ */
+function getProjects(): Project[] {
+  const json = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+  if (!json) return [];
+  return JSON.parse(json);
+}
+
+/**
+ * LocalStorage에서 Templates 읽기 (인라인 구현)
+ */
+function getTemplates(): WorkTemplate[] {
+  const json = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
+  if (!json) return [];
+  return JSON.parse(json);
+}
 
 interface MigrationResult {
   success: boolean;

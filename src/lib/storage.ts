@@ -1,32 +1,17 @@
 /**
  * LocalStorage Utility Functions
  * 참조: prd/Azrael-PRD-Shared.md §5 LocalStorage 스키마
+ *
+ * Note: Supabase 마이그레이션 후 대부분의 데이터는 Supabase에서 관리됩니다.
+ * 이 파일은 UserState(개인 설정)와 초기화 로직만 담당합니다.
  */
 
 import {
-  Project,
-  WorkTemplate,
   Holiday,
   UserState,
-  CalculationResult,
-  ScheduleEntry,
   STORAGE_KEYS,
   DEFAULT_PROJECTS
 } from '../types';
-
-/**
- * Date 필드 복원 함수
- * 참조: Azrael-PRD-Shared.md §5.1
- */
-function reviveEntries(entries: ScheduleEntry[]): void {
-  entries.forEach(entry => {
-    entry.startDateTime = new Date(entry.startDateTime);
-    entry.endDateTime = new Date(entry.endDateTime);
-    if (entry.children) {
-      reviveEntries(entry.children);
-    }
-  });
-}
 
 /**
  * 초기 데이터 생성
@@ -39,7 +24,7 @@ export function initializeDefaultData(): void {
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(DEFAULT_PROJECTS));
 
     // 테스트용 기본 템플릿 (M4/GL 예시)
-    const defaultTemplates: WorkTemplate[] = [
+    const defaultTemplates = [
       {
         id: 'template_M4_GL',
         projectId: 'M4_GL',
@@ -66,33 +51,8 @@ export function initializeDefaultData(): void {
 }
 
 /**
- * Projects
- */
-export function getProjects(): Project[] {
-  const json = localStorage.getItem(STORAGE_KEYS.PROJECTS);
-  if (!json) return [];
-  return JSON.parse(json);
-}
-
-export function saveProjects(projects: Project[]): void {
-  localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
-}
-
-/**
- * WorkTemplates
- */
-export function getTemplates(): WorkTemplate[] {
-  const json = localStorage.getItem(STORAGE_KEYS.TEMPLATES);
-  if (!json) return [];
-  return JSON.parse(json);
-}
-
-export function saveTemplates(templates: WorkTemplate[]): void {
-  localStorage.setItem(STORAGE_KEYS.TEMPLATES, JSON.stringify(templates));
-}
-
-/**
- * Holidays
+ * Holidays (공휴일)
+ * MainScreen에서 계산 시 사용
  */
 export function loadHolidays(): Holiday[] {
   const json = localStorage.getItem(STORAGE_KEYS.HOLIDAYS);
@@ -103,42 +63,9 @@ export function loadHolidays(): Holiday[] {
   return holidays;
 }
 
-export function saveHolidays(holidays: Holiday[]): void {
-  localStorage.setItem(STORAGE_KEYS.HOLIDAYS, JSON.stringify(holidays));
-}
-
 /**
- * CalculationResult
- */
-export function loadCalculationResult(projectId: string): CalculationResult | null {
-  const json = localStorage.getItem(STORAGE_KEYS.CALCULATION(projectId));
-  if (!json) return null;
-
-  const result = JSON.parse(json);
-
-  // Date 필드 복원
-  result.updateDate = new Date(result.updateDate);
-  result.headsUpDate = new Date(result.headsUpDate);
-  if (result.iosReviewDate) result.iosReviewDate = new Date(result.iosReviewDate);
-  result.calculatedAt = new Date(result.calculatedAt);
-
-  // ScheduleEntry의 Date 필드 복원
-  reviveEntries(result.table1Entries);
-  reviveEntries(result.table2Entries);
-  reviveEntries(result.table3Entries);
-
-  return result;
-}
-
-export function saveCalculationResult(result: CalculationResult): void {
-  localStorage.setItem(
-    STORAGE_KEYS.CALCULATION(result.projectId),
-    JSON.stringify(result)
-  );
-}
-
-/**
- * UserState
+ * UserState (사용자 상태)
+ * LocalStorage에 저장되는 개인 설정
  */
 export function getUserState(): UserState | null {
   const json = localStorage.getItem(STORAGE_KEYS.USER_STATE);
@@ -148,32 +75,4 @@ export function getUserState(): UserState | null {
 
 export function saveUserState(state: UserState): void {
   localStorage.setItem(STORAGE_KEYS.USER_STATE, JSON.stringify(state));
-}
-
-/**
- * 프로젝트 삭제
- * 참조: Azrael-PRD-Shared.md §7.5
- */
-export function deleteProject(projectId: string): void {
-  // 1. Projects 배열에서 제거
-  const projects = getProjects();
-  const filtered = projects.filter(p => p.id !== projectId);
-  saveProjects(filtered);
-
-  // 2. Templates 배열에서 제거
-  const templates = getTemplates();
-  const filteredTemplates = templates.filter(t => t.projectId !== projectId);
-  saveTemplates(filteredTemplates);
-
-  // 3. CalculationResult 키 삭제
-  localStorage.removeItem(STORAGE_KEYS.CALCULATION(projectId));
-
-  // 4. UserState.lastProjectId 업데이트
-  const userState = getUserState();
-  if (userState && userState.lastProjectId === projectId) {
-    if (filtered.length > 0) {
-      userState.lastProjectId = filtered[0].id;
-      saveUserState(userState);
-    }
-  }
 }

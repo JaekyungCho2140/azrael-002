@@ -96,9 +96,9 @@ describe('calculateDateTimeFromStage', () => {
 
     const result = calculateDateTimeFromStage(updateDate, stage, holidays);
 
-    // 10 영업일 전 = 2026-01-27 (화)
+    // 13 영업일 전 = 2026-01-22 (목)
     expect(result.startDateTime.getMonth()).toBe(0); // 1월
-    expect(result.startDateTime.getDate()).toBe(27);
+    expect(result.startDateTime.getDate()).toBe(22);
     expect(result.startDateTime.getHours()).toBe(9);
     expect(result.startDateTime.getMinutes()).toBe(0);
 
