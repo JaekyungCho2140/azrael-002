@@ -257,7 +257,7 @@ export function MainScreen({
         // JIRA API로 Epic 실제 존재 여부 확인
         const jiraConfig = JSON.parse(jiraConfigStr);
         const checkResult = await checkJiraIssueExists(existingEpic.epicKey, {
-          email: jiraConfig.email || jiraConfig.accountId,
+          email: currentUserEmail,  // Basic Auth에는 실제 이메일 필요
           apiToken: jiraConfig.apiToken,
         });
 
@@ -622,7 +622,7 @@ export function MainScreen({
 
       // 3. JIRA API로 Epic 실제 존재 여부 확인
       const checkResult = await checkJiraIssueExists(epicMapping.epicKey, {
-        email: jiraConfig.email || jiraConfig.accountId,
+        email: currentUserEmail,  // Basic Auth에는 실제 이메일 필요
         apiToken: jiraConfig.apiToken,
       });
 
