@@ -706,6 +706,7 @@ export function MainScreen({
         issueId: headsupMapping?.taskId,
         stageId: 'HEADSUP',
         summary: `${dateStr} 업데이트 일정 헤즈업`,
+        description: currentProject.jiraHeadsupDescription || '',  // Phase 1.7: 헤즈업 설명
         startDate: calculationResult.headsUpDate.toISOString(),
         endDate: calculationResult.headsUpDate.toISOString(),
         assignee: jiraConfig.accountId,
@@ -749,9 +750,10 @@ export function MainScreen({
             issueId: taskMapping?.taskId,
             stageId: stage.id,
             summary,
+            description: stage.jiraDescription || '',  // Phase 1.7: WorkStage JIRA 설명
             startDate: startDateTime.toISOString(),
             endDate: endDateTime.toISOString(),
-            assignee: jiraConfig.accountId,
+            assignee: stage.jiraAssigneeId || jiraConfig.accountId,  // Phase 1.7: WorkStage 담당자 우선
             issueType: 'Task' as const,
           });
 
@@ -782,9 +784,10 @@ export function MainScreen({
                 issueId: subtaskMapping?.taskId,
                 stageId: childStage.id,
                 summary: childSummary,
+                description: childStage.jiraDescription || '',  // Phase 1.7: WorkStage JIRA 설명
                 startDate: childStart.toISOString(),
                 endDate: childEnd.toISOString(),
-                assignee: jiraConfig.accountId,
+                assignee: childStage.jiraAssigneeId || jiraConfig.accountId,  // Phase 1.7: WorkStage 담당자 우선
                 issueType: 'Sub-task' as const,
                 parentTaskId: taskMapping?.taskId, // 부모 Task ID
               });

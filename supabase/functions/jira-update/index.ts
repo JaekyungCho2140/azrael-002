@@ -236,7 +236,7 @@ serve(async (req) => {
     for (const update of updates) {
       if (update.issueId) {
         // 기존 Task 업데이트
-        const updatePayload = {
+        const updatePayload: any = {
           fields: {
             summary: update.summary,
             [CUSTOM_FIELD_START]: update.startDate,
@@ -244,6 +244,12 @@ serve(async (req) => {
             assignee: update.assignee ? { accountId: update.assignee } : null,
           },
         };
+
+        // description 추가 (ADF 변환)
+        const descriptionADF = textToADF(update.description);
+        if (descriptionADF) {
+          updatePayload.fields.description = descriptionADF;
+        }
 
         const taskResponse = await fetch(`${JIRA_URL}/rest/api/3/issue/${update.issueId}`, {
           method: 'PUT',
