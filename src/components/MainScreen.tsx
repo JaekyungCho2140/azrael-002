@@ -35,6 +35,7 @@ import {
   createTaskMappings,
   fetchTaskMappings,
   retryWithBackoff,
+  checkJiraIssueExists,
   type TaskMapping
 } from '../lib/api/jira';
 import './MainScreen.css';
@@ -249,12 +250,46 @@ export function MainScreen({
       return;
     }
 
-    // Epic 중복 체크
+    // Epic 중복 체크 (JIRA 실제 존재 확인 포함)
     try {
       const existingEpic = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
       if (existingEpic && existingEpic.epicId !== 'PENDING') {
-        alert(`이미 생성된 Epic이 있습니다 (${existingEpic.epicKey}).\n\n[JIRA 업데이트] 버튼을 사용하여 일정을 변경하세요.`);
-        return;
+        // JIRA API로 Epic 실제 존재 여부 확인
+        const jiraConfig = JSON.parse(jiraConfigStr);
+        const checkResult = await checkJiraIssueExists(existingEpic.epicKey, {
+          email: jiraConfig.email || jiraConfig.accountId,
+          apiToken: jiraConfig.apiToken,
+        });
+
+        if (checkResult.errorCode === 'UNAUTHORIZED') {
+          alert('JIRA 인증에 실패했습니다.\n설정 → JIRA 연동 탭에서 API Token을 확인해주세요.');
+          return;
+        }
+
+        if (checkResult.errorCode === 'NETWORK_ERROR') {
+          alert(`JIRA 연결 오류: ${checkResult.errorMessage}\n\n잠시 후 다시 시도해주세요.`);
+          return;
+        }
+
+        if (checkResult.exists) {
+          // Epic이 실제로 JIRA에 존재 → 기존 안내
+          alert(`이미 생성된 Epic이 있습니다 (${existingEpic.epicKey}).\n\n[JIRA 업데이트] 버튼을 사용하여 일정을 변경하세요.`);
+          return;
+        } else {
+          // Epic이 JIRA에서 삭제됨 → 매핑 정리 후 재생성 제안
+          const shouldCleanup = confirm(
+            `JIRA에서 Epic (${existingEpic.epicKey})이 삭제되었습니다.\n\n` +
+            `매핑 정보를 정리하고 새로 생성하시겠습니까?\n` +
+            `(기존 매핑이 삭제됩니다)`
+          );
+
+          if (shouldCleanup) {
+            await deleteEpicMapping(existingEpic.id!);
+            // 매핑 삭제 후 계속 생성 진행
+          } else {
+            return;
+          }
+        }
       }
     } catch (err: any) {
       alert(`Epic 확인 실패: ${err.message}`);
@@ -570,23 +605,50 @@ export function MainScreen({
     }
 
     try {
-      // 1. Epic 매핑 조회
-      const epicMapping = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
-      if (!epicMapping || epicMapping.epicId === 'PENDING') {
-        alert('생성된 Epic이 없습니다.\n먼저 [JIRA 생성]을 실행하세요.');
-        return;
-      }
-
-      // 2. Task 매핑 조회
-      const existingTaskMappings = await fetchTaskMappings(epicMapping.id!);
-
-      // 3. JIRA Config 로드
+      // 1. JIRA Config 로드 (Epic 존재 확인에 필요하므로 먼저 로드)
       const jiraConfigStr = localStorage.getItem('azrael:jiraConfig');
       if (!jiraConfigStr) {
         alert('JIRA 설정을 찾을 수 없습니다.');
         return;
       }
       const jiraConfig = JSON.parse(jiraConfigStr);
+
+      // 2. Epic 매핑 조회
+      const epicMapping = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
+      if (!epicMapping || epicMapping.epicId === 'PENDING') {
+        alert('생성된 Epic이 없습니다.\n먼저 [JIRA 생성]을 실행하세요.');
+        return;
+      }
+
+      // 3. JIRA API로 Epic 실제 존재 여부 확인
+      const checkResult = await checkJiraIssueExists(epicMapping.epicKey, {
+        email: jiraConfig.email || jiraConfig.accountId,
+        apiToken: jiraConfig.apiToken,
+      });
+
+      if (checkResult.errorCode === 'UNAUTHORIZED') {
+        alert('JIRA 인증에 실패했습니다.\n설정 → JIRA 연동 탭에서 API Token을 확인해주세요.');
+        return;
+      }
+
+      if (checkResult.errorCode === 'NETWORK_ERROR') {
+        alert(`JIRA 연결 오류: ${checkResult.errorMessage}\n\n잠시 후 다시 시도해주세요.`);
+        return;
+      }
+
+      if (!checkResult.exists) {
+        // Epic이 JIRA에서 삭제됨 → 매핑 정리 후 재생성 안내
+        alert(
+          `JIRA에서 Epic (${epicMapping.epicKey})이 삭제되었습니다.\n\n` +
+          `[JIRA 생성] 버튼을 사용하여 새로 생성해주세요.`
+        );
+        // 매핑 자동 정리
+        await deleteEpicMapping(epicMapping.id!);
+        return;
+      }
+
+      // 4. Task 매핑 조회
+      const existingTaskMappings = await fetchTaskMappings(epicMapping.id!);
 
       // 4. 업데이트할 데이터 생성
       const template = templates.find(t => t.id === currentProject.templateId);

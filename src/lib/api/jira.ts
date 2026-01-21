@@ -256,6 +256,44 @@ export async function retryWithBackoff<T>(
 }
 
 /**
+ * JIRA Issue 존재 여부 확인
+ * JIRA에서 직접 삭제된 경우를 감지하기 위한 API
+ */
+export interface JiraCheckResult {
+  exists: boolean;
+  issueKey: string;
+  issueId?: string;
+  errorCode?: 'NOT_FOUND' | 'UNAUTHORIZED' | 'NETWORK_ERROR';
+  errorMessage?: string;
+}
+
+export async function checkJiraIssueExists(
+  issueKey: string,
+  jiraAuth: { email: string; apiToken: string }
+): Promise<JiraCheckResult> {
+  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(`${supabaseUrl}/functions/v1/jira-check`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${supabaseAnonKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      issueKey,
+      jiraAuth,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`JIRA 확인 실패 (HTTP ${response.status})`);
+  }
+
+  return await response.json();
+}
+
+/**
  * JIRA 담당자 목록 조회
  * Phase 1.7: jira_assignees 테이블에서 활성화된 담당자 조회
  */
