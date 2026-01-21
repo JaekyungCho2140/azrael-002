@@ -18,6 +18,7 @@ export interface Project {
   jiraProjectKey?: string;       // JIRA 프로젝트 키 (Phase 1, 예: "L10NM4")
   jiraEpicTemplate?: string;     // JIRA Epic Summary 템플릿 (Phase 0.5)
   jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿 (Phase 0.5)
+  jiraHeadsupDescription?: string; // JIRA 헤즈업 Task 설명 (ADF 테이블 마크업 지원)
   jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (Phase 1.5, 기본값: "PM(표준)")
   // isDeletable는 런타임 계산 필드 (저장 안 함)
 }

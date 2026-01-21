@@ -280,10 +280,14 @@ export function MainScreen({
 
       // 헤즈업 Task
       const taskIssueType = currentProject.jiraTaskIssueType || 'PM(표준)';
+      const headsupSummary = currentProject.jiraHeadsupTemplate
+        ? currentProject.jiraHeadsupTemplate.replace(/{date}/g, dateStr).replace(/{projectName}/g, currentProject.name).replace(/{headsUp}/g, headsUpStr)
+        : `${dateStr} 업데이트 일정 헤즈업`;
       tasks.push({
         type: 'Task',  // 표준화: 미리보기 카운팅용
         issueTypeName: taskIssueType,
-        summary: `${dateStr} 업데이트 일정 헤즈업`,
+        summary: headsupSummary,
+        jiraDescription: currentProject.jiraHeadsupDescription || undefined,
         startDate: calculationResult.headsUpDate,
         endDate: calculationResult.headsUpDate,
         stageId: 'HEADSUP',

@@ -52,6 +52,11 @@ export interface Database {
           show_ios_review_date: boolean;
           template_id: string;
           disclaimer: string;
+          jira_project_key: string | null;
+          jira_epic_template: string | null;
+          jira_headsup_template: string | null;
+          jira_headsup_description: string | null;
+          jira_task_issue_type: string | null;
           created_at: string;
           updated_at: string;
           created_by: string;
@@ -64,6 +69,11 @@ export interface Database {
           show_ios_review_date?: boolean;
           template_id: string;
           disclaimer?: string;
+          jira_project_key?: string | null;
+          jira_epic_template?: string | null;
+          jira_headsup_template?: string | null;
+          jira_headsup_description?: string | null;
+          jira_task_issue_type?: string | null;
           created_at?: string;
           updated_at?: string;
           created_by: string;
@@ -76,6 +86,11 @@ export interface Database {
           show_ios_review_date?: boolean;
           template_id?: string;
           disclaimer?: string;
+          jira_project_key?: string | null;
+          jira_epic_template?: string | null;
+          jira_headsup_template?: string | null;
+          jira_headsup_description?: string | null;
+          jira_task_issue_type?: string | null;
           created_at?: string;
           updated_at?: string;
           created_by?: string;

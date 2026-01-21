@@ -23,10 +23,11 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const [iosReviewOffset, setIosReviewOffset] = useState(7);
   const [disclaimer, setDisclaimer] = useState('');
 
-  // JIRA 관련 필드 (Phase 0.5 + Phase 1 + Phase 1.5)
+  // JIRA 관련 필드 (Phase 0.5 + Phase 1 + Phase 1.5 + Phase 1.7)
   const [jiraProjectKey, setJiraProjectKey] = useState('');
   const [jiraEpicTemplate, setJiraEpicTemplate] = useState('');
   const [jiraHeadsupTemplate, setJiraHeadsupTemplate] = useState('');
+  const [jiraHeadsupDescription, setJiraHeadsupDescription] = useState('');
   const [jiraTaskIssueType, setJiraTaskIssueType] = useState('');
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraProjectKey(project.jiraProjectKey || '');
       setJiraEpicTemplate(project.jiraEpicTemplate || '');
       setJiraHeadsupTemplate(project.jiraHeadsupTemplate || '');
+      setJiraHeadsupDescription(project.jiraHeadsupDescription || '');
       setJiraTaskIssueType(project.jiraTaskIssueType || '');
     } else {
       setName('');
@@ -49,6 +51,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraProjectKey('');
       setJiraEpicTemplate('');
       setJiraHeadsupTemplate('');
+      setJiraHeadsupDescription('');
       setJiraTaskIssueType('');
     }
   }, [project, isOpen]);
@@ -70,6 +73,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       jiraProjectKey: jiraProjectKey.trim() || undefined,
       jiraEpicTemplate: jiraEpicTemplate.trim() || undefined,
       jiraHeadsupTemplate: jiraHeadsupTemplate.trim() || undefined,
+      jiraHeadsupDescription: jiraHeadsupDescription.trim() || undefined,
       jiraTaskIssueType: jiraTaskIssueType.trim() || undefined
     };
 
@@ -210,6 +214,30 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
         />
         <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
           비워두면 기본 형식 사용
+        </small>
+      </div>
+
+      {/* 헤즈업 Task 설명 (Phase 1.7) */}
+      <div className="form-group">
+        <label className="form-label">
+          헤즈업 Task 설명 (선택)
+          <span
+            className="info-icon"
+            title="표 입력 형식: ||헤더1|헤더2|| (헤더행), |내용1|내용2| (데이터행)"
+            style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
+          >
+            ?
+          </span>
+        </label>
+        <textarea
+          className="form-input"
+          value={jiraHeadsupDescription}
+          onChange={(e) => setJiraHeadsupDescription(e.target.value)}
+          placeholder="헤즈업 Task의 JIRA 설명 (ADF 테이블 마크업 지원)&#10;&#10;예시:&#10;||담당자|상태|마감일||&#10;|홍길동|진행중|2026-01-25|"
+          rows={5}
+        />
+        <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+          표 형식: ||헤더1|헤더2|| (헤더), |내용1|내용2| (데이터)
         </small>
       </div>
 

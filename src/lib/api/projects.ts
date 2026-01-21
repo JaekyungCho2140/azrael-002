@@ -21,6 +21,7 @@ function mapToProject(row: any): Project {
     jiraProjectKey: row.jira_project_key || undefined,
     jiraEpicTemplate: row.jira_epic_template || undefined,
     jiraHeadsupTemplate: row.jira_headsup_template || undefined,
+    jiraHeadsupDescription: row.jira_headsup_description || undefined,
     jiraTaskIssueType: row.jira_task_issue_type || undefined,
   };
 }
@@ -67,6 +68,7 @@ export async function createProject(project: Omit<Project, 'id'>): Promise<Proje
       jira_project_key: project.jiraProjectKey || null,
       jira_epic_template: project.jiraEpicTemplate || null,
       jira_headsup_template: project.jiraHeadsupTemplate || null,
+      jira_headsup_description: project.jiraHeadsupDescription || null,
       jira_task_issue_type: project.jiraTaskIssueType || null,
       created_by: userEmail,
     })
@@ -100,6 +102,7 @@ export async function updateProject(
       jira_project_key: updates.jiraProjectKey !== undefined ? updates.jiraProjectKey : undefined,
       jira_epic_template: updates.jiraEpicTemplate !== undefined ? updates.jiraEpicTemplate : undefined,
       jira_headsup_template: updates.jiraHeadsupTemplate !== undefined ? updates.jiraHeadsupTemplate : undefined,
+      jira_headsup_description: updates.jiraHeadsupDescription !== undefined ? updates.jiraHeadsupDescription : undefined,
       jira_task_issue_type: updates.jiraTaskIssueType !== undefined ? updates.jiraTaskIssueType : undefined,
     })
     .eq('id', id);
