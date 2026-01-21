@@ -44,9 +44,10 @@ interface ADFNode {
 
 /**
  * 테이블 마크업 행들을 ADF table 노드로 변환
- * 형식:
- *   ||헤더1|헤더2|헤더3||  (헤더 행: 파이프 2개로 시작/끝)
- *   |내용1|내용2|내용3|    (데이터 행: 파이프 1개로 시작/끝)
+ * 지원 형식:
+ *   1) ||헤더1|헤더2|헤더3||  (SuperClaude 스타일)
+ *   2) ||헤더1||헤더2||헤더3||  (JIRA Wiki 스타일)
+ *   3) |내용1|내용2|내용3|    (데이터 행)
  */
 function parseTableMarkup(tableLines: string[]): ADFNode | null {
   if (tableLines.length === 0) return null;
@@ -61,8 +62,13 @@ function parseTableMarkup(tableLines: string[]): ADFNode | null {
 
     let cells: string[];
     if (isHeader) {
+      // JIRA Wiki 스타일 감지: ||헤더1||헤더2||헤더3||
       const inner = trimmedLine.slice(2, -2);
-      cells = inner.split('|').map(c => c.trim());
+      if (inner.includes('||')) {
+        cells = inner.split('||').map(c => c.trim());
+      } else {
+        cells = inner.split('|').map(c => c.trim());
+      }
     } else if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
       const inner = trimmedLine.slice(1, -1);
       cells = inner.split('|').map(c => c.trim());
@@ -70,7 +76,10 @@ function parseTableMarkup(tableLines: string[]): ADFNode | null {
       continue;
     }
 
-    if (cells.length === 0 || (cells.length === 1 && cells[0] === '')) continue;
+    // 빈 셀 필터링
+    cells = cells.filter(c => c !== '');
+
+    if (cells.length === 0) continue;
 
     const cellNodes: ADFNode[] = cells.map(cellText => ({
       type: isHeader ? 'tableHeader' : 'tableCell',
