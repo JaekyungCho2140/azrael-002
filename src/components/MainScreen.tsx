@@ -230,6 +230,16 @@ export function MainScreen({
 
     // Phase 1.7: Supabase에 저장
     saveMutation.mutate({ result, userEmail: currentUserEmail });
+
+    // Epic 매핑 존재 여부 확인 (JIRA 업데이트 버튼 활성화용)
+    fetchEpicMapping(currentProject.id, updateDateObj).then(epicMapping => {
+      const hasMapping = !!(epicMapping && epicMapping.epicId !== 'PENDING');
+      setHasEpicMapping(hasMapping);
+      console.log('[handleCalculate] Epic 매핑 확인:', hasMapping, epicMapping?.epicKey);
+    }).catch(err => {
+      console.error('[handleCalculate] Epic 매핑 확인 실패:', err);
+      setHasEpicMapping(false);
+    });
   };
 
   // JIRA 생성 핸들러 (Phase 1)
