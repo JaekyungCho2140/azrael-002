@@ -129,7 +129,13 @@ export function CalendarView({
           height="auto"
           dayMaxEvents={true}
           eventDisplay="block"
-          displayEventTime={false}
+          displayEventTime={true}
+          displayEventEnd={true}
+          eventTimeFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }}
         />
       </div>
     </div>

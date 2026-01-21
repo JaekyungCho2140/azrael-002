@@ -33,6 +33,7 @@ table {
   border-collapse: collapse;
   font-family: var(--font-body);
   font-size: var(--text-sm);
+  table-layout: fixed; /* 고정 너비 레이아웃 */
 }
 
 thead {
@@ -53,6 +54,63 @@ td {
   text-align: center;
   border-bottom: 1px solid var(--azrael-gray-200);
   color: var(--azrael-gray-900);
+  vertical-align: top;
+}
+
+/* ========================================
+ * 열 너비 설정 (T1/T2/T3 공통)
+ * ======================================== */
+
+/* # 열: 숫자 3개 (예: 9.9) 표기 가능한 최소 너비 */
+.col-index {
+  width: 45px;
+  min-width: 45px;
+  max-width: 45px;
+}
+
+/* 배치 열: 텍스트에 맞게 자동 조절, 최소 너비 설정 */
+.col-stage {
+  width: 120px;
+  min-width: 100px;
+}
+
+/* 날짜 열: MM/DD(요일) HH:MM 형식 (예: 03/04(수) 18:00) */
+.col-date {
+  width: 110px;
+  min-width: 110px;
+  max-width: 110px;
+  white-space: nowrap;
+}
+
+/* 설명/담당자 열: 개행 허용 */
+.col-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  text-align: left;
+}
+
+/* ========================================
+ * T1 전용 스타일: 설명:담당자 = 3:2
+ * ======================================== */
+.table-t1 .col-description {
+  width: 30%; /* 3/5 */
+}
+
+.table-t1 .col-assignee {
+  width: 20%; /* 2/5 */
+}
+
+/* ========================================
+ * T2/T3 전용 스타일: 설명:JIRA설명 = 1:1
+ * ======================================== */
+.table-t2 .col-description,
+.table-t3 .col-description {
+  width: calc((100% - 45px - 120px - 110px - 110px - 120px) / 2);
+}
+
+.table-t2 .col-jira-description,
+.table-t3 .col-jira-description {
+  width: calc((100% - 45px - 120px - 110px - 110px - 120px) / 2);
 }
 
 tr:hover {
@@ -125,6 +183,7 @@ tr.subtask td:nth-child(3) {
   border-top: 1px solid var(--azrael-gray-200);
   font-size: var(--text-sm);
   color: var(--azrael-gray-700);
+  white-space: pre-wrap;
 }
 
 .disclaimer strong {
@@ -133,9 +192,31 @@ tr.subtask td:nth-child(3) {
   color: var(--azrael-gray-900);
 }
 
+/* Disclaimer 커스텀 서식 */
+.disclaimer .fmt-bold {
+  font-weight: bold;
+}
+
+.disclaimer .fmt-red {
+  color: #DC2626; /* Tailwind red-600 */
+}
+
+.disclaimer .fmt-green {
+  color: #16A34A; /* Tailwind green-600 */
+}
+
+.disclaimer .fmt-blue {
+  color: #2563EB; /* Tailwind blue-600 */
+}
+
+.disclaimer .fmt-underline {
+  text-decoration: underline;
+}
+
 /* JIRA 담당자 컬럼 스타일 (Phase 0.5) */
-.jira-assignee {
+.col-jira-assignee {
   width: 120px;
+  min-width: 120px;
   max-width: 120px;
   text-align: center;
 }

@@ -39,15 +39,19 @@ export function GanttChart({ entries, collapsedParentIds = new Set(), chartId, c
     };
     collectVisible(entries);
 
-    // Gantt 태스크 변환
-    const tasks = visibleEntries.map((entry, index) => ({
-      id: entry.id,
-      name: entry.stageName,
-      start: formatDateLocal(entry.startDateTime),
-      end: formatDateLocal(entry.endDateTime),
-      progress: 100,
-      dependencies: index > 0 ? visibleEntries[index - 1].id : ''
-    }));
+    // Gantt 태스크 변환 (방법 A: task.name에 시간 포함)
+    const tasks = visibleEntries.map((entry, index) => {
+      const startTime = formatTime(entry.startDateTime);
+      const endTime = formatTime(entry.endDateTime);
+      return {
+        id: entry.id,
+        name: `${startTime} ${entry.stageName} ${endTime}`,
+        start: formatDateLocal(entry.startDateTime),
+        end: formatDateLocal(entry.endDateTime),
+        progress: 100,
+        dependencies: index > 0 ? visibleEntries[index - 1].id : ''
+      };
+    });
 
     // 기존 내용 정리 (중복 방지)
     const chartElement = document.getElementById(chartId);

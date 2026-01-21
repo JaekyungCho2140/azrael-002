@@ -15,13 +15,41 @@ interface ScheduleTableProps {
   disclaimer?: string;
 }
 
+/**
+ * Disclaimer 커스텀 서식 파싱
+ * 지원 태그: <b></b> 굵게, <r></r> 빨강, <g></g> 초록, <bl></bl> 파랑, <u></u> 밑줄
+ * 색상 태그는 중복 불가, 나머지는 중복 가능
+ */
+function parseDisclaimerFormat(text: string): string {
+  // 태그 매핑 (순서 중요: 더 긴 태그 먼저 처리)
+  const tagMap: Array<[RegExp, string, string]> = [
+    [/<bl>(.*?)<\/bl>/gs, '<span class="fmt-blue">', '</span>'],
+    [/<b>(.*?)<\/b>/gs, '<span class="fmt-bold">', '</span>'],
+    [/<r>(.*?)<\/r>/gs, '<span class="fmt-red">', '</span>'],
+    [/<g>(.*?)<\/g>/gs, '<span class="fmt-green">', '</span>'],
+    [/<u>(.*?)<\/u>/gs, '<span class="fmt-underline">', '</span>'],
+  ];
+
+  let result = text;
+
+  for (const [regex, openTag, closeTag] of tagMap) {
+    result = result.replace(regex, (_, content) => `${openTag}${content}${closeTag}`);
+  }
+
+  // 줄바꿈 처리
+  result = result.replace(/\n/g, '<br/>');
+
+  return result;
+}
+
 export function ScheduleTable({
   title,
   entries,
   type,
   disclaimer
 }: ScheduleTableProps) {
-  // Phase 4: 편집 기능 제거 (읽기 전용 테이블)
+  // 테이블 타입별 클래스
+  const tableClass = type === 'table1' ? 'table-t1' : type === 'table2' ? 'table-t2' : 'table-t3';
 
   const renderRow = (entry: ScheduleEntry, depth: number = 0): JSX.Element[] => {
     const hasChildren = entry.children && entry.children.length > 0;
@@ -32,39 +60,39 @@ export function ScheduleTable({
       <tr key={entry.id} className={depth > 0 ? 'subtask' : ''}>
 
           {/* # */}
-          <td className="copy-include">{entry.index}</td>
+          <td className="copy-include col-index">{entry.index}</td>
 
           {/* 배치 */}
-          <td className="copy-include" style={{ paddingLeft: depth > 0 ? '2rem' : undefined }}>
+          <td className="copy-include col-stage" style={{ paddingLeft: depth > 0 ? '2rem' : undefined, textAlign: 'left' }}>
             {depth > 0 && 'ㄴ '}
             {entry.stageName}
           </td>
 
           {/* 마감/HO */}
-          <td className="copy-include">{formatTableDate(entry.startDateTime)}</td>
+          <td className="copy-include col-date">{formatTableDate(entry.startDateTime)}</td>
 
           {/* 테이블 전달/HB */}
-          <td className="copy-include">{formatTableDate(entry.endDateTime)}</td>
+          <td className="copy-include col-date">{formatTableDate(entry.endDateTime)}</td>
 
           {/* 설명 - Phase 1.7: 읽기 전용 (WorkStage 템플릿에서만 편집) */}
-          <td className="copy-include readonly">
-            <span dangerouslySetInnerHTML={{ __html: entry.description || '' }} />
+          <td className="copy-include readonly col-text col-description">
+            <span dangerouslySetInnerHTML={{ __html: (entry.description || '').replace(/\n/g, '<br/>') }} />
           </td>
 
           {/* 담당자 (테이블 1) 또는 JIRA 설명 (테이블 2/3) - Phase 1.7: 읽기 전용 */}
           {type === 'table1' ? (
-            <td className="copy-include readonly">
-              <span dangerouslySetInnerHTML={{ __html: entry.assignee || '' }} />
+            <td className="copy-include readonly col-text col-assignee">
+              <span dangerouslySetInnerHTML={{ __html: (entry.assignee || '').replace(/\n/g, '<br/>') }} />
             </td>
           ) : (
-            <td className="copy-exclude readonly">
-              <span dangerouslySetInnerHTML={{ __html: entry.jiraDescription || '' }} />
+            <td className="copy-exclude readonly col-text col-jira-description">
+              <span dangerouslySetInnerHTML={{ __html: (entry.jiraDescription || '').replace(/\n/g, '<br/>') }} />
             </td>
           )}
 
           {/* JIRA 담당자 (테이블 2/3) - Phase 1.7: 읽기 전용, 이름 표시 */}
           {type !== 'table1' && (
-            <td className="copy-exclude readonly jira-assignee">
+            <td className="copy-exclude readonly col-jira-assignee">
               <span>{entry.jiraAssignee || ''}</span>
             </td>
           )}
@@ -91,16 +119,33 @@ export function ScheduleTable({
         <CopyImageButton targetId={tableId} />
       </div>
 
-      <table>
+      <table className={tableClass}>
+        <colgroup>
+          <col className="col-index" />
+          <col className="col-stage" />
+          <col className="col-date" />
+          <col className="col-date" />
+          <col className="col-description" />
+          {type === 'table1' ? (
+            <col className="col-assignee" />
+          ) : (
+            <>
+              <col className="col-jira-description" />
+              <col className="col-jira-assignee" />
+            </>
+          )}
+        </colgroup>
         <thead>
           <tr>
-            <th className="copy-include">#</th>
-            <th className="copy-include">배치</th>
-            <th className="copy-include">{type === 'table1' ? '마감' : 'HO'}</th>
-            <th className="copy-include">{type === 'table1' ? '테이블 전달' : 'HB'}</th>
-            <th className="copy-include">설명</th>
-            <th className={type === 'table1' ? 'copy-include' : 'copy-exclude'}>{type === 'table1' ? '담당자' : 'JIRA 설명'}</th>
-            {type !== 'table1' && <th className="copy-exclude">JIRA 담당자</th>}
+            <th className="copy-include col-index">#</th>
+            <th className="copy-include col-stage">배치</th>
+            <th className="copy-include col-date">{type === 'table1' ? '마감' : 'HO'}</th>
+            <th className="copy-include col-date">{type === 'table1' ? '테이블 전달' : 'HB'}</th>
+            <th className="copy-include col-description">설명</th>
+            <th className={type === 'table1' ? 'copy-include col-assignee' : 'copy-exclude col-jira-description'}>
+              {type === 'table1' ? '담당자' : 'JIRA 설명'}
+            </th>
+            {type !== 'table1' && <th className="copy-exclude col-jira-assignee">JIRA 담당자</th>}
           </tr>
         </thead>
         <tbody>
@@ -109,11 +154,10 @@ export function ScheduleTable({
       </table>
 
       {disclaimer && type === 'table1' && (
-        <div className="disclaimer" style={{ whiteSpace: 'pre-wrap' }}>
-          {disclaimer.split('\n').map((line, i) => (
-            <div key={i}>{line}</div>
-          ))}
-        </div>
+        <div
+          className="disclaimer"
+          dangerouslySetInnerHTML={{ __html: parseDisclaimerFormat(disclaimer) }}
+        />
       )}
     </div>
   );
