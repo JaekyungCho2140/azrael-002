@@ -16,6 +16,7 @@ interface UpdateJiraRequest {
     issueId?: string;
     stageId: string;
     summary: string;
+    description?: string;  // 테이블 마크업 포함 가능
     startDate: string;
     endDate: string;
     assignee?: string;
@@ -25,6 +26,146 @@ interface UpdateJiraRequest {
   jiraAuth: {
     email: string;
     apiToken: string;
+  };
+}
+
+// ========================================
+// ADF (Atlassian Document Format) 변환 유틸리티
+// 참조: https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
+// ========================================
+
+interface ADFNode {
+  type: string;
+  attrs?: Record<string, any>;
+  content?: ADFNode[];
+  text?: string;
+  marks?: { type: string }[];
+}
+
+/**
+ * 테이블 마크업 행들을 ADF table 노드로 변환
+ * 형식:
+ *   ||헤더1|헤더2|헤더3||  (헤더 행: 파이프 2개로 시작/끝)
+ *   |내용1|내용2|내용3|    (데이터 행: 파이프 1개로 시작/끝)
+ */
+function parseTableMarkup(tableLines: string[]): ADFNode | null {
+  if (tableLines.length === 0) return null;
+
+  const tableRows: ADFNode[] = [];
+
+  for (const line of tableLines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    const isHeader = trimmedLine.startsWith('||') && trimmedLine.endsWith('||');
+
+    let cells: string[];
+    if (isHeader) {
+      const inner = trimmedLine.slice(2, -2);
+      cells = inner.split('|').map(c => c.trim());
+    } else if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+      const inner = trimmedLine.slice(1, -1);
+      cells = inner.split('|').map(c => c.trim());
+    } else {
+      continue;
+    }
+
+    if (cells.length === 0 || (cells.length === 1 && cells[0] === '')) continue;
+
+    const cellNodes: ADFNode[] = cells.map(cellText => ({
+      type: isHeader ? 'tableHeader' : 'tableCell',
+      attrs: {},
+      content: [
+        {
+          type: 'paragraph',
+          content: cellText ? [
+            {
+              type: 'text',
+              text: cellText,
+              ...(isHeader ? { marks: [{ type: 'strong' }] } : {}),
+            },
+          ] : [],
+        },
+      ],
+    }));
+
+    tableRows.push({
+      type: 'tableRow',
+      content: cellNodes,
+    });
+  }
+
+  if (tableRows.length === 0) return null;
+
+  return {
+    type: 'table',
+    attrs: {
+      isNumberColumnEnabled: false,
+      layout: 'default',
+    },
+    content: tableRows,
+  };
+}
+
+function isTableLine(line: string): boolean {
+  const trimmed = line.trim();
+  return (trimmed.startsWith('||') && trimmed.endsWith('||')) ||
+         (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.startsWith('||'));
+}
+
+/**
+ * 평문 텍스트를 ADF (Atlassian Document Format)로 변환
+ * 테이블 마크업 지원
+ */
+function textToADF(text: string): ADFNode | null {
+  if (!text || text.trim() === '') {
+    return null;
+  }
+
+  const lines = text.split('\n');
+  const content: ADFNode[] = [];
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    if (isTableLine(trimmedLine)) {
+      const tableLines: string[] = [];
+      while (i < lines.length) {
+        const currentLine = lines[i].trim();
+        if (isTableLine(currentLine)) {
+          tableLines.push(currentLine);
+          i++;
+        } else if (currentLine === '') {
+          i++;
+          break;
+        } else {
+          break;
+        }
+      }
+
+      const tableNode = parseTableMarkup(tableLines);
+      if (tableNode) {
+        content.push(tableNode);
+      }
+    } else {
+      content.push({
+        type: 'paragraph',
+        content: trimmedLine ? [{ type: 'text', text: line }] : [],
+      });
+      i++;
+    }
+  }
+
+  if (content.length === 0) {
+    return null;
+  }
+
+  return {
+    type: 'doc',
+    version: 1,
+    content,
   };
 }
 
@@ -122,7 +263,6 @@ serve(async (req) => {
           fields: {
             project: { key: await getProjectKeyFromEpic(epicId, headers) },
             summary: update.summary,
-            description: '',
             issuetype: { name: update.issueType },
             parent: { id: update.issueType === 'Sub-task' && update.parentTaskId ? update.parentTaskId : epicId },
             [CUSTOM_FIELD_START]: update.startDate,
@@ -130,6 +270,12 @@ serve(async (req) => {
             assignee: update.assignee ? { accountId: update.assignee } : undefined,
           },
         };
+
+        // description이 있으면 ADF로 변환하여 추가 (테이블 마크업 지원)
+        const descriptionADF = textToADF(update.description);
+        if (descriptionADF) {
+          createPayload.fields.description = descriptionADF;
+        }
 
         const taskResponse = await fetch(`${JIRA_URL}/rest/api/3/issue`, {
           method: 'POST',

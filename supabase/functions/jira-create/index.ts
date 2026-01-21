@@ -45,31 +45,170 @@ const JIRA_URL = Deno.env.get('JIRA_URL') || 'https://wemade.atlassian.net';
 const CUSTOM_FIELD_START = Deno.env.get('JIRA_CUSTOM_FIELD_START') || 'customfield_10569';
 const CUSTOM_FIELD_END = Deno.env.get('JIRA_CUSTOM_FIELD_END') || 'customfield_10570';
 
+// ========================================
+// ADF (Atlassian Document Format) 변환 유틸리티
+// 참조: https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/
+// ========================================
+
+interface ADFNode {
+  type: string;
+  attrs?: Record<string, any>;
+  content?: ADFNode[];
+  text?: string;
+  marks?: { type: string }[];
+}
+
+/**
+ * 테이블 마크업 행들을 ADF table 노드로 변환
+ * 형식:
+ *   ||헤더1|헤더2|헤더3||  (헤더 행: 파이프 2개로 시작/끝)
+ *   |내용1|내용2|내용3|    (데이터 행: 파이프 1개로 시작/끝)
+ *
+ * @param tableLines - 테이블 마크업 행 배열
+ * @returns ADF table 노드 또는 null
+ */
+function parseTableMarkup(tableLines: string[]): ADFNode | null {
+  if (tableLines.length === 0) return null;
+
+  const tableRows: ADFNode[] = [];
+
+  for (const line of tableLines) {
+    const trimmedLine = line.trim();
+    if (!trimmedLine) continue;
+
+    // 헤더 행 감지: ||...||
+    const isHeader = trimmedLine.startsWith('||') && trimmedLine.endsWith('||');
+
+    let cells: string[];
+    if (isHeader) {
+      // ||헤더1|헤더2|| → ['헤더1', '헤더2']
+      const inner = trimmedLine.slice(2, -2); // 앞뒤 || 제거
+      cells = inner.split('|').map(c => c.trim());
+    } else if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
+      // |내용1|내용2| → ['내용1', '내용2']
+      const inner = trimmedLine.slice(1, -1); // 앞뒤 | 제거
+      cells = inner.split('|').map(c => c.trim());
+    } else {
+      continue; // 유효하지 않은 행
+    }
+
+    // 빈 셀 배열이면 스킵
+    if (cells.length === 0 || (cells.length === 1 && cells[0] === '')) continue;
+
+    const cellNodes: ADFNode[] = cells.map(cellText => {
+      const node: ADFNode = {
+        type: isHeader ? 'tableHeader' : 'tableCell',
+        attrs: {},
+        content: [
+          {
+            type: 'paragraph',
+            content: cellText ? [
+              {
+                type: 'text',
+                text: cellText,
+                ...(isHeader ? { marks: [{ type: 'strong' }] } : {}),
+              },
+            ] : [],
+          },
+        ],
+      };
+      return node;
+    });
+
+    tableRows.push({
+      type: 'tableRow',
+      content: cellNodes,
+    });
+  }
+
+  if (tableRows.length === 0) return null;
+
+  return {
+    type: 'table',
+    attrs: {
+      isNumberColumnEnabled: false,
+      layout: 'default',
+    },
+    content: tableRows,
+  };
+}
+
+/**
+ * 테이블 마크업 행인지 확인
+ * @param line - 검사할 행
+ * @returns 테이블 행이면 true
+ */
+function isTableLine(line: string): boolean {
+  const trimmed = line.trim();
+  // ||...|| (헤더) 또는 |...| (데이터) 형식
+  return (trimmed.startsWith('||') && trimmed.endsWith('||')) ||
+         (trimmed.startsWith('|') && trimmed.endsWith('|') && !trimmed.startsWith('||'));
+}
+
 /**
  * 평문 텍스트를 ADF (Atlassian Document Format)로 변환
- * @param text 평문 텍스트 (줄바꿈 포함 가능)
+ * 테이블 마크업 지원:
+ *   ||헤더1|헤더2|헤더3||
+ *   |내용1|내용2|내용3|
+ *
+ * @param text 평문 텍스트 (줄바꿈, 테이블 마크업 포함 가능)
  * @returns ADF JSON 객체
  */
-function textToADF(text: string) {
+function textToADF(text: string): ADFNode | null {
   if (!text || text.trim() === '') {
     return null;
   }
 
   const lines = text.split('\n');
-  const paragraphs = lines.map(line => ({
-    type: 'paragraph',
-    content: [
-      {
-        type: 'text',
-        text: line,
-      },
-    ],
-  }));
+  const content: ADFNode[] = [];
+
+  let i = 0;
+  while (i < lines.length) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    // 테이블 시작 감지
+    if (isTableLine(trimmedLine)) {
+      // 테이블 블록 수집
+      const tableLines: string[] = [];
+      while (i < lines.length) {
+        const currentLine = lines[i].trim();
+        if (isTableLine(currentLine)) {
+          tableLines.push(currentLine);
+          i++;
+        } else if (currentLine === '') {
+          // 빈 줄이면 테이블 종료
+          i++;
+          break;
+        } else {
+          // 테이블 형식이 아니면 종료
+          break;
+        }
+      }
+
+      const tableNode = parseTableMarkup(tableLines);
+      if (tableNode) {
+        content.push(tableNode);
+      }
+    } else {
+      // 일반 텍스트 (paragraph)
+      content.push({
+        type: 'paragraph',
+        content: trimmedLine ? [{ type: 'text', text: line }] : [],
+      });
+      i++;
+    }
+  }
+
+  // content가 비어있으면 null 반환
+  if (content.length === 0) {
+    return null;
+  }
 
   return {
     type: 'doc',
     version: 1,
-    content: paragraphs,
+    content,
   };
 }
 
