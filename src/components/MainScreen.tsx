@@ -66,6 +66,8 @@ export function MainScreen({
   const [jiraPreviewData, setJiraPreviewData] = useState<any>(null);
   const [isCreatingJira, setIsCreatingJira] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [isJiraLoading, setIsJiraLoading] = useState(false);
+  const [jiraLoadingMessage, setJiraLoadingMessage] = useState('');
 
   // Phase 1.7: 계산 결과 Supabase 연동
   const saveMutation = useSaveCalculationResult();
@@ -251,6 +253,8 @@ export function MainScreen({
     }
 
     // Epic 중복 체크 (JIRA 실제 존재 확인 포함)
+    setIsJiraLoading(true);
+    setJiraLoadingMessage('JIRA 일감 확인 중...');
     try {
       const existingEpic = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
       if (existingEpic && existingEpic.epicId !== 'PENDING') {
@@ -262,21 +266,25 @@ export function MainScreen({
         });
 
         if (checkResult.errorCode === 'UNAUTHORIZED') {
+          setIsJiraLoading(false);
           alert('JIRA 인증에 실패했습니다.\n설정 → JIRA 연동 탭에서 API Token을 확인해주세요.');
           return;
         }
 
         if (checkResult.errorCode === 'NETWORK_ERROR') {
+          setIsJiraLoading(false);
           alert(`JIRA 연결 오류: ${checkResult.errorMessage}\n\n잠시 후 다시 시도해주세요.`);
           return;
         }
 
         if (checkResult.exists) {
           // Epic이 실제로 JIRA에 존재 → 기존 안내
+          setIsJiraLoading(false);
           alert(`이미 생성된 Epic이 있습니다 (${existingEpic.epicKey}).\n\n[JIRA 업데이트] 버튼을 사용하여 일정을 변경하세요.`);
           return;
         } else {
           // Epic이 JIRA에서 삭제됨 → 매핑 정리 후 재생성 제안
+          setIsJiraLoading(false);
           const shouldCleanup = confirm(
             `JIRA에서 Epic (${existingEpic.epicKey})이 삭제되었습니다.\n\n` +
             `매핑 정보를 정리하고 새로 생성하시겠습니까?\n` +
@@ -284,6 +292,8 @@ export function MainScreen({
           );
 
           if (shouldCleanup) {
+            setIsJiraLoading(true);
+            setJiraLoadingMessage('매핑 정리 중...');
             await deleteEpicMapping(existingEpic.id!);
             // 매핑 삭제 후 계속 생성 진행
           } else {
@@ -292,9 +302,11 @@ export function MainScreen({
         }
       }
     } catch (err: any) {
+      setIsJiraLoading(false);
       alert(`Epic 확인 실패: ${err.message}`);
       return;
     }
+    setIsJiraLoading(false);
 
     // 미리보기 데이터 생성
     try {
@@ -604,10 +616,14 @@ export function MainScreen({
       return;
     }
 
+    setIsJiraLoading(true);
+    setJiraLoadingMessage('JIRA 일감 확인 중...');
+
     try {
       // 1. JIRA Config 로드 (Epic 존재 확인에 필요하므로 먼저 로드)
       const jiraConfigStr = localStorage.getItem('azrael:jiraConfig');
       if (!jiraConfigStr) {
+        setIsJiraLoading(false);
         alert('JIRA 설정을 찾을 수 없습니다.');
         return;
       }
@@ -616,34 +632,41 @@ export function MainScreen({
       // 2. Epic 매핑 조회
       const epicMapping = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
       if (!epicMapping || epicMapping.epicId === 'PENDING') {
+        setIsJiraLoading(false);
         alert('생성된 Epic이 없습니다.\n먼저 [JIRA 생성]을 실행하세요.');
         return;
       }
 
       // 3. JIRA API로 Epic 실제 존재 여부 확인
+      console.log('[handleUpdateJira] Epic 존재 확인:', epicMapping.epicKey);
       const checkResult = await checkJiraIssueExists(epicMapping.epicKey, {
         email: currentUserEmail,  // Basic Auth에는 실제 이메일 필요
         apiToken: jiraConfig.apiToken,
       });
+      console.log('[handleUpdateJira] checkResult:', checkResult);
 
       if (checkResult.errorCode === 'UNAUTHORIZED') {
+        setIsJiraLoading(false);
         alert('JIRA 인증에 실패했습니다.\n설정 → JIRA 연동 탭에서 API Token을 확인해주세요.');
         return;
       }
 
       if (checkResult.errorCode === 'NETWORK_ERROR') {
+        setIsJiraLoading(false);
         alert(`JIRA 연결 오류: ${checkResult.errorMessage}\n\n잠시 후 다시 시도해주세요.`);
         return;
       }
 
       if (!checkResult.exists) {
         // Epic이 JIRA에서 삭제됨 → 매핑 정리 후 재생성 안내
+        setJiraLoadingMessage('매핑 정리 중...');
+        console.log('[handleUpdateJira] Epic 삭제됨, 매핑 정리');
+        await deleteEpicMapping(epicMapping.id!);
+        setIsJiraLoading(false);
         alert(
           `JIRA에서 Epic (${epicMapping.epicKey})이 삭제되었습니다.\n\n` +
           `[JIRA 생성] 버튼을 사용하여 새로 생성해주세요.`
         );
-        // 매핑 자동 정리
-        await deleteEpicMapping(epicMapping.id!);
         return;
       }
 
@@ -762,12 +785,16 @@ export function MainScreen({
           }
         });
 
-      // 5. 확인 다이얼로그
+      // 5. 확인 다이얼로그 (로딩 해제 후 사용자 입력 대기)
+      setIsJiraLoading(false);
       if (!confirm(`JIRA 일감을 업데이트하시겠습니까?\n\n업데이트: ${updatedCount}개\n신규 생성: ${createdCount}개`)) {
         return;
       }
 
       // 6. Edge Function 호출
+      setIsJiraLoading(true);
+      setJiraLoadingMessage('JIRA 업데이트 중...');
+
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
@@ -814,8 +841,10 @@ export function MainScreen({
       }
 
       // 8. 성공 메시지
+      setIsJiraLoading(false);
       alert(`JIRA 일감이 업데이트되었습니다!\n\n업데이트: ${result.updatedCount}개\n신규 생성: ${result.createdCount}개`);
     } catch (err: any) {
+      setIsJiraLoading(false);
       console.error('JIRA 업데이트 실패:', err);
       alert(`JIRA 업데이트 실패:\n${err.message}`);
     }
@@ -833,6 +862,16 @@ export function MainScreen({
 
   return (
     <div className="main-screen">
+      {/* JIRA 로딩 오버레이 */}
+      {isJiraLoading && (
+        <div className="jira-loading-overlay">
+          <div className="jira-loading-content">
+            <div className="jira-loading-spinner"></div>
+            <p>{jiraLoadingMessage}</p>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="main-header">
         <div className="logo">

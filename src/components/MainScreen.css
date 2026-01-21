@@ -183,3 +183,51 @@
   border-radius: 12px;
   border: 2px dashed var(--azrael-gray-300);
 }
+
+/* JIRA 로딩 오버레이 */
+.jira-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+.jira-loading-content {
+  background: white;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.jira-loading-content p {
+  margin: 0;
+  font-size: var(--text-base);
+  color: var(--azrael-gray-700);
+  font-weight: var(--weight-medium);
+}
+
+.jira-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--azrael-gray-200);
+  border-top-color: var(--azrael-orange-500);
+  border-radius: 50%;
+  animation: jira-spin 0.8s linear infinite;
+}
+
+@keyframes jira-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
