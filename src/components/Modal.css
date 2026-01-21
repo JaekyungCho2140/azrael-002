@@ -52,7 +52,7 @@
   color: var(--azrael-gray-600);
   cursor: pointer;
   border-radius: 6px;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,13 +118,19 @@
   border-radius: 6px;
   font-size: var(--text-base);
   font-family: var(--font-body);
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .form-input:focus {
-  outline: none;
   border-color: var(--azrael-orange-500);
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--azrael-orange-500);
+  outline-offset: 2px;
 }
 
 .form-checkbox {

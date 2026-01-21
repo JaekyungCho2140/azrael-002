@@ -4,7 +4,7 @@
  * 참조: prd/Azrael-PRD-Phase0.md §10.3
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { WorkStage } from '../types';
@@ -39,6 +39,18 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
 
   // JIRA 담당자 목록 조회
   const { data: jiraAssignees = [] } = useJiraAssignees();
+
+  // 폼 라벨 연결용 ID
+  const nameId = useId();
+  const startOffsetDaysId = useId();
+  const endOffsetDaysId = useId();
+  const startTimeId = useId();
+  const endTimeId = useId();
+  const jiraSummaryTemplateId = useId();
+  const descriptionId = useId();
+  const assigneeId = useId();
+  const jiraDescriptionId = useId();
+  const jiraAssigneeIdField = useId();
 
   useEffect(() => {
     if (stage) {
@@ -218,8 +230,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       }
     >
       <div className="form-group">
-        <label className="form-label">업무 단계 이름</label>
+        <label className="form-label" htmlFor={nameId}>업무 단계 이름</label>
         <input
+          id={nameId}
           type="text"
           className="form-input"
           value={name}
@@ -229,8 +242,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       </div>
 
       <div className="form-group">
-        <label className="form-label">마감 역산 영업일 (시작일시)</label>
+        <label className="form-label" htmlFor={startOffsetDaysId}>마감 역산 영업일 (시작일시)</label>
         <input
+          id={startOffsetDaysId}
           type="number"
           className="form-input"
           value={startOffsetDays}
@@ -243,8 +257,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       </div>
 
       <div className="form-group">
-        <label className="form-label">테이블 전달 역산 영업일 (종료일시)</label>
+        <label className="form-label" htmlFor={endOffsetDaysId}>테이블 전달 역산 영업일 (종료일시)</label>
         <input
+          id={endOffsetDaysId}
           type="number"
           className="form-input"
           value={endOffsetDays}
@@ -257,8 +272,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       </div>
 
       <div className="form-group">
-        <label className="form-label">기본 시작 시각 (HH:MM)</label>
+        <label className="form-label" htmlFor={startTimeId}>기본 시작 시각 (HH:MM)</label>
         <input
+          id={startTimeId}
           type="time"
           className="form-input"
           value={startTime}
@@ -267,8 +283,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       </div>
 
       <div className="form-group">
-        <label className="form-label">기본 종료 시각 (HH:MM)</label>
+        <label className="form-label" htmlFor={endTimeId}>기본 종료 시각 (HH:MM)</label>
         <input
+          id={endTimeId}
           type="time"
           className="form-input"
           value={endTime}
@@ -308,7 +325,7 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
 
       {/* JIRA Summary 템플릿 (Phase 0.5) */}
       <div className="form-group">
-        <label className="form-label">
+        <label className="form-label" htmlFor={jiraSummaryTemplateId}>
           JIRA Summary 템플릿
           <span
             className="info-icon"
@@ -319,6 +336,7 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
           </span>
         </label>
         <input
+          id={jiraSummaryTemplateId}
           type="text"
           className="form-input"
           value={jiraSummaryTemplate}
@@ -332,8 +350,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
 
       {/* Phase 1.7: 부가 정보 입력 필드 */}
       <div className="form-group">
-        <label className="form-label">설명 (모든 테이블 공통)</label>
+        <label className="form-label" htmlFor={descriptionId}>설명 (모든 테이블 공통)</label>
         <textarea
+          id={descriptionId}
           className="form-input"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
@@ -346,8 +365,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       {/* T1 전용 필드 */}
       {tableTargets.includes('table1') && (
         <div className="form-group">
-          <label className="form-label">담당자 (테이블 1 전용)</label>
+          <label className="form-label" htmlFor={assigneeId}>담당자 (테이블 1 전용)</label>
           <input
+            id={assigneeId}
             type="text"
             className="form-input"
             value={assignee}
@@ -361,8 +381,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       {(tableTargets.includes('table2') || tableTargets.includes('table3')) && (
         <>
           <div className="form-group">
-            <label className="form-label">JIRA 설명 (테이블 2/3 전용)</label>
+            <label className="form-label" htmlFor={jiraDescriptionId}>JIRA 설명 (테이블 2/3 전용)</label>
             <textarea
+              id={jiraDescriptionId}
               className="form-input"
               value={jiraDescription}
               onChange={(e) => setJiraDescription(e.target.value)}
@@ -373,8 +394,9 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
           </div>
 
           <div className="form-group">
-            <label className="form-label">JIRA 담당자 (테이블 2/3 전용)</label>
+            <label className="form-label" htmlFor={jiraAssigneeIdField}>JIRA 담당자 (테이블 2/3 전용)</label>
             <select
+              id={jiraAssigneeIdField}
               className="form-input"
               value={jiraAssigneeId || ''}
               onChange={(e) => setJiraAssigneeId(e.target.value || null)}

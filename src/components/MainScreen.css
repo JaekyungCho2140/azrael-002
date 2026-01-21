@@ -51,13 +51,19 @@
   background: white;
   color: var(--azrael-gray-900);
   cursor: pointer;
-  transition: all 0.2s ease;
-  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .project-dropdown:focus {
   border-color: var(--azrael-orange-500);
   box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.project-dropdown:focus-visible {
+  outline: 2px solid var(--azrael-orange-500);
+  outline-offset: 2px;
 }
 
 .input-section {

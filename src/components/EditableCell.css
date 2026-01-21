@@ -30,7 +30,7 @@
   cursor: pointer;
   font-size: 0.875rem;
   font-weight: var(--weight-semibold);
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -56,7 +56,7 @@
   min-height: 1.5rem;
   padding: 0.5rem;
   cursor: text;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, outline 0.15s ease;
   word-break: break-word;
 }
 

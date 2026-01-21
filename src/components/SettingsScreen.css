@@ -40,7 +40,7 @@
 .settings-nav-item {
   padding: 0.875rem 1.5rem;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background-color 0.15s ease, color 0.15s ease, border-left-color 0.15s ease;
   border-left: 3px solid transparent;
   color: var(--azrael-gray-700);
   font-weight: var(--weight-regular);

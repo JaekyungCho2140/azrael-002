@@ -4,7 +4,7 @@
  * 참조: prd/Azrael-PRD-Phase0.md §10.4
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { Holiday } from '../types';
@@ -18,6 +18,10 @@ interface HolidayAddModalProps {
 export function HolidayAddModal({ isOpen, onClose, onSave }: HolidayAddModalProps) {
   const [date, setDate] = useState('');
   const [name, setName] = useState('');
+
+  // 폼 라벨 연결용 ID
+  const dateId = useId();
+  const nameId = useId();
 
   useEffect(() => {
     if (!isOpen) {
@@ -62,8 +66,9 @@ export function HolidayAddModal({ isOpen, onClose, onSave }: HolidayAddModalProp
       }
     >
       <div className="form-group">
-        <label className="form-label">날짜</label>
+        <label className="form-label" htmlFor={dateId}>날짜</label>
         <input
+          id={dateId}
           type="date"
           className="form-input"
           value={date}
@@ -72,8 +77,9 @@ export function HolidayAddModal({ isOpen, onClose, onSave }: HolidayAddModalProp
       </div>
 
       <div className="form-group">
-        <label className="form-label">공휴일 이름</label>
+        <label className="form-label" htmlFor={nameId}>공휴일 이름</label>
         <input
+          id={nameId}
           type="text"
           className="form-input"
           value={name}

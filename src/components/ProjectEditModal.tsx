@@ -4,7 +4,7 @@
  * 참조: prd/Azrael-PRD-Phase0.md §10.2
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useId } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { Project } from '../types';
@@ -29,6 +29,18 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const [jiraHeadsupTemplate, setJiraHeadsupTemplate] = useState('');
   const [jiraHeadsupDescription, setJiraHeadsupDescription] = useState('');
   const [jiraTaskIssueType, setJiraTaskIssueType] = useState('');
+
+  // 폼 라벨 연결용 ID
+  const nameId = useId();
+  const headsUpOffsetId = useId();
+  const showIosReviewDateId = useId();
+  const iosReviewOffsetId = useId();
+  const disclaimerId = useId();
+  const jiraProjectKeyId = useId();
+  const jiraEpicTemplateId = useId();
+  const jiraHeadsupTemplateId = useId();
+  const jiraHeadsupDescriptionId = useId();
+  const jiraTaskIssueTypeId = useId();
 
   useEffect(() => {
     if (project) {
@@ -94,8 +106,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       }
     >
       <div className="form-group">
-        <label className="form-label">프로젝트 이름</label>
+        <label className="form-label" htmlFor={nameId}>프로젝트 이름</label>
         <input
+          id={nameId}
           type="text"
           className="form-input"
           value={name}
@@ -105,8 +118,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       </div>
 
       <div className="form-group">
-        <label className="form-label">헤즈업 Offset (영업일 전)</label>
+        <label className="form-label" htmlFor={headsUpOffsetId}>헤즈업 Offset (영업일 전)</label>
         <input
+          id={headsUpOffsetId}
           type="number"
           className="form-input"
           value={headsUpOffset}
@@ -118,6 +132,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       <div className="form-group">
         <label className="form-checkbox">
           <input
+            id={showIosReviewDateId}
             type="checkbox"
             checked={showIosReviewDate}
             onChange={(e) => setShowIosReviewDate(e.target.checked)}
@@ -128,8 +143,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
 
       {showIosReviewDate && (
         <div className="form-group">
-          <label className="form-label">iOS 심사일 Offset (영업일 전)</label>
+          <label className="form-label" htmlFor={iosReviewOffsetId}>iOS 심사일 Offset (영업일 전)</label>
           <input
+            id={iosReviewOffsetId}
             type="number"
             className="form-input"
             value={iosReviewOffset}
@@ -140,8 +156,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       )}
 
       <div className="form-group">
-        <label className="form-label">Disclaimer (선택)</label>
+        <label className="form-label" htmlFor={disclaimerId}>Disclaimer (선택)</label>
         <textarea
+          id={disclaimerId}
           className="form-input"
           value={disclaimer}
           onChange={(e) => setDisclaimer(e.target.value)}
@@ -156,8 +173,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
 
       {/* JIRA 프로젝트 키 (Phase 1) */}
       <div className="form-group">
-        <label className="form-label">JIRA 프로젝트 키 (선택)</label>
+        <label className="form-label" htmlFor={jiraProjectKeyId}>JIRA 프로젝트 키 (선택)</label>
         <input
+          id={jiraProjectKeyId}
           type="text"
           className="form-input"
           value={jiraProjectKey}
@@ -171,7 +189,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
 
       {/* Epic Summary 템플릿 (Phase 0.5) */}
       <div className="form-group">
-        <label className="form-label">
+        <label className="form-label" htmlFor={jiraEpicTemplateId}>
           Epic Summary 템플릿 (선택)
           <span
             className="info-icon"
@@ -182,6 +200,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           </span>
         </label>
         <input
+          id={jiraEpicTemplateId}
           type="text"
           className="form-input"
           value={jiraEpicTemplate}
@@ -195,7 +214,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
 
       {/* 헤즈업 Task Summary 템플릿 (Phase 0.5) */}
       <div className="form-group">
-        <label className="form-label">
+        <label className="form-label" htmlFor={jiraHeadsupTemplateId}>
           헤즈업 Task Summary 템플릿 (선택)
           <span
             className="info-icon"
@@ -206,6 +225,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           </span>
         </label>
         <input
+          id={jiraHeadsupTemplateId}
           type="text"
           className="form-input"
           value={jiraHeadsupTemplate}
@@ -219,7 +239,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
 
       {/* 헤즈업 Task 설명 (Phase 1.7) */}
       <div className="form-group">
-        <label className="form-label">
+        <label className="form-label" htmlFor={jiraHeadsupDescriptionId}>
           헤즈업 Task 설명 (선택)
           <span
             className="info-icon"
@@ -230,6 +250,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           </span>
         </label>
         <textarea
+          id={jiraHeadsupDescriptionId}
           className="form-input"
           value={jiraHeadsupDescription}
           onChange={(e) => setJiraHeadsupDescription(e.target.value)}
@@ -243,7 +264,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
 
       {/* Task 이슈 타입 (Phase 1.5) */}
       <div className="form-group">
-        <label className="form-label">
+        <label className="form-label" htmlFor={jiraTaskIssueTypeId}>
           Task 이슈 타입 (선택)
           <span
             className="info-icon"
@@ -254,6 +275,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           </span>
         </label>
         <input
+          id={jiraTaskIssueTypeId}
           type="text"
           className="form-input"
           value={jiraTaskIssueType}

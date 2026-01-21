@@ -4,6 +4,9 @@
  */
 
 :root {
+  /* Color Scheme - Light Only */
+  color-scheme: light;
+
   /* Primary - Azrael Orange */
   --azrael-orange-50: #FFF4E6;
   --azrael-orange-100: #FFE0B2;

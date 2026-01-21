@@ -1008,6 +1008,7 @@ export function SettingsScreen({
                     value={jiraApiToken}
                     onChange={(e) => setJiraApiToken(e.target.value)}
                     placeholder="JIRA API Token 입력"
+                    autoComplete="off"
                     style={{ flex: 1 }}
                   />
                   <Button

@@ -11,11 +11,12 @@
   border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: all 0.2s var(--ease-default);
+  transition: background-color 0.2s var(--ease-default), color 0.2s var(--ease-default), border-color 0.2s var(--ease-default), box-shadow 0.2s var(--ease-default), transform 0.2s var(--ease-default);
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  touch-action: manipulation;
 }
 
 .btn-primary {
