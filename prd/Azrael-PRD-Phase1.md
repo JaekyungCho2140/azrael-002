@@ -1,26 +1,26 @@
 # Azrael PRD - Phase 1: JIRA 연동
 
-**작성일**: 2026-01-14
-**버전**: 2.0
+**최종 업데이트**: 2026-01-21
+**버전**: 2.1
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md) | [Azrael-PRD-Shared.md](./Azrael-PRD-Shared.md)
-**최종 요구사항**: [Phase1-Final-Requirements-Summary.md](./Phase1-Final-Requirements-Summary.md)
 
-**Phase 1 Status**: 🟡 설계 완료 (개발 대기)
+**Phase 1 Status**: ✅ 완료
 
-**⚠️ 전제조건**: Phase 0.5 완료 필요
-- 하위 일감 템플릿 설정 기능
-- 테이블 2/3 "JIRA 담당자" 컬럼 추가
+**포함 기능**:
+- Phase 1 (JIRA 연동): Epic/Task/Subtask 생성 및 업데이트
+- Phase 1.7 (계산 결과 서버화): Supabase 저장, 읽기 전용 테이블
+- Phase 1.8 (JIRA 확인): JIRA 일감 존재 여부 확인 Edge Function
 
 ---
 
 ## 📋 문서 목적
 
-이 문서는 **Phase 1 (JIRA 연동)** 기능을 상세하게 정의합니다:
+이 문서는 **Phase 1 (JIRA 연동)** 기능을 정의합니다:
 - JIRA 일감 자동 생성 (Epic/Task/Subtask)
 - JIRA 일감 업데이트 (날짜 변경 시)
 - JIRA Summary 템플릿 시스템 (변수 커스터마이징)
 - JIRA API 인증 및 설정
-- Phase 0 수정사항 (테이블 컬럼, 하위 일감 템플릿)
+- JIRA 일감 존재 확인 (Phase 1.8)
 
 **목표**: 계산된 일정을 JIRA 일감으로 자동 생성하여 수동 작업 시간 90% 절감
 
@@ -615,7 +615,67 @@ async function createIssuesWithRateLimit(issues, jiraAuth) {
 - 에러 메시지: "JIRA 요청 한도 초과. 잠시 후 다시 시도하세요."
 - **재시도 로직은 Phase 1.5 이후 개선 과제** (현재 보류)
 
-### 8.5. Edge Functions 배포 가이드
+### 8.5. Edge Function: jira-check (Phase 1.8)
+
+**파일**: `supabase/functions/jira-check/index.ts`
+
+**목적**: JIRA 일감 존재 여부 확인 (업데이트 버튼 활성화 판단)
+
+**요청**:
+```typescript
+{
+  issueKey: string;  // 예: "M4L10N-123"
+  jiraAuth: {
+    email: string;
+    apiToken: string;
+  };
+}
+```
+
+**응답**:
+```typescript
+{
+  success: boolean;
+  exists: boolean;     // JIRA에 해당 일감이 존재하는지
+  error?: string;
+}
+```
+
+**사용 시나리오**:
+1. 사용자가 계산 화면에서 JIRA 업데이트 버튼 클릭
+2. Supabase에 Epic 매핑이 있지만, 실제 JIRA에서 삭제되었을 수 있음
+3. jira-check로 Epic 존재 여부 확인
+4. 존재하면 업데이트 진행, 미존재면 매핑 삭제 후 생성 권유
+
+**구현**:
+```typescript
+async function checkJiraIssueExists(
+  issueKey: string,
+  jiraAuth: { email: string; apiToken: string }
+): Promise<{ exists: boolean; error?: string }> {
+  const response = await fetch(
+    `${JIRA_URL}/rest/api/3/issue/${issueKey}?fields=id`,
+    {
+      headers: {
+        'Authorization': `Basic ${btoa(`${jiraAuth.email}:${jiraAuth.apiToken}`)}`,
+        'Accept': 'application/json'
+      }
+    }
+  );
+
+  if (response.status === 404) {
+    return { exists: false };
+  }
+
+  if (!response.ok) {
+    return { exists: false, error: `JIRA API 오류: ${response.status}` };
+  }
+
+  return { exists: true };
+}
+```
+
+### 8.6. Edge Functions 배포 가이드
 
 **Supabase CLI 설치**:
 ```bash
@@ -631,6 +691,7 @@ supabase link --project-ref vgoqkyqqkieogrtnmsva
 ```bash
 supabase functions deploy jira-create
 supabase functions deploy jira-update
+supabase functions deploy jira-check
 ```
 
 **환경 변수 설정** (Supabase Dashboard → Edge Functions → Secrets):
@@ -657,34 +718,35 @@ curl -i --location --request POST 'http://localhost:54321/functions/v1/jira-crea
 
 ---
 
-## 9. Phase 0 수정사항
+## 9. Phase 1.7: 계산 결과 서버화
 
-### 9.1. 테이블 2/3 컬럼 추가
+### 9.1. 테이블 읽기 전용
 
-**새 컬럼**: "JIRA 담당자"
+**배경**: 기존 테이블 셀 편집 기능을 제거하고, WorkStage 템플릿이 단일 진실 공급원으로 작동
 
-**헤더**:
+**변경 사항**:
+- 테이블 1/2/3 모두 읽기 전용
+- 편집은 설정 → 업무 단계에서만 가능
+- 계산 결과는 Supabase `calculation_results` 및 `schedule_entries` 테이블에 저장
+
+**테이블 2/3 구조**:
 ```
-| # | 배치 | HO | HB | 설명 | JIRA 설명 | JIRA 담당자 | [+][↓][✕] |
-```
-
-**데이터**: Account ID
-**필수**: 선택적 (빈 값이면 현재 사용자)
-
-**ScheduleEntry**:
-```typescript
-interface ScheduleEntry {
-  // ...
-  jiraAssignee?: string;
-}
+| # | 배치 | HO | HB | 설명 | JIRA 설명 | JIRA 담당자 |
 ```
 
-### 9.2. 하위 일감 템플릿 설정
+### 9.2. JIRA 담당자 관리
 
-업무 단계 편집 모달에 아코디언 추가:
-- 하위 일감 목록
-- 인라인 폼으로 추가/편집
-- Supabase parent_stage_id 활용
+**설정 위치**: 설정 → 업무 단계 → 업무 편집 모달 → JIRA 담당자 선택
+
+**JiraAssignee 테이블**: 프로젝트별 담당자 목록 관리
+- displayName: 화면 표시용 이름
+- accountId: JIRA API 호출용 Account ID
+- email: 사용자 식별용
+
+**데이터 흐름**:
+1. WorkStage 템플릿에서 기본 담당자 설정 (jira_assignee_id)
+2. 계산 시 ScheduleEntry.jiraAssignee에 담당자 이름 복사
+3. 테이블에서 읽기 전용으로 표시
 
 자세한 내용: [Azrael-PRD-Phase0.5.md](./Azrael-PRD-Phase0.5.md) 참조
 
@@ -740,20 +802,12 @@ interface ScheduleEntry {
 
 ---
 
-## 11. 개발 일정
-
-**Phase 0.5**: 1주 (하위 일감 템플릿, 테이블 컬럼)
-**Phase 1**: 3-4주 (JIRA API, 템플릿, 미리보기)
-**총**: 4-5주
-
----
-
-## 12. 참조 문서
+## 11. 참조 문서
 
 - **Master**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md)
 - **Shared**: [Azrael-PRD-Shared.md](./Azrael-PRD-Shared.md)
 - **Phase 0**: [Azrael-PRD-Phase0.md](./Azrael-PRD-Phase0.md)
-- **최종 요구사항**: [Phase1-Final-Requirements-Summary.md](./Phase1-Final-Requirements-Summary.md)
+- **Phase 0.5**: [Azrael-PRD-Phase0.5.md](./Azrael-PRD-Phase0.5.md)
 
 ---
 

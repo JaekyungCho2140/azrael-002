@@ -1,8 +1,7 @@
 # Azrael PRD - Shared Components
 
-**작성일**: 2026-01-09
-**최종 업데이트**: 2026-01-20
-**버전**: 3.0 (Phase 1.7 반영)
+**최종 업데이트**: 2026-01-21
+**버전**: 3.1 (Phase 1.8 반영)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md)
 
 ---
@@ -57,7 +56,7 @@
 | **설명** | 사용자 입력 텍스트 필드 | 편집 가능 |
 | **담당자** | 사용자 입력 텍스트 필드 | 편집 가능 |
 | **JIRA 설명** | JIRA 일감 생성 시 설명 필드에 포함될 내용 | 편집 가능 |
-| **Disclaimer** | 테이블 하단 메모 (프로젝트별 저장, 최대 6줄 또는 600자) | Bold/Italic/색상(빨강,파랑,검정) |
+| **Disclaimer** | 테이블 하단 메모 (프로젝트별 저장, 최대 600자) | 커스텀 서식 태그 지원: `<b>`, `<r>`, `<g>`, `<bl>`, `<u>` |
 
 ### 1.5. 하위 일감 용어
 
@@ -82,17 +81,17 @@ interface Project {
   iosReviewOffset?: number;      // iOS 심사일 Offset (영업일, 선택적)
   showIosReviewDate: boolean;    // iOS 심사일 표시 여부
   templateId: string;            // 업무 단계 템플릿 ID
-  disclaimer: string;            // 테이블 하단 Disclaimer 메모 (최대 600자, HTML)
-  jiraProjectKey?: string;       // JIRA 프로젝트 키 (Phase 1, 예: "M4L10N")
-  jiraEpicTemplate?: string;     // JIRA Epic Summary 템플릿 (Phase 0.5)
-  jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿 (Phase 0.5)
+  disclaimer: string;            // 테이블 하단 Disclaimer 메모 (최대 600자)
+  jiraProjectKey?: string;       // JIRA 프로젝트 키 (예: "L10NM4")
+  jiraEpicTemplate?: string;     // JIRA Epic Summary 템플릿
+  jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿
+  jiraHeadsupDescription?: string; // JIRA 헤즈업 Task 설명 (ADF 테이블 마크업 지원)
+  jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (기본값: "PM(표준)")
 }
 ```
 
 **Supabase 테이블**: `projects`
 - 추가 필드: `created_at`, `updated_at`, `created_by`
-- Phase 0.5 추가: `jira_epic_template`, `jira_headsup_template`
-- Phase 1 추가: `jira_project_key`
 - 제약조건: `template_id` → `work_templates.id` (외래키)
 
 ### 2.2. WorkTemplate (업무 단계 템플릿)
@@ -115,10 +114,10 @@ interface WorkStage {
   order: number;                 // 표시 순서 (DECIMAL 5,1: 1.0, 1.1, 1.2...)
   parentStageId?: string;        // 하위 일감의 경우 부모 Stage ID
   depth: number;                 // 0=부모, 1=자식 (최대 1)
-  jiraSummaryTemplate?: string;  // JIRA Summary 템플릿 (Phase 0.5)
-  jiraSubtaskIssueType?: string; // JIRA Subtask 이슈 타입 (Phase 1)
+  jiraSummaryTemplate?: string;  // JIRA Summary 템플릿
+  jiraSubtaskIssueType?: string; // JIRA Subtask 이슈 타입 (하위 일감만, 기본값: name)
 
-  // Phase 1.7: 부가 정보 (모든 업데이트일 공통 적용)
+  // 부가 정보 (모든 업데이트일 공통 적용)
   description: string;           // 모든 테이블 공통 - "설명" 컬럼
   assignee: string;              // T1 전용 - "담당자" 컬럼
   jiraDescription: string;       // T2/T3 전용 - "JIRA 설명" 컬럼
@@ -156,9 +155,9 @@ interface ScheduleEntry {
 }
 ```
 
-**저장 위치**:
-- Phase 1.7 이전: LocalStorage (개인 데이터)
-- Phase 1.7 이후: Supabase (팀 공유 데이터) - 설정 > 업무 단계에서 수정
+**저장 위치**: Supabase (팀 공유 데이터)
+- 편집 위치: 설정 > 업무 단계
+- 테이블(T1/T2/T3)은 읽기 전용
 
 ### 2.4. CalculationResult (계산 결과)
 
@@ -175,11 +174,10 @@ interface CalculationResult {
 }
 ```
 
-**저장 위치**:
-- Phase 1.7 이전: LocalStorage (개인 데이터)
-- Phase 1.7 이후: **Supabase (팀 공유)** - calculation_results, schedule_entries 테이블
-  - 프로젝트 + 업데이트일 기준 UPSERT (덮어쓰기)
-  - 누구든 같은 조건 계산 → 같은 결과 조회
+**저장 위치**: Supabase (팀 공유)
+- calculation_results, schedule_entries 테이블
+- 프로젝트 + 업데이트일 기준 UPSERT (덮어쓰기)
+- 누구든 같은 조건 계산 → 같은 결과 조회
 
 ### 2.5. Holiday (공휴일)
 
@@ -217,17 +215,18 @@ interface UserState {
 **Supabase (팀 공유 데이터)**:
 - Projects: 프로젝트 설정
 - WorkTemplates: 업무 단계 템플릿
-- WorkStages: 업무 단계 상세 + 부가 정보 (Phase 1.7)
+- WorkStages: 업무 단계 상세 + 부가 정보
 - Holidays: 공휴일 목록
-- **CalculationResults**: 계산 결과 메타데이터 (Phase 1.7)
-- **ScheduleEntries**: 테이블 엔트리 데이터 (Phase 1.7)
-- **JiraAssignees**: JIRA 담당자 매핑 (Phase 1.7)
-- JiraEpicMappings: JIRA Epic 매핑 (Phase 1)
-- JiraTaskMappings: JIRA Task 매핑 (Phase 1)
+- CalculationResults: 계산 결과 메타데이터
+- ScheduleEntries: 테이블 엔트리 데이터 (description, assignee 포함 - Phase 2)
+- JiraAssignees: JIRA 담당자 매핑
+- JiraEpicMappings: JIRA Epic 매핑
+- JiraTaskMappings: JIRA Task 매핑
+- EmailTemplates: 이메일 템플릿 (Phase 2)
 
 **LocalStorage (개인 데이터)**:
 - UserState: 사용자 상태 (온보딩, 마지막 프로젝트)
-- JiraConfig: JIRA API Token (Phase 1)
+- JiraConfig: JIRA API Token
 
 ### 3.2. Supabase 스키마
 
@@ -655,17 +654,15 @@ CSV 임포트를 통해 Supabase에 저장됨:
 
 - **Master**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md)
 - **Phase 0**: [Azrael-PRD-Phase0.md](./Azrael-PRD-Phase0.md)
+- **Phase 0.5**: [Azrael-PRD-Phase0.5.md](./Azrael-PRD-Phase0.5.md)
 - **Phase 1**: [Azrael-PRD-Phase1.md](./Azrael-PRD-Phase1.md)
 - **Phase 2**: [Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)
 - **Phase 3**: [Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)
+- **Design**: [Azrael-PRD-Design.md](./Azrael-PRD-Design.md)
 
 ---
 
-**문서 종료**
-
----
-
-## 11. Phase 1.7 확장 데이터 구조
+## 11. 확장 데이터 구조
 
 ### 11.1. JiraAssignee (JIRA 담당자 매핑)
 
@@ -680,16 +677,19 @@ interface JiraAssignee {
 ```
 
 **Supabase 테이블**: `jira_assignees`
-- 초기 데이터 (5명):
-  - 조재경: 617f7523f485cd0068077192
-  - 김민혜: 62b57632f38b4dcf73daedb2
-  - 임정원: 712020:1a1a9943-9787-44e1-b2da-d4f558df471e
-  - 박선률: 6209c939bba9ca0070c94b16
-  - 김홍균: 712020:f337238b-f5a1-4c32-8b58-7b699889da3e
 
-### 11.2. CalculationResult (서버 저장)
+### 11.2. JiraConfig (JIRA 연동 설정)
 
-**Supabase 테이블**: `calculation_results`
+```typescript
+interface JiraConfig {
+  apiToken: string;              // JIRA API Token (평문 저장)
+  accountId: string;             // 현재 사용자 JIRA Account ID (자동 조회)
+}
+```
+
+**저장 위치**: LocalStorage (`azrael:jiraConfig`)
+
+### 11.3. calculation_results 테이블
 
 ```sql
 CREATE TABLE calculation_results (
@@ -704,14 +704,7 @@ CREATE TABLE calculation_results (
 );
 ```
 
-**특징**:
-- 복합 유니크 제약: 프로젝트 + 업데이트일
-- 계산 버튼 클릭 시 자동 UPSERT (덮어쓰기)
-- 팀 전체 공유
-
-### 11.3. ScheduleEntry (서버 저장)
-
-**Supabase 테이블**: `schedule_entries`
+### 11.4. schedule_entries 테이블
 
 ```sql
 CREATE TABLE schedule_entries (
@@ -723,51 +716,33 @@ CREATE TABLE schedule_entries (
   stage_name TEXT NOT NULL,
   start_datetime TIMESTAMPTZ NOT NULL,
   end_datetime TIMESTAMPTZ NOT NULL,
+  description TEXT DEFAULT '',      -- Phase 2 추가: 이메일 테이블 설명 컬럼
+  assignee TEXT DEFAULT '',         -- Phase 2 추가: 이메일 테이블 담당자 컬럼
   parent_id UUID,
   FOREIGN KEY (calculation_id) REFERENCES calculation_results(id) ON DELETE CASCADE
 );
 ```
 
-**특징**:
-- calculation_id로 계산 결과와 연결
-- parent_id로 하위 일감 계층 구조 유지
-- CASCADE DELETE: 계산 결과 삭제 시 자동 삭제
-
 ---
 
-## 12. Phase 1.7 설계 원칙
+## 12. 설계 원칙
 
 ### 12.1. WorkStage = 단일 진실 공급원
 
-**원칙**:
 - WorkStage 1개 = JIRA Task 1개 (1:1 매핑)
 - 부가 정보는 WorkStage 템플릿에 저장
 - 모든 업데이트일에 공통 적용
 
-**효과**:
-- 데이터 중복 제거
-- 유지보수성 향상
-- 명확한 데이터 흐름
-
 ### 12.2. 읽기 전용 테이블
 
-**원칙**:
 - 계산 결과 테이블(T1/T2/T3)은 완전 읽기 전용
 - 편집은 설정 > 업무 단계에서만 가능
 - 계산 시 WorkStage → ScheduleEntry 자동 복사
 
-**효과**:
-- 데이터 일관성 보장
-- 실수로 인한 데이터 손실 방지
-- 명확한 편집 위치
-
 ### 12.3. JIRA Description ADF 형식
 
-**배경**:
-- JIRA API v3는 평문 문자열 거부
-- ADF (Atlassian Document Format) JSON 필수
+JIRA API v3는 평문 문자열 거부, ADF (Atlassian Document Format) JSON 필수:
 
-**구현**:
 ```typescript
 function textToADF(text: string) {
   const lines = text.split('\n');
@@ -782,9 +757,21 @@ function textToADF(text: string) {
 }
 ```
 
-**효과**:
-- 줄바꿈 지원
-- 향후 표, 링크 등 고급 포맷 확장 가능
+### 12.4. Disclaimer 커스텀 서식
+
+테이블 하단 Disclaimer에서 지원하는 커스텀 서식 태그:
+
+| 태그 | 효과 |
+|------|------|
+| `<b>text</b>` | 굵게 |
+| `<r>text</r>` | 빨강 |
+| `<g>text</g>` | 초록 |
+| `<bl>text</bl>` | 파랑 |
+| `<u>text</u>` | 밑줄 |
+
+- 색상 태그는 중복 불가 (하나의 텍스트에 하나의 색상)
+- 굵게/밑줄은 다른 태그와 중첩 가능
+- 줄바꿈: `\n` → `<br/>`
 
 ---
 
