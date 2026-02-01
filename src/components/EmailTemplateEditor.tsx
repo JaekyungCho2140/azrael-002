@@ -10,8 +10,6 @@
 
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
 import { Table } from '@tiptap/extension-table';
 import TableRow from '@tiptap/extension-table-row';
 import TableCell from '@tiptap/extension-table-cell';
@@ -70,12 +68,12 @@ export function EmailTemplateEditor({
     extensions: [
       StarterKit.configure({
         heading: false, // 이메일에 불필요
-      }),
-      Underline,
-      Link.configure({
-        openOnClick: false,
-        HTMLAttributes: {
-          style: 'color: #0066cc; text-decoration: underline;',
+        // StarterKit에 포함된 Link, Underline은 여기서 설정
+        link: {
+          openOnClick: false,
+          HTMLAttributes: {
+            style: 'color: #0066cc; text-decoration: underline;',
+          },
         },
       }),
       Table.configure({
@@ -105,12 +103,14 @@ export function EmailTemplateEditor({
     },
   }, [editorKey]);
 
-  // 외부 content 변경 시 에디터 동기화 (key 변경으로 재생성되므로 보통 불필요)
+  // 외부 content 변경 시 에디터 동기화
+  // 부모의 useEffect에서 bodyTemplate이 비동기로 설정되므로
+  // content 변경도 감시해야 초기 로드 시 빈 에디터 방지
   useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
+    if (editor && content && content !== editor.getHTML()) {
       editor.commands.setContent(content, { emitUpdate: false });
     }
-  }, [editorKey]);
+  }, [editor, content, editorKey]);
 
   // 변수 삽입 핸들러
   const handleInsertVariable = useCallback((variable: string) => {
