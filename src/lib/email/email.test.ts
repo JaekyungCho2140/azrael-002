@@ -11,7 +11,7 @@
  * 8. Gmail 붙여넣기 호환성 (인라인 스타일)
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { renderTemplate, validateTemplate } from './templateParser';
 import {
   formatEmailDate,
@@ -42,16 +42,16 @@ import type {
 
 function makeEntry(overrides: Partial<ScheduleEntry> = {}): ScheduleEntry {
   return {
+    id: 'entry-1',
     stageId: 'stage-1',
-    index: '1',
+    index: 1,
     stageName: 'LQA',
     startDateTime: new Date('2026-02-10T10:00:00'),
     endDateTime: new Date('2026-02-12T18:00:00'),
-    businessDays: 2,
-    depth: 0,
     description: '',
     assignee: '',
     children: [],
+    isManualEdit: false,
     ...overrides,
   };
 }
@@ -62,18 +62,19 @@ function makeCalcResult(overrides: Partial<CalculationResult> = {}): Calculation
     updateDate: new Date('2026-02-10'),
     headsUpDate: new Date('2026-02-03'),
     iosReviewDate: new Date('2026-02-07'),
+    calculatedAt: new Date('2026-02-01T12:00:00'),
     table1Entries: [
-      makeEntry({ index: '1', stageName: 'LQA', children: [
-        makeEntry({ index: '1.1', stageName: 'LQA-Sub', depth: 1 }),
+      makeEntry({ index: 1, stageName: 'LQA', children: [
+        makeEntry({ id: 'entry-1-1', index: 1.1, stageName: 'LQA-Sub' }),
       ]}),
-      makeEntry({ index: '2', stageName: 'Final' }),
+      makeEntry({ id: 'entry-2', index: 2, stageName: 'Final' }),
     ],
     table2Entries: [
-      makeEntry({ index: '1', stageName: 'LQA' }),
-      makeEntry({ index: '2', stageName: 'Final' }),
+      makeEntry({ index: 1, stageName: 'LQA' }),
+      makeEntry({ id: 'entry-2', index: 2, stageName: 'Final' }),
     ],
     table3Entries: [
-      makeEntry({ index: '1', stageName: 'LQA' }),
+      makeEntry({ index: 1, stageName: 'LQA' }),
     ],
     ...overrides,
   };
@@ -85,6 +86,7 @@ const mockProject: Project = {
   headsUpOffset: 5,
   showIosReviewDate: true,
   iosReviewOffset: 3,
+  templateId: 'tmpl-default',
   disclaimer: '<r>주의</r> 일정 변경 가능',
 };
 
@@ -320,9 +322,9 @@ describe('getEntriesByTableType', () => {
     const entries = getEntriesByTableType(calcResult, 'table1');
     // table1: parent(LQA) + child(LQA-Sub) + parent(Final) = 3
     expect(entries).toHaveLength(3);
-    expect(entries[0].index).toBe('1');
-    expect(entries[1].index).toBe('1.1');
-    expect(entries[2].index).toBe('2');
+    expect(entries[0].index).toBe(1);
+    expect(entries[1].index).toBe(1.1);
+    expect(entries[2].index).toBe(2);
   });
 
   it('table2 엔트리 추출', () => {
@@ -587,7 +589,7 @@ describe('generateEmail', () => {
       {
         template,
         project: { ...mockProject, showIosReviewDate: false },
-        calcResult: { ...calcResult, iosReviewDate: null },
+        calcResult: { ...calcResult, iosReviewDate: undefined },
       },
     );
     expect(result.bodyHtml).not.toContain('iOS 심사일');
@@ -606,7 +608,7 @@ describe('generateEmail', () => {
       { projectId: 'proj-1', updateDate: new Date('2026-02-10'), tableType: 'table2', templateId: 'tmpl-1' },
       {
         template,
-        project: { ...mockProject, disclaimer: null },
+        project: { ...mockProject, disclaimer: '' },
         calcResult,
       },
     );
