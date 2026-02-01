@@ -135,6 +135,83 @@ export interface JiraAssignee {
   isActive: boolean;             // 활성 상태
 }
 
+// ============================================================
+// Phase 2: 이메일 생성 타입
+// 참조: Azrael-PRD-Phase2.md §4.1, §4.3
+// ============================================================
+
+/**
+ * 테이블 타입
+ * 참조: Azrael-PRD-Phase2.md §2.1 테이블 명칭 표
+ */
+export type TableType = 'table1' | 'table2' | 'table3';
+
+/**
+ * 템플릿 카테고리 (라디오 선택용)
+ * 참조: Azrael-PRD-Phase2.md §4.3 EmailTemplateSelector
+ */
+export type TemplateCategory = 'basic' | 'detailed' | 'custom';
+
+/**
+ * EmailTemplate (이메일 템플릿)
+ * 참조: Azrael-PRD-Phase2.md §4.1
+ * 저장: Supabase email_templates 테이블 (프로젝트별 관리)
+ */
+export interface EmailTemplate {
+  id: string;                    // UUID
+  projectId: string;             // 소속 프로젝트 ID
+  name: string;                  // 템플릿 이름 (프로젝트 내 UNIQUE, 최대 50자)
+  subjectTemplate: string;       // 제목 템플릿 (변수 치환 지원)
+  bodyTemplate: string;          // 본문 템플릿 (HTML, 변수/조건부 블록 지원)
+  isBuiltIn: boolean;            // 기본 제공 템플릿 여부 (true=삭제 불가)
+  createdAt: string;             // ISO 8601 문자열 (Supabase JSON 응답은 항상 string)
+  createdBy: string | null;      // 생성자 이메일 ('SYSTEM' 또는 사용자 이메일)
+  updatedAt: string;             // ISO 8601 문자열
+}
+
+/**
+ * 템플릿 변수 컨텍스트
+ * 참조: Azrael-PRD-Phase2.md §2.5 파서 구현
+ */
+export type TemplateContext = Record<string, string | boolean | null | undefined>;
+
+/**
+ * EmailGenerationRequest (이메일 생성 요청)
+ * 참조: Azrael-PRD-Phase2.md §4.1
+ */
+export interface EmailGenerationRequest {
+  projectId: string;
+  updateDate: Date;
+  tableType: TableType;
+  templateId: string;            // 기본 제공 또는 사용자 정의 템플릿 ID
+}
+
+/**
+ * EmailGenerationResult (이메일 생성 결과)
+ * 참조: Azrael-PRD-Phase2.md §4.1
+ */
+export interface EmailGenerationResult {
+  subject: string;               // 생성된 제목 (플레인텍스트)
+  bodyHtml: string;              // 생성된 본문 (HTML, juice 인라인 스타일 적용)
+  bodyText: string;              // 생성된 본문 (플레인텍스트)
+}
+
+/**
+ * 유효한 템플릿 변수 목록
+ * 참조: Azrael-PRD-Phase2.md §2.4
+ * ⚠️ §2.4 이메일 템플릿 변수 테이블과 동기화 필수
+ */
+export const VALID_TEMPLATE_VARIABLES = [
+  'updateDate', 'updateDateShort', 'headsUp', 'iosReviewDate',
+  'table', 'disclaimer', 'projectName', 'showIosReviewDate',
+] as const;
+
+/**
+ * boolean 전용 변수 — 조건부 블록({{#if}})에서만 사용
+ * 참조: Azrael-PRD-Phase2.md §2.4 (v2.7)
+ */
+export const BOOLEAN_ONLY_VARIABLES = ['showIosReviewDate'] as const;
+
 /**
  * LocalStorage 키 상수
  */

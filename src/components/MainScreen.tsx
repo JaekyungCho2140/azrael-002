@@ -11,6 +11,7 @@ import { GanttChart } from './GanttChart';
 import { CalendarView } from './CalendarView';
 import { SettingsScreen } from './SettingsScreen';
 import { JiraPreviewModal } from './JiraPreviewModal';
+import { EmailGeneratorModal } from './EmailGeneratorModal';
 import { loadHolidays } from '../lib/storage';
 import { useSaveCalculationResult, useJiraAssignees } from '../hooks/useSupabase';
 import { supabase } from '../lib/supabase';
@@ -58,6 +59,7 @@ export function MainScreen({
   const [updateDate, setUpdateDate] = useState<string>('');
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   // JIRA 관련 상태 (Phase 1)
   const [hasJiraConfig, setHasJiraConfig] = useState(false);
@@ -869,6 +871,7 @@ export function MainScreen({
       <SettingsScreen
         currentProjectId={currentProject.id}
         onClose={() => setShowSettings(false)}
+        calculationResult={calculationResult}
       />
     );
   }
@@ -939,6 +942,13 @@ export function MainScreen({
             title={!hasEpicMapping ? '먼저 JIRA 생성 필요' : ''}
           >
             🔄 JIRA 업데이트
+          </Button>
+          <Button
+            onClick={() => setShowEmailModal(true)}
+            disabled={!calculationResult}
+            title={!calculationResult ? '일정 계산 후 사용 가능' : ''}
+          >
+            ✉️ 이메일 복사
           </Button>
         </div>
       </div>
@@ -1028,6 +1038,15 @@ export function MainScreen({
           isCreating={isCreatingJira}
         />
       )}
+
+      <EmailGeneratorModal
+        isOpen={showEmailModal}
+        onClose={() => setShowEmailModal(false)}
+        projectId={currentProject.id}
+        project={currentProject}
+        updateDate={new Date(updateDate.split(' ')[0])}
+        calculationResult={calculationResult}
+      />
     </div>
   );
 }

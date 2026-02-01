@@ -1,0 +1,171 @@
+/**
+ * TipTap Editor Styles
+ * 이메일 템플릿 에디터 스타일
+ */
+
+.tiptap-editor-wrapper {
+  border: 1px solid var(--azrael-gray-300);
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* ============================================================
+   툴바
+   ============================================================ */
+
+.tiptap-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0.5rem;
+  background: var(--azrael-gray-50);
+  border-bottom: 1px solid var(--azrael-gray-200);
+  align-items: center;
+}
+
+.toolbar-group {
+  display: flex;
+  gap: 2px;
+  padding-right: 0.5rem;
+  border-right: 1px solid var(--azrael-gray-200);
+}
+
+.toolbar-group:last-child {
+  border-right: none;
+  padding-right: 0;
+}
+
+.toolbar-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--azrael-gray-700);
+  transition: background-color 0.1s ease;
+}
+
+.toolbar-btn:hover {
+  background: var(--azrael-gray-200);
+}
+
+.toolbar-btn.active {
+  background: var(--azrael-orange-100, #ffe0b2);
+  color: var(--azrael-orange-700, #e65100);
+}
+
+.toolbar-color-picker {
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--azrael-gray-300);
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 2px;
+}
+
+/* 변수 삽입 드롭다운 */
+.toolbar-variable-group {
+  position: relative;
+}
+
+.toolbar-variable-btn {
+  width: auto;
+  padding: 0 0.5rem;
+  font-size: var(--text-xs);
+  white-space: nowrap;
+}
+
+.toolbar-variable-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 10;
+  min-width: 320px;
+  background: white;
+  border: 1px solid var(--azrael-gray-300);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  padding: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.variable-option {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--text-xs);
+  color: var(--azrael-gray-700);
+  border-radius: 4px;
+  transition: background-color 0.1s ease;
+}
+
+.variable-option:hover {
+  background: var(--azrael-gray-100);
+  color: var(--azrael-gray-900);
+}
+
+/* ============================================================
+   에디터 본문
+   ============================================================ */
+
+.tiptap-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 300px;
+}
+
+.tiptap-content .tiptap {
+  padding: 1rem;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #333333;
+  outline: none;
+  min-height: 280px;
+}
+
+.tiptap-content .tiptap p {
+  margin: 0 0 0.5rem 0;
+}
+
+.tiptap-content .tiptap ul,
+.tiptap-content .tiptap ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.tiptap-content .tiptap table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 0.5rem 0;
+}
+
+.tiptap-content .tiptap th,
+.tiptap-content .tiptap td {
+  border: 1px solid #dddddd;
+  padding: 8px;
+  text-align: left;
+  position: relative;
+}
+
+.tiptap-content .tiptap th {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.tiptap-content .tiptap a {
+  color: #0066cc;
+  text-decoration: underline;
+}

@@ -1,6 +1,7 @@
 /**
  * Supabase Database TypeScript 타입 정의
  * 참조: supabase/migrations/001_initial_schema.sql
+ *        supabase/migrations/006_phase2_email_templates.sql
  *
  * 수동 작성 (Supabase CLI gen types 대체)
  */
@@ -173,6 +174,42 @@ export interface Database {
           project_id?: string;
           created_at?: string;
           updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "fk_project";
+            columns: ["project_id"];
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      // Phase 2: 이메일 템플릿 (006_phase2_email_templates.sql)
+      email_templates: {
+        Row: {
+          id: string;
+          project_id: string;
+          name: string;
+          subject_template: string;
+          body_template: string;
+          is_built_in: boolean;
+          created_at: string;
+          created_by: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          name: string;
+          subject_template: string;
+          body_template: string;
+          is_built_in?: boolean;       // seed 트리거 전용. 프론트엔드에서 true 설정 금지
+          created_by?: string | null;
+        };
+        Update: {
+          name?: string;
+          subject_template?: string;
+          body_template?: string;
         };
         Relationships: [
           {

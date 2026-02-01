@@ -6,11 +6,12 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Project, WorkTemplate, WorkStage } from '../types';
+import { Project, WorkTemplate, WorkStage, EmailTemplate } from '../types';
 import { Button } from './Button';
 import { ProjectEditModal } from './ProjectEditModal';
 import { StageEditModal } from './StageEditModal';
 import { HolidayAddModal } from './HolidayAddModal';
+import { EmailTemplateEditModal } from './EmailTemplateEditModal';
 import { supabase } from '../lib/supabase';
 import {
   useProjects,
@@ -25,18 +26,24 @@ import {
   useSyncApiHolidays,
 } from '../hooks/useSupabase';
 import { formatDateLocal } from '../lib/businessDays';
+import {
+  useEmailTemplates,
+  useDeleteEmailTemplate,
+} from '../hooks/useEmailTemplates';
 import './SettingsScreen.css';
 
 interface SettingsScreenProps {
   currentProjectId: string;
   onClose: () => void;
+  calculationResult?: import('../types').CalculationResult | null;
 }
 
-type SettingsTab = 'projects' | 'stages' | 'holidays' | 'jira';
+type SettingsTab = 'projects' | 'stages' | 'holidays' | 'jira' | 'emailTemplates';
 
 export function SettingsScreen({
   currentProjectId,
-  onClose
+  onClose,
+  calculationResult,
 }: SettingsScreenProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('projects');
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId);
@@ -83,6 +90,8 @@ export function SettingsScreen({
   const createHolidayMutation = useCreateHoliday();
   const deleteHolidayMutation = useDeleteHoliday();
   const syncApiHolidaysMutation = useSyncApiHolidays();
+  const { data: emailTemplates } = useEmailTemplates(selectedProjectId);
+  const deleteEmailTemplateMutation = useDeleteEmailTemplate();
 
   // 모달 상태
   const [projectModalOpen, setProjectModalOpen] = useState(false);
@@ -90,6 +99,8 @@ export function SettingsScreen({
   const [stageModalOpen, setStageModalOpen] = useState(false);
   const [editingStage, setEditingStage] = useState<WorkStage | undefined>();
   const [holidayModalOpen, setHolidayModalOpen] = useState(false);
+  const [emailTemplateModalOpen, setEmailTemplateModalOpen] = useState(false);
+  const [editingEmailTemplate, setEditingEmailTemplate] = useState<EmailTemplate | null>(null);
 
   // JIRA 설정 상태 (Phase 1)
   const [jiraApiToken, setJiraApiToken] = useState('');
@@ -590,6 +601,31 @@ export function SettingsScreen({
     event.target.value = '';
   };
 
+  // ─── 이메일 템플릿 핸들러 ───
+  const selectedProject = projects?.find(p => p.id === selectedProjectId);
+
+  const handleAddEmailTemplate = () => {
+    setEditingEmailTemplate(null);
+    setEmailTemplateModalOpen(true);
+  };
+
+  const handleEditEmailTemplate = (tmpl: EmailTemplate) => {
+    setEditingEmailTemplate(tmpl);
+    setEmailTemplateModalOpen(true);
+  };
+
+  const handleDeleteEmailTemplate = (tmpl: EmailTemplate) => {
+    if (!confirm(`"${tmpl.name}" 템플릿을 삭제하시겠습니까?`)) return;
+    deleteEmailTemplateMutation.mutate(
+      { templateId: tmpl.id, projectId: selectedProjectId },
+      {
+        onError: (err: any) => {
+          alert(`삭제 실패: ${err.message}`);
+        },
+      },
+    );
+  };
+
   // 모든 공휴일 삭제 (관리자 전용)
   const handleClearAllHolidays = async () => {
     if (!confirm('모든 공휴일을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
@@ -648,6 +684,12 @@ export function SettingsScreen({
             onClick={() => setActiveTab('jira')}
           >
             JIRA 연동
+          </div>
+          <div
+            className={`settings-nav-item ${activeTab === 'emailTemplates' ? 'active' : ''}`}
+            onClick={() => setActiveTab('emailTemplates')}
+          >
+            이메일 템플릿
           </div>
         </div>
 
@@ -1079,6 +1121,74 @@ export function SettingsScreen({
               )}
             </div>
           )}
+
+          {/* 이메일 템플릿 관리 */}
+          {activeTab === 'emailTemplates' && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>이메일 템플릿</h3>
+                <Button onClick={handleAddEmailTemplate}>+ 새 템플릿</Button>
+              </div>
+
+              {!selectedProjectId ? (
+                <div style={{ marginTop: '1rem', color: 'var(--azrael-gray-500)', fontSize: 'var(--text-sm)' }}>
+                  프로젝트를 먼저 선택해주세요
+                </div>
+              ) : (
+                <table className="stages-table" style={{ marginTop: '1rem' }}>
+                  <thead>
+                    <tr>
+                      <th>이름</th>
+                      <th>유형</th>
+                      <th>생성일</th>
+                      <th>편집</th>
+                      <th>삭제</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {emailTemplates
+                      ?.sort((a, b) => {
+                        // built-in 먼저, 그 다음 created_at DESC
+                        if (a.isBuiltIn !== b.isBuiltIn) return a.isBuiltIn ? -1 : 1;
+                        return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                      })
+                      .map(tmpl => (
+                        <tr key={tmpl.id}>
+                          <td>{tmpl.name}</td>
+                          <td>{tmpl.isBuiltIn ? '기본 제공' : '사용자 정의'}</td>
+                          <td>{new Date(tmpl.createdAt).toLocaleDateString('ko-KR')}</td>
+                          <td>
+                            <button
+                              className="btn-icon"
+                              onClick={() => handleEditEmailTemplate(tmpl)}
+                            >
+                              ✎
+                            </button>
+                          </td>
+                          <td>
+                            {!tmpl.isBuiltIn && (
+                              <button
+                                className="btn-icon btn-danger"
+                                onClick={() => handleDeleteEmailTemplate(tmpl)}
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                    {(!emailTemplates || emailTemplates.length === 0) && (
+                      <tr>
+                        <td colSpan={5} style={{ textAlign: 'center', color: 'var(--azrael-gray-500)' }}>
+                          템플릿이 없습니다
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -1115,6 +1225,18 @@ export function SettingsScreen({
           );
         }}
       />
+
+      {selectedProject && (
+        <EmailTemplateEditModal
+          isOpen={emailTemplateModalOpen}
+          onClose={() => setEmailTemplateModalOpen(false)}
+          projectId={selectedProjectId}
+          template={editingEmailTemplate}
+          project={selectedProject}
+          calculationResult={calculationResult ?? null}
+          onSave={() => {}}
+        />
+      )}
     </div>
   );
 }

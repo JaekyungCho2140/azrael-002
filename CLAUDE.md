@@ -27,9 +27,10 @@ src/
 
 supabase/
 ├── migrations/   # DB 스키마 (5개)
-└── functions/    # Edge Functions (2개)
+└── functions/    # Edge Functions (3개)
     ├── jira-create/
-    └── jira-update/
+    ├── jira-update/
+    └── jira-check/
 ```
 
 ## 핵심 규칙
@@ -41,6 +42,7 @@ supabase/
 - 정보 수집 후 → Serena의 think_about_collected_information 호출
 - 코드 작성 전 → Serena의 think_about_task_adherence 호출
 - 작업 완료 시 → Serena의 think_about_whether_you_are_done 호출
+- 오류 발생 시 PRD 문서 참조
 
 ## 데이터 저장 전략
 - **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees
@@ -68,5 +70,7 @@ supabase/
 - ✅ Phase 0.5: 하위 일감 템플릿
 - ✅ Phase 1: JIRA 연동
 - ✅ Phase 1.7: 계산 결과 서버화, 부가 정보 관리 (2026-01-20)
+- ✅ Phase 1.8: JIRA 일감 존재 확인 (2026-01-21)
 - ⏳ Phase 2: 이메일 생성 (예정)
 - ⏳ Phase 3: 슬랙 연동 (예정)
+- ⏳ Phase 4: 프리셋 관리 (예정)

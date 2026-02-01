@@ -1,0 +1,130 @@
+/**
+ * EmailTemplateEditModal Styles
+ * 템플릿 편집 모달 (좌우 분할 레이아웃)
+ */
+
+/* ============================================================
+   전체 레이아웃
+   ============================================================ */
+
+.edit-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+/* ============================================================
+   이름/제목 입력
+   ============================================================ */
+
+.edit-name-row,
+.edit-subject-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.edit-field-label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-800);
+}
+
+.edit-field-label-inline {
+  font-weight: var(--weight-medium);
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-700);
+}
+
+.edit-name-error {
+  font-size: var(--text-xs);
+  color: var(--azrael-error, #d32f2f);
+}
+
+/* ============================================================
+   미리보기 테이블 선택
+   ============================================================ */
+
+.edit-preview-table-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.edit-table-select {
+  width: auto;
+  max-width: 200px;
+  font-size: var(--text-sm);
+}
+
+/* ============================================================
+   좌우 분할
+   ============================================================ */
+
+.edit-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  min-height: 400px;
+}
+
+.edit-left-pane,
+.edit-right-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0; /* flex overflow 대응 */
+}
+
+.edit-pane-label {
+  font-weight: var(--weight-semibold);
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-700);
+  flex-shrink: 0;
+}
+
+.edit-no-preview {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-500);
+  background: var(--azrael-gray-50);
+  border: 1px solid var(--azrael-gray-200);
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* 우측 미리보기 영역 내부 높이 맞춤 */
+.edit-right-pane .email-preview {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-right-pane .preview-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.edit-right-pane .preview-body {
+  flex: 1;
+  max-height: 360px;
+}
+
+/* ============================================================
+   Footer
+   ============================================================ */
+
+.edit-modal-footer {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  width: 100%;
+}
