@@ -12,6 +12,7 @@
     "import-csv": "tsx src/scripts/importFromCSV.ts"
   },
   "dependencies": {
+    "@floating-ui/dom": "^1.7.5",
     "@fullcalendar/core": "^6.1.20",
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/react": "^6.1.20",
