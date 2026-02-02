@@ -1,0 +1,1536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Azrael - 수동 테스트 시나리오</title>
+  <style>
+    /* ===== Azrael Design Tokens ===== */
+    :root {
+      --orange-50: #FFF4E6;
+      --orange-100: #FFE0B2;
+      --orange-300: #FFB74D;
+      --orange-500: #FF9800;
+      --orange-600: #FB8C00;
+      --orange-700: #F57C00;
+      --orange-900: #E65100;
+      --gray-50: #FAFAFA;
+      --gray-100: #F5F5F5;
+      --gray-200: #EEEEEE;
+      --gray-300: #E0E0E0;
+      --gray-400: #BDBDBD;
+      --gray-600: #757575;
+      --gray-800: #424242;
+      --gray-900: #212121;
+      --white: #FFFFFF;
+      --success: #4CAF50;
+      --success-light: #E8F5E9;
+      --error: #F44336;
+      --error-light: #FFEBEE;
+      --info: #2196F3;
+      --info-light: #E3F2FD;
+      --warning: #FFC107;
+      --warning-light: #FFF8E1;
+      --teal: #009688;
+      --purple: #673AB7;
+    }
+
+    /* ===== Reset & Base ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+
+    body {
+      font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: var(--gray-900);
+      background: var(--gray-50);
+      line-height: 1.7;
+    }
+
+    /* ===== Navigation ===== */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      height: 100vh;
+      background: var(--white);
+      border-right: 1px solid var(--gray-200);
+      overflow-y: auto;
+      z-index: 100;
+      padding: 1.5rem 0;
+    }
+
+    .nav-logo {
+      text-align: center;
+      padding: 0 1.5rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    .nav-logo span { font-size: 2rem; }
+
+    .nav-logo h2 {
+      font-family: 'Nunito', sans-serif;
+      color: var(--orange-500);
+      font-size: 1.15rem;
+      margin-top: 0.25rem;
+    }
+
+    .nav-logo p {
+      font-size: 0.7rem;
+      color: var(--gray-600);
+    }
+
+    .nav-section {
+      padding: 1rem 0 0.25rem 1.5rem;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--gray-400);
+    }
+
+    .nav a {
+      display: block;
+      padding: 0.4rem 1.5rem;
+      color: var(--gray-800);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: all 0.15s;
+      border-left: 3px solid transparent;
+    }
+
+    .nav a:hover {
+      background: var(--orange-50);
+      color: var(--orange-700);
+      border-left-color: var(--orange-500);
+    }
+
+    .nav .progress-bar {
+      margin: 1rem 1.5rem;
+      background: var(--gray-200);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .nav .progress-bar .fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+
+    .nav .progress-text {
+      text-align: center;
+      font-size: 0.7rem;
+      color: var(--gray-600);
+    }
+
+    /* ===== Main Content ===== */
+    .main {
+      margin-left: 280px;
+      padding: 2rem 3rem 4rem;
+      max-width: 1000px;
+    }
+
+    /* ===== Typography ===== */
+    h1 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 2rem;
+      color: var(--orange-700);
+      border-bottom: 3px solid var(--orange-500);
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 + p { color: var(--gray-600); margin-bottom: 2rem; }
+
+    h2 {
+      font-family: 'Nunito', sans-serif;
+      font-size: 1.4rem;
+      color: var(--gray-900);
+      margin-top: 3rem;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      color: var(--orange-700);
+      margin-top: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    p { margin-bottom: 0.75rem; }
+
+    /* ===== Test Scenario Card ===== */
+    .scenario {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      margin: 1.25rem 0;
+      overflow: hidden;
+      transition: box-shadow 0.2s;
+    }
+
+    .scenario:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .scenario-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1.25rem;
+      background: var(--gray-50);
+      border-bottom: 1px solid var(--gray-200);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .scenario-header:hover { background: var(--orange-50); }
+
+    .scenario-id {
+      background: var(--orange-500);
+      color: var(--white);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    .scenario-title {
+      flex: 1;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .scenario-priority {
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+    }
+
+    .priority-critical { background: var(--error-light); color: var(--error); }
+    .priority-high { background: var(--warning-light); color: #E65100; }
+    .priority-medium { background: var(--info-light); color: var(--info); }
+    .priority-low { background: var(--gray-100); color: var(--gray-600); }
+
+    .scenario-check {
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--gray-300);
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+
+    .scenario-check.checked {
+      background: var(--success);
+      border-color: var(--success);
+      color: var(--white);
+      font-size: 0.75rem;
+    }
+
+    .scenario-body {
+      padding: 1rem 1.25rem;
+      font-size: 0.875rem;
+    }
+
+    .scenario.passed .scenario-header {
+      background: var(--success-light);
+      border-bottom-color: #C8E6C9;
+    }
+
+    .scenario.passed .scenario-id {
+      background: var(--success);
+    }
+
+    /* ===== Given-When-Then ===== */
+    .gwt { margin: 0.5rem 0; }
+
+    .gwt-label {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.1rem 0.45rem;
+      border-radius: 4px;
+      margin-right: 0.5rem;
+      vertical-align: middle;
+    }
+
+    .gwt-given .gwt-label { background: var(--info-light); color: #1565C0; }
+    .gwt-when .gwt-label { background: var(--warning-light); color: #E65100; }
+    .gwt-then .gwt-label { background: var(--success-light); color: #2E7D32; }
+    .gwt-and .gwt-label { background: var(--gray-100); color: var(--gray-600); }
+
+    .gwt-text {
+      display: inline;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    /* ===== Verification Checklist ===== */
+    .verify-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.75rem 0 0;
+    }
+
+    .verify-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.35rem 0;
+      font-size: 0.85rem;
+    }
+
+    .verify-list li::before {
+      content: '☐';
+      flex-shrink: 0;
+      font-size: 1rem;
+      line-height: 1.4;
+      cursor: pointer;
+    }
+
+    .verify-list li.checked::before {
+      content: '☑';
+      color: var(--success);
+    }
+
+    /* ===== Tags ===== */
+    .tags { margin-top: 0.5rem; display: flex; gap: 0.35rem; flex-wrap: wrap; }
+
+    .tag {
+      display: inline-block;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .tag-auth { background: #FCE4EC; color: #C62828; border-color: #F8BBD0; }
+    .tag-calc { background: var(--orange-50); color: var(--orange-900); border-color: var(--orange-100); }
+    .tag-jira { background: #E3F2FD; color: #1565C0; border-color: #BBDEFB; }
+    .tag-email { background: #F3E5F5; color: #6A1B9A; border-color: #E1BEE7; }
+    .tag-settings { background: #E8F5E9; color: #2E7D32; border-color: #C8E6C9; }
+    .tag-ui { background: #FFF8E1; color: #F57F17; border-color: #FFECB3; }
+    .tag-export { background: #EFEBE9; color: #4E342E; border-color: #D7CCC8; }
+    .tag-manual { background: #ECEFF1; color: #37474F; border-color: #CFD8DC; }
+
+    /* ===== Summary Table ===== */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    thead { background: var(--gray-100); }
+
+    th {
+      padding: 0.6rem 0.75rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--gray-800);
+      border-bottom: 2px solid var(--gray-300);
+    }
+
+    td {
+      padding: 0.5rem 0.75rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+
+    tr:hover td { background: var(--orange-50); }
+
+    /* ===== Callout ===== */
+    .callout {
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      margin: 1rem 0;
+      font-size: 0.85rem;
+    }
+
+    .callout-prereq {
+      background: var(--warning-light);
+      border-left: 4px solid var(--warning);
+    }
+
+    .callout-note {
+      background: var(--info-light);
+      border-left: 4px solid var(--info);
+    }
+
+    .callout-danger {
+      background: var(--error-light);
+      border-left: 4px solid var(--error);
+    }
+
+    .callout strong { display: block; margin-bottom: 0.2rem; }
+
+    code {
+      background: var(--gray-100);
+      border: 1px solid var(--gray-200);
+      border-radius: 4px;
+      padding: 0.1rem 0.35rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--orange-700);
+    }
+
+    .section-stats {
+      display: flex;
+      gap: 1rem;
+      margin: 0.75rem 0 1.5rem;
+      font-size: 0.8rem;
+      color: var(--gray-600);
+    }
+
+    .section-stats span {
+      background: var(--gray-100);
+      padding: 0.25rem 0.65rem;
+      border-radius: 6px;
+    }
+
+    .version-info {
+      text-align: right;
+      font-size: 0.75rem;
+      color: var(--gray-400);
+      margin-top: 3rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--gray-200);
+    }
+
+    /* ===== Print ===== */
+    @media print {
+      .nav { display: none; }
+      .main { margin-left: 0; max-width: 100%; }
+      .scenario { break-inside: avoid; }
+      h2 { page-break-before: always; }
+    }
+
+    @media (max-width: 768px) {
+      .nav { display: none; }
+      .main { margin-left: 0; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== Sidebar Navigation ===== -->
+<nav class="nav">
+  <div class="nav-logo">
+    <span>🐱</span>
+    <h2>Azrael 테스트 시나리오</h2>
+    <p>수동 테스트 가이드 v2.9</p>
+  </div>
+
+  <div class="progress-bar"><div class="fill" id="progressFill"></div></div>
+  <div class="progress-text" id="progressText">0 / 42 완료</div>
+
+  <div class="nav-section">테스트 영역</div>
+  <a href="#summary">요약 &amp; 환경</a>
+  <a href="#auth">TS-01 인증 &amp; 접근</a>
+  <a href="#calc">TS-02 일정 계산</a>
+  <a href="#tables">TS-03 결과 테이블</a>
+  <a href="#gantt">TS-04 간트 차트 &amp; 캘린더</a>
+  <a href="#export">TS-05 이미지 복사</a>
+  <a href="#jira">TS-06 JIRA 연동</a>
+  <a href="#email">TS-07 이메일 생성</a>
+  <a href="#settings">TS-08 설정 관리</a>
+  <a href="#ui">TS-09 UI/UX 검증</a>
+  <a href="#edge">TS-10 엣지 케이스</a>
+</nav>
+
+<!-- ===== Main Content ===== -->
+<div class="main">
+
+<h1>🐱 Azrael 수동 테스트 시나리오</h1>
+<p>Phase 0~2 전 기능 검증을 위한 수동 테스트 가이드 (42개 시나리오)</p>
+
+<!-- ===== Summary ===== -->
+<h2 id="summary">테스트 환경 &amp; 요약</h2>
+
+<div class="callout callout-prereq">
+  <strong>⚠️ 테스트 전제조건</strong>
+  <ul style="margin:0.5rem 0 0 1.2rem;">
+    <li>Chrome 90+ 브라우저 (권장)</li>
+    <li>해상도 1280 × 720 이상</li>
+    <li>허용된 Google 회사 계정</li>
+    <li>JIRA API 토큰 (JIRA 테스트 시)</li>
+    <li>Supabase에 테스트용 프로젝트/업무 단계/공휴일 데이터 존재</li>
+    <li>테스트 JIRA 프로젝트 (생성/업데이트 테스트 시 사용, 운영 프로젝트 금지)</li>
+  </ul>
+</div>
+
+<table>
+  <thead>
+    <tr><th>영역</th><th>시나리오 수</th><th>우선순위</th><th>자동화 가능</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>TS-01 인증 &amp; 접근</td><td>4</td><td>🔴 Critical</td><td>부분적 (OAuth 수동)</td></tr>
+    <tr><td>TS-02 일정 계산</td><td>5</td><td>🔴 Critical</td><td>✅</td></tr>
+    <tr><td>TS-03 결과 테이블</td><td>4</td><td>🟡 High</td><td>✅</td></tr>
+    <tr><td>TS-04 간트 &amp; 캘린더</td><td>3</td><td>🟢 Medium</td><td>부분적</td></tr>
+    <tr><td>TS-05 이미지 복사</td><td>3</td><td>🟡 High</td><td>❌ (클립보드 수동)</td></tr>
+    <tr><td>TS-06 JIRA 연동</td><td>6</td><td>🔴 Critical</td><td>부분적 (JIRA API)</td></tr>
+    <tr><td>TS-07 이메일 생성</td><td>5</td><td>🟡 High</td><td>부분적</td></tr>
+    <tr><td>TS-08 설정 관리</td><td>6</td><td>🟡 High</td><td>✅</td></tr>
+    <tr><td>TS-09 UI/UX 검증</td><td>3</td><td>🟢 Medium</td><td>부분적</td></tr>
+    <tr><td>TS-10 엣지 케이스</td><td>3</td><td>🟡 High</td><td>부분적</td></tr>
+  </tbody>
+</table>
+
+<!-- ===== TS-01: 인증 ===== -->
+<h2 id="auth">TS-01. 인증 &amp; 접근 제어</h2>
+<div class="section-stats">
+  <span>4개 시나리오</span>
+  <span>🔴 Critical</span>
+  <span class="tag tag-auth">인증</span>
+  <span class="tag tag-manual">수동 필수</span>
+</div>
+
+<div class="scenario" data-id="TC-0101">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0101</span>
+    <span class="scenario-title">허용된 계정으로 Google OAuth 로그인</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">로그아웃 상태에서 Azrael 로그인 화면이 표시됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"🔐 Gmail로 로그인" 버튼을 클릭하고, 화이트리스트에 등록된 Google 회사 계정으로 로그인</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">메인 화면으로 리다이렉트됨</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">헤더에 프로젝트 드롭다운, 설정, 로그아웃 버튼이 표시됨</span></div>
+    <ul class="verify-list">
+      <li>로그인 화면에 Azrael 로고와 "Gmail로 로그인" 버튼 표시</li>
+      <li>Google 로그인 팝업 정상 표시</li>
+      <li>인증 성공 후 메인 화면 전환 (2초 이내)</li>
+      <li>헤더에 프로젝트 드롭다운, ⚙️, 🚪 버튼 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-auth">인증</span><span class="tag tag-manual">수동 필수</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0102">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0102</span>
+    <span class="scenario-title">비허용 계정 접근 차단</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">로그아웃 상태에서 Azrael 로그인 화면이 표시됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">화이트리스트에 등록되지 않은 Google 계정으로 로그인 시도</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">"접근이 거부되었습니다" 오류 메시지 표시</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">메인 화면으로 진입 불가</span></div>
+    <ul class="verify-list">
+      <li>에러 메시지 "접근이 거부되었습니다" 또는 유사 문구 확인</li>
+      <li>메인 화면에 접근 불가 확인</li>
+    </ul>
+    <div class="tags"><span class="tag tag-auth">인증</span><span class="tag tag-manual">수동 필수</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0103">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0103</span>
+    <span class="scenario-title">최초 접속 온보딩 플로우</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">처음 로그인한 사용자 (온보딩 미완료 상태)</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">로그인 성공</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">프로젝트 선택 온보딩 화면 표시</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">프로젝트를 선택하고 "시작" 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">선택한 프로젝트가 활성화된 상태로 메인 화면 진입</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">재로그인 시 온보딩이 다시 표시되지 않음</span></div>
+    <ul class="verify-list">
+      <li>온보딩 화면에 프로젝트 라디오 버튼 목록 표시</li>
+      <li>프로젝트 미선택 시 "시작" 버튼 비활성화 (또는 안내 문구)</li>
+      <li>프로젝트 선택 후 메인 화면 전환</li>
+      <li>브라우저 새로고침 후 온보딩 미표시 확인</li>
+    </ul>
+    <div class="tags"><span class="tag tag-auth">인증</span><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0104">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0104</span>
+    <span class="scenario-title">로그아웃 동작</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">로그인된 상태에서 메인 화면 표시</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">헤더의 🚪 로그아웃 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">로그인 화면으로 리다이렉트</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">세션 만료, URL 직접 접근 시에도 로그인 화면으로 이동</span></div>
+    <ul class="verify-list">
+      <li>로그아웃 후 로그인 화면 표시</li>
+      <li>브라우저 뒤로가기 시 메인 화면 접근 불가</li>
+      <li>URL 직접 입력으로 메인 화면 접근 불가</li>
+    </ul>
+    <div class="tags"><span class="tag tag-auth">인증</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-02: 일정 계산 ===== -->
+<h2 id="calc">TS-02. 일정 계산</h2>
+<div class="section-stats">
+  <span>5개 시나리오</span>
+  <span>🔴 Critical</span>
+  <span class="tag tag-calc">계산</span>
+</div>
+
+<div class="scenario" data-id="TC-0201">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0201</span>
+    <span class="scenario-title">기본 일정 계산 실행</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트가 선택되고, 업무 단계가 설정된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">업데이트일에 <code>2026-03-10</code> 입력 후 "計算" 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">3개의 스케줄 테이블이 생성되어 결과 화면에 표시됨</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">헤즈업 날짜가 HeadsUp Offset 영업일만큼 과거 날짜로 표시됨</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">간트 차트 3개와 캘린더 뷰가 함께 표시됨</span></div>
+    <ul class="verify-list">
+      <li>Table 1, Table 2, Table 3 모두 정상 표시</li>
+      <li>헤즈업 날짜가 설정된 offset만큼 역산됨</li>
+      <li>각 업무 단계의 마감일/전달일이 영업일 기준으로 역산됨</li>
+      <li>주말(토/일)이 계산에서 제외됨 — 날짜가 월~금만 해당</li>
+      <li>간트 차트 3개가 테이블 아래 표시</li>
+      <li>캘린더에 모든 테이블 일정이 색상별로 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0202">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0202</span>
+    <span class="scenario-title">공휴일 제외 검증</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">공휴일이 등록된 상태 (예: 2026-03-01 삼일절)</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">업무 단계에 역산 offset이 설정됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">공휴일을 포함하는 날짜 범위의 업데이트일로 計算 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">계산 결과의 날짜가 공휴일을 건너뛰어 정확한 영업일에 해당</span></div>
+    <ul class="verify-list">
+      <li>등록된 공휴일 날짜가 결과에 포함되지 않음</li>
+      <li>공휴일이 역산 과정에서 skip되어 하루 더 뒤로 밀림</li>
+      <li>수동 계산과 시스템 계산 결과가 일치함</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0203">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0203</span>
+    <span class="scenario-title">iOS 심사일 표시 (활성화/비활성화)</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">iOS 심사일이 <strong>활성화</strong>된 프로젝트 선택</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">헤즈업 날짜와 함께 iOS 심사일이 별도 표시됨</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">iOS 심사일이 <strong>비활성화</strong>된 프로젝트 선택</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">iOS 심사일 필드가 표시되지 않음</span></div>
+    <ul class="verify-list">
+      <li>활성화된 프로젝트: iOS 심사일 날짜 표시 및 offset 역산 정확</li>
+      <li>비활성화된 프로젝트: iOS 심사일 영역 없음</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0204">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0204</span>
+    <span class="scenario-title">프로젝트 전환 후 재계산</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트 A에서 計算 완료</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">헤더 드롭다운에서 프로젝트 B로 전환</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">프로젝트 B의 마지막 계산 결과가 표시되거나, 없으면 초기 입력 화면</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">프로젝트 B에서 새 업데이트일로 計算 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">프로젝트 B의 업무 단계 기준으로 결과 생성</span></div>
+    <ul class="verify-list">
+      <li>프로젝트 전환 시 이전 프로젝트 결과 유지 (A로 복귀 시 확인)</li>
+      <li>전환된 프로젝트의 업무 단계로 계산됨</li>
+      <li>헤즈업 offset이 전환된 프로젝트 설정 기준</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0205">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0205</span>
+    <span class="scenario-title">계산 결과 서버 공유 확인</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">사용자 A가 프로젝트 X에서 계산을 완료한 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">사용자 B가 동일 프로젝트 X를 선택</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">사용자 A가 계산한 최신 결과가 표시됨</span></div>
+    <ul class="verify-list">
+      <li>다른 브라우저/PC에서 같은 프로젝트 접근 시 동일 결과 확인</li>
+      <li>Supabase에 calculation_results 레코드 존재 확인</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-03: 결과 테이블 ===== -->
+<h2 id="tables">TS-03. 결과 테이블</h2>
+<div class="section-stats">
+  <span>4개 시나리오</span>
+  <span>🟡 High</span>
+  <span class="tag tag-calc">계산</span>
+  <span class="tag tag-ui">UI</span>
+</div>
+
+<div class="scenario" data-id="TC-0301">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0301</span>
+    <span class="scenario-title">테이블 1 컬럼 및 데이터 표시</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 1에 #, 배치명, 마감, 테이블전달, 설명, 담당자 컬럼 표시</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">마감/전달 날짜가 MM/DD(요) HH:MM 형식</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">테이블 하단에 면책 조항(Disclaimer) 표시</span></div>
+    <ul class="verify-list">
+      <li>테이블 1 컬럼 순서: #, 배치명, 마감, 테이블전달, 설명, 담당자</li>
+      <li>날짜 형식: 02/10(화) 09:00</li>
+      <li>Table 1 대상 업무 단계만 표시 (tableTargets 확인)</li>
+      <li>면책 조항이 테이블 하단에 올바른 스타일로 렌더링</li>
+      <li>모든 셀 읽기 전용 (클릭해도 편집 불가)</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0302">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0302</span>
+    <span class="scenario-title">테이블 2/3 하위 일감 계층 표시</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">하위 일감이 있는 업무 단계로 計算 완료</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 2/3에 상위 단계는 "1", 하위 단계는 "1.1", "1.2" 형태로 순번 표시</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">하위 일감 행은 "ㄴ" 접두어와 들여쓰기 적용</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">JIRA 설명 및 JIRA 담당자 컬럼이 추가로 표시</span></div>
+    <ul class="verify-list">
+      <li>상위 단계: #1, #2, #3... 하위: #1.1, #1.2...</li>
+      <li>하위 일감 행에 "ㄴ" 접두어 표시</li>
+      <li>하위 행 들여쓰기(좌측 패딩) 적용</li>
+      <li>JIRA 설명, JIRA 담당자 컬럼 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0303">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0303</span>
+    <span class="scenario-title">테이블 필터링 (tableTargets)</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">업무 단계 A는 Table 1, 2에만 대상 / 단계 B는 Table 2, 3에만 대상</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 1에 단계 A만 표시, 테이블 3에 단계 B만 표시, 테이블 2에 A+B 모두 표시</span></div>
+    <ul class="verify-list">
+      <li>각 테이블에 해당 대상 업무 단계만 표시됨</li>
+      <li>tableTargets에 포함되지 않은 단계는 해당 테이블에서 미표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0304">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0304</span>
+    <span class="scenario-title">Disclaimer HTML 렌더링</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트 면책 조항에 HTML 태그 포함 (예: <code>&lt;b&gt;</code>, <code>&lt;r&gt;</code>, <code>&lt;u&gt;</code>)</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 결과의 테이블 1 하단 확인</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">볼드(<code>&lt;b&gt;</code>), 빨간색(<code>&lt;r&gt;</code>), 밑줄(<code>&lt;u&gt;</code>) 등이 올바르게 렌더링됨</span></div>
+    <ul class="verify-list">
+      <li>&lt;b&gt;텍스트&lt;/b&gt; → 볼드체</li>
+      <li>&lt;r&gt;텍스트&lt;/r&gt; → 빨간색</li>
+      <li>&lt;g&gt;텍스트&lt;/g&gt; → 녹색</li>
+      <li>&lt;bl&gt;텍스트&lt;/bl&gt; → 파란색</li>
+      <li>&lt;u&gt;텍스트&lt;/u&gt; → 밑줄</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-04: 간트 & 캘린더 ===== -->
+<h2 id="gantt">TS-04. 간트 차트 &amp; 캘린더</h2>
+<div class="section-stats">
+  <span>3개 시나리오</span>
+  <span>🟢 Medium</span>
+  <span class="tag tag-ui">UI</span>
+</div>
+
+<div class="scenario" data-id="TC-0401">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0401</span>
+    <span class="scenario-title">간트 차트 3개 색상별 표시</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">3개 간트 차트가 테이블 아래 각각 표시</span></div>
+    <ul class="verify-list">
+      <li>간트 1: 주황색(#FF9800), 테이블 1 데이터</li>
+      <li>간트 2: 틸색(#009688), 테이블 2 데이터</li>
+      <li>간트 3: 보라색(#673AB7), 테이블 3 데이터</li>
+      <li>각 막대에 마우스 호버 시 작업명/시작/종료 팝업</li>
+      <li>일(Day) 단위 타임라인 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0402">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0402</span>
+    <span class="scenario-title">캘린더 뷰 색상별 일정 표시</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">월간 캘린더에 3개 테이블의 일정이 색상별로 오버레이</span></div>
+    <ul class="verify-list">
+      <li>캘린더 월간 그리드 표시</li>
+      <li>각 테이블의 일정이 해당 색상으로 표시</li>
+      <li>날짜 네비게이션 (이전/다음 월) 작동</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0403">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0403</span>
+    <span class="scenario-title">간트 차트 상위-하위 계층 표현</span>
+    <span class="scenario-priority priority-low">Low</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">하위 일감이 있는 업무 단계로 計算 완료</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">간트 차트에서 상위 일감이 하위 일감을 포함하는 구조로 표시</span></div>
+    <ul class="verify-list">
+      <li>상위 업무 막대가 하위 업무 범위를 포함</li>
+      <li>하위 업무 막대가 들여쓰기 형태로 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-05: 이미지 복사 ===== -->
+<h2 id="export">TS-05. 이미지 복사</h2>
+<div class="section-stats">
+  <span>3개 시나리오</span>
+  <span>🟡 High</span>
+  <span class="tag tag-export">내보내기</span>
+  <span class="tag tag-manual">수동 필수</span>
+</div>
+
+<div class="scenario" data-id="TC-0501">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0501</span>
+    <span class="scenario-title">테이블 이미지 클립보드 복사</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 결과 테이블이 표시된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">테이블 옆 📋 복사 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">"복사 성공!" 토스트 메시지 표시</span></div>
+    <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">클립보드에 PNG 이미지 저장됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">슬랙/메일에 Ctrl+V 붙여넣기</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 이미지가 올바르게 붙여넣어짐</span></div>
+    <ul class="verify-list">
+      <li>📋 버튼 클릭 시 토스트 "복사 성공!" 표시</li>
+      <li>슬랙에 Ctrl+V로 이미지 붙여넣기 성공</li>
+      <li>이미지에 테이블 헤더/데이터/면책조항 모두 포함</li>
+      <li>텍스트가 읽을 수 있는 해상도</li>
+    </ul>
+    <div class="tags"><span class="tag tag-export">내보내기</span><span class="tag tag-manual">수동 필수</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0502">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0502</span>
+    <span class="scenario-title">간트 차트 이미지 복사</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">간트 차트가 표시된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">간트 차트 영역의 📋 복사 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">간트 차트가 PNG 이미지로 클립보드에 복사됨</span></div>
+    <ul class="verify-list">
+      <li>토스트 메시지 표시</li>
+      <li>붙여넣기 시 차트 이미지 확인</li>
+      <li>색상/막대/라벨 모두 포함</li>
+    </ul>
+    <div class="tags"><span class="tag tag-export">내보내기</span><span class="tag tag-manual">수동 필수</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0503">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0503</span>
+    <span class="scenario-title">Safari 브라우저 이미지 복사</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">Safari 브라우저에서 계산 완료 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">📋 복사 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">Safari에서도 클립보드 복사가 정상 작동 (또는 대체 방법 제공)</span></div>
+    <ul class="verify-list">
+      <li>Safari에서 클립보드 권한 팝업이 표시될 수 있음</li>
+      <li>복사 성공 또는 대체 다운로드 옵션 제공</li>
+    </ul>
+    <div class="tags"><span class="tag tag-export">내보내기</span><span class="tag tag-manual">수동 필수</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-06: JIRA 연동 ===== -->
+<h2 id="jira">TS-06. JIRA 연동</h2>
+<div class="section-stats">
+  <span>6개 시나리오</span>
+  <span>🔴 Critical</span>
+  <span class="tag tag-jira">JIRA</span>
+</div>
+
+<div class="callout callout-danger">
+  <strong>🚫 주의: 테스트 JIRA 프로젝트 사용</strong>
+  JIRA 생성/업데이트 테스트는 반드시 테스트 전용 JIRA 프로젝트에서 수행하세요. 운영 프로젝트에 테스트 일감을 생성하지 마세요.
+</div>
+
+<div class="scenario" data-id="TC-0601">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0601</span>
+    <span class="scenario-title">JIRA API 토큰 연결 테스트</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 &gt; JIRA 탭에서 API 토큰이 입력된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"연결 테스트" 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">성공: 계정 이메일과 Account ID 표시, "저장" 버튼 활성화</span></div>
+    <ul class="verify-list">
+      <li>유효한 토큰: 성공 상태 + 계정 정보 표시</li>
+      <li>무효한 토큰: 에러 메시지 + "저장" 비활성 유지</li>
+      <li>저장 후 페이지 새로고침 시 토큰 유지됨</li>
+    </ul>
+    <div class="tags"><span class="tag tag-jira">JIRA</span><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0602">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0602</span>
+    <span class="scenario-title">JIRA Epic + Task + Subtask 생성</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 + JIRA 설정 완료 + 테스트 프로젝트 키 설정</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"JIRA 생성" 클릭 → 미리보기 확인 → "확인" 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">JIRA에 Epic, Task, Subtask가 올바르게 생성됨</span></div>
+    <ul class="verify-list">
+      <li>미리보기에 Epic/Task/Subtask 트리 구조 표시</li>
+      <li>생성 완료 후 Epic 키(예: L10NTEST-123) 성공 메시지</li>
+      <li>JIRA에서 실제 Epic 확인 — Summary 템플릿 변수 치환 확인</li>
+      <li>Task의 날짜/시간/담당자가 계산 결과와 일치</li>
+      <li>Subtask가 올바른 부모 Task 아래 생성됨</li>
+      <li>Headsup Task가 별도 생성됨 (stageId: HEADSUP)</li>
+    </ul>
+    <div class="tags"><span class="tag tag-jira">JIRA</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0603">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0603</span>
+    <span class="scenario-title">JIRA 중복 생성 방지</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">동일 프로젝트 + 업데이트일로 이미 Epic이 생성된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"JIRA 생성" 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">중복 안내 메시지 표시, 새 Epic 생성 차단</span></div>
+    <ul class="verify-list">
+      <li>기존 Epic이 있으면 중복 경고 메시지</li>
+      <li>"JIRA 업데이트"를 사용하도록 안내</li>
+      <li>JIRA에 중복 Epic이 생성되지 않음</li>
+    </ul>
+    <div class="tags"><span class="tag tag-jira">JIRA</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0604">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0604</span>
+    <span class="scenario-title">JIRA 일감 업데이트</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">기존 Epic 매핑이 존재하고, 업무 단계를 수정 후 재계산</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"JIRA 업데이트" 클릭 → 확인</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">기존 Task 날짜 수정 + 새 Task 생성이 올바르게 수행</span></div>
+    <ul class="verify-list">
+      <li>기존 Task의 일정이 새 계산 결과로 업데이트됨</li>
+      <li>새로 추가된 업무 단계에 대한 Task가 새로 생성됨</li>
+      <li>JIRA에서 실제 날짜 변경 확인</li>
+      <li>업데이트 완료 메시지 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-jira">JIRA</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0605">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0605</span>
+    <span class="scenario-title">삭제된 JIRA Epic 처리</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">JIRA에서 Epic을 수동으로 삭제한 상태 (Azrael 매핑은 남아있음)</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"JIRA 업데이트" 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">Epic이 JIRA에 존재하지 않음을 감지, 정리 옵션 제공</span></div>
+    <ul class="verify-list">
+      <li>"Epic이 JIRA에서 삭제되었습니다" 안내 메시지</li>
+      <li>매핑 정리(cleanup) 옵션 제공</li>
+      <li>정리 후 "JIRA 생성"으로 새 Epic 생성 가능</li>
+    </ul>
+    <div class="tags"><span class="tag tag-jira">JIRA</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0606">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0606</span>
+    <span class="scenario-title">JIRA 담당자 매핑 반영</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">업무 단계에 JIRA 담당자가 설정된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">JIRA 생성 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">생성된 JIRA Task의 Assignee가 설정된 JIRA Account ID와 일치</span></div>
+    <ul class="verify-list">
+      <li>테이블에 JIRA 담당자 이름 표시</li>
+      <li>JIRA에서 Task의 Assignee 확인</li>
+      <li>담당자 미설정 시 현재 사용자로 기본 할당</li>
+    </ul>
+    <div class="tags"><span class="tag tag-jira">JIRA</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-07: 이메일 생성 ===== -->
+<h2 id="email">TS-07. 이메일 생성 <span style="font-size:0.7em;color:var(--orange-700);">Phase 2</span></h2>
+<div class="section-stats">
+  <span>5개 시나리오</span>
+  <span>🟡 High</span>
+  <span class="tag tag-email">이메일</span>
+</div>
+
+<div class="scenario" data-id="TC-0701">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0701</span>
+    <span class="scenario-title">이메일 생성 모달 열기 및 테이블 선택</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"✉️ 이메일 복사" 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">이메일 생성 모달 표시, Table 2가 기본 선택</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">Table 1 / Table 3으로 변경</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">선택된 테이블의 데이터로 미리보기 갱신</span></div>
+    <ul class="verify-list">
+      <li>모달에 테이블 선택 라디오 버튼 (T1/T2/T3) 표시</li>
+      <li>기본 선택: Table 2</li>
+      <li>테이블 변경 시 미리보기 실시간 갱신</li>
+      <li>템플릿 선택 드롭다운/리스트 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-email">이메일</span><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0702">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0702</span>
+    <span class="scenario-title">이메일 템플릿 변수 치환</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">템플릿에 <code>{{updateDate}}</code>, <code>{{headsUp}}</code>, <code>{{table}}</code> 변수 포함</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">이메일 생성 모달에서 해당 템플릿 선택</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">미리보기에서 모든 변수가 실제 값으로 치환되어 표시</span></div>
+    <ul class="verify-list">
+      <li><code>{{updateDate}}</code> → 실제 업데이트일 (예: 2026-02-10)</li>
+      <li><code>{{headsUp}}</code> → 실제 헤즈업 날짜</li>
+      <li><code>{{projectName}}</code> → 현재 프로젝트 이름</li>
+      <li><code>{{table}}</code> → 선택된 테이블의 HTML 렌더링</li>
+      <li><code>{{disclaimer}}</code> → 프로젝트 면책 조항</li>
+      <li>미치환 변수 없음 ({{xxx}} 형태 텍스트 미잔존)</li>
+    </ul>
+    <div class="tags"><span class="tag tag-email">이메일</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0703">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0703</span>
+    <span class="scenario-title">조건부 렌더링 (iOS 심사일)</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">템플릿에 <code>{{#if showIosReviewDate}}...{{/if}}</code> 조건부 블록 포함</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">iOS 심사일 활성화된 프로젝트에서 이메일 생성</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">조건부 블록 내용이 표시됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">iOS 심사일 비활성화된 프로젝트에서 이메일 생성</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">조건부 블록 내용이 숨겨짐</span></div>
+    <ul class="verify-list">
+      <li>활성화: iOS 심사일 관련 텍스트 표시</li>
+      <li>비활성화: iOS 심사일 관련 텍스트 미표시 (빈 공간도 없음)</li>
+    </ul>
+    <div class="tags"><span class="tag tag-email">이메일</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0704">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0704</span>
+    <span class="scenario-title">이메일 클립보드 복사 → 이메일 클라이언트 붙여넣기</span>
+    <span class="scenario-priority priority-critical">Critical</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">이메일 미리보기가 올바르게 표시된 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"클립보드 복사" 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">성공 토스트 메시지 표시</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">Outlook/Gmail에서 새 메일 작성 → Ctrl+V</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">서식이 유지된 이메일 본문이 붙여넣어짐 (테이블, 볼드, 색상 등)</span></div>
+    <ul class="verify-list">
+      <li>"클립보드 복사" 클릭 시 토스트 표시</li>
+      <li>Outlook 붙여넣기: HTML 서식 유지</li>
+      <li>Gmail 붙여넣기: HTML 서식 유지</li>
+      <li>테이블 레이아웃, 볼드, 색상 모두 보존</li>
+      <li>이메일 제목은 별도 복사 가능</li>
+    </ul>
+    <div class="tags"><span class="tag tag-email">이메일</span><span class="tag tag-manual">수동 필수</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0705">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0705</span>
+    <span class="scenario-title">이메일 템플릿 CRUD</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 &gt; 이메일 템플릿 탭</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"+ 새 템플릿" → 이름/제목/본문 입력 → 저장</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">템플릿 목록에 새 템플릿 추가됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">편집 → 제목 변경 → 저장</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">변경 내용이 반영됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">삭제 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">커스텀 템플릿이 삭제됨, 기본 제공 템플릿은 삭제 불가</span></div>
+    <ul class="verify-list">
+      <li>새 템플릿 생성 및 목록 갱신</li>
+      <li>기존 템플릿 편집 및 변경 반영</li>
+      <li>커스텀 템플릿 삭제 가능</li>
+      <li>기본 제공(Built-in) 템플릿 삭제 버튼 미표시 또는 비활성</li>
+      <li>동일 이름 중복 시 에러 표시</li>
+      <li>프로젝트 선택 드롭다운으로 템플릿 필터링</li>
+    </ul>
+    <div class="tags"><span class="tag tag-email">이메일</span><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-08: 설정 관리 ===== -->
+<h2 id="settings">TS-08. 설정 관리</h2>
+<div class="section-stats">
+  <span>6개 시나리오</span>
+  <span>🟡 High</span>
+  <span class="tag tag-settings">설정</span>
+</div>
+
+<div class="scenario" data-id="TC-0801">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0801</span>
+    <span class="scenario-title">프로젝트 CRUD</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 &gt; 프로젝트 탭</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">추가 → 이름/offset 입력 → 저장</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">프로젝트 목록에 추가되고 헤더 드롭다운에도 반영</span></div>
+    <ul class="verify-list">
+      <li>프로젝트 추가 → 목록 갱신</li>
+      <li>프로젝트 편집 → 변경 반영</li>
+      <li>프로젝트 삭제 → 확인 대화 → 목록에서 제거</li>
+      <li>마지막 프로젝트 삭제 차단</li>
+      <li>헤더 드롭다운에 즉시 반영</li>
+    </ul>
+    <div class="tags"><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0802">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0802</span>
+    <span class="scenario-title">업무 단계 CRUD (상위 + 하위)</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 &gt; 업무 단계 탭, 프로젝트 선택</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">상위 단계 추가 → 이름/offset/시간/테이블 입력 → 저장</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">단계 목록에 추가</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">편집 → 하위 일감 아코디언 열기 → 하위 추가 → 저장</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">목록에 상위/하위 계층 구조로 표시</span></div>
+    <ul class="verify-list">
+      <li>상위 단계 추가/편집/삭제</li>
+      <li>하위 일감 추가 (아코디언 UI)</li>
+      <li>목록에서 "ㄴ" 접두어로 하위 표시</li>
+      <li>각 필드(이름, offset, 시간, 테이블, JIRA 설정) 저장 확인</li>
+      <li>삭제 시 확인 대화 표시</li>
+      <li>프로젝트 변경 시 해당 프로젝트 단계만 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0803">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0803</span>
+    <span class="scenario-title">공휴일 API 가져오기</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 &gt; 공휴일 탭</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"API에서 가져오기" 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">현재 연도 대한민국 공휴일 목록이 로드됨 (Source: API)</span></div>
+    <ul class="verify-list">
+      <li>공휴일 목록에 1월 1일(신정), 설날, 삼일절 등 표시</li>
+      <li>Source 컬럼에 "API" 표시</li>
+      <li>이미 로드된 경우 덮어쓰기 확인 대화</li>
+      <li>API 실패 시 에러 메시지 표시</li>
+    </ul>
+    <div class="tags"><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0804">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0804</span>
+    <span class="scenario-title">공휴일 수동 추가/삭제</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 &gt; 공휴일 탭</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"+ 공휴일 수동 추가" → 날짜/이름 입력 → 추가</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">목록에 추가됨 (Source: Manual)</span></div>
+    <ul class="verify-list">
+      <li>수동 공휴일 추가 (날짜 + 이름)</li>
+      <li>Source 컬럼에 "Manual" 표시</li>
+      <li>개별 삭제 가능</li>
+      <li>추가된 공휴일이 이후 계산에 반영됨</li>
+    </ul>
+    <div class="tags"><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0805">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0805</span>
+    <span class="scenario-title">CSV 가져오기 (관리자 전용)</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">관리자 계정(jkcho@wemade.com)으로 로그인</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">프로젝트/업무 단계/공휴일 탭에서 "CSV 가져오기" 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">CSV 파일 선택 → 데이터 일괄 로드</span></div>
+    <ul class="verify-list">
+      <li>관리자에게만 CSV 버튼 표시</li>
+      <li>일반 사용자에게는 CSV 버튼 미표시</li>
+      <li>올바른 CSV 형식: 데이터 정상 로드</li>
+      <li>잘못된 CSV 형식: 에러 메시지 (잘못된 행 수 표시)</li>
+    </ul>
+    <div class="tags"><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0806">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0806</span>
+    <span class="scenario-title">설정 사이드바 탭 전환</span>
+    <span class="scenario-priority priority-low">Low</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 화면</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">좌측 사이드바에서 각 탭 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">해당 탭의 콘텐츠 영역으로 전환</span></div>
+    <ul class="verify-list">
+      <li>5개 탭 모두 전환 정상 (프로젝트, 업무 단계, 공휴일, JIRA, 이메일 템플릿)</li>
+      <li>활성 탭에 주황색 좌측 테두리 + 배경색 표시</li>
+      <li>비활성 탭은 기본 스타일</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span><span class="tag tag-settings">설정</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-09: UI/UX 검증 ===== -->
+<h2 id="ui">TS-09. UI/UX 검증</h2>
+<div class="section-stats">
+  <span>3개 시나리오</span>
+  <span>🟢 Medium</span>
+  <span class="tag tag-ui">UI</span>
+</div>
+
+<div class="scenario" data-id="TC-0901">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0901</span>
+    <span class="scenario-title">버튼 텍스트 개행 방지 (1280px)</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">브라우저 너비 1280px 이상</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">메인 화면의 4개 액션 버튼 (計算, JIRA 생성, JIRA 업데이트, ✉️ 이메일 복사) 확인</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">모든 버튼 텍스트가 한 줄로 표시, 컨테이너(960px) 내에 수용</span></div>
+    <ul class="verify-list">
+      <li>4개 버튼 텍스트 모두 줄바꿈 없이 1줄 표시</li>
+      <li>버튼이 960px 컨테이너 바깥으로 돌출되지 않음</li>
+      <li>버튼이 수평/수직 중앙 정렬됨</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0902">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0902</span>
+    <span class="scenario-title">설정 탭 "추가" 버튼 위치 통일</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">설정 화면</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">프로젝트, 업무 단계, 공휴일, 이메일 템플릿 각 탭 확인</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">모든 탭에서 "추가" 버튼이 제목 우측 상단에 일관되게 위치</span></div>
+    <ul class="verify-list">
+      <li>프로젝트 탭: "+ 새 프로젝트 추가" 우측 상단</li>
+      <li>업무 단계 탭: "+ 업무 단계 추가" 우측 상단</li>
+      <li>공휴일 탭: "+ 공휴일 수동 추가" 우측 상단</li>
+      <li>이메일 템플릿 탭: "+ 새 템플릿" 우측 상단</li>
+      <li>4개 탭 모두 동일한 flex 레이아웃 패턴 (space-between)</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-0903">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-0903</span>
+    <span class="scenario-title">토스트 알림 동작</span>
+    <span class="scenario-priority priority-low">Low</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">성공/실패 동작이 발생하는 상황</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">이미지 복사, 이메일 복사, JIRA 생성 등 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">적절한 색상의 토스트 메시지 표시 후 3-5초 내 자동 소멸</span></div>
+    <ul class="verify-list">
+      <li>성공: 녹색 토스트</li>
+      <li>실패: 빨간색 토스트</li>
+      <li>3-5초 후 자동 소멸</li>
+      <li>여러 토스트 동시 표시 가능</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<!-- ===== TS-10: 엣지 케이스 ===== -->
+<h2 id="edge">TS-10. 엣지 케이스</h2>
+<div class="section-stats">
+  <span>3개 시나리오</span>
+  <span>🟡 High</span>
+  <span class="tag tag-ui">UI</span>
+</div>
+
+<div class="scenario" data-id="TC-1001">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-1001</span>
+    <span class="scenario-title">업무 단계 미설정 상태에서 계산 시도</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">선택된 프로젝트에 업무 단계가 0개인 상태</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 버튼 클릭</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">적절한 안내 메시지 (예: "업무 단계를 먼저 설정하세요")</span></div>
+    <ul class="verify-list">
+      <li>에러 메시지 또는 안내 경고 표시</li>
+      <li>빈 테이블이 생성되지 않음</li>
+      <li>앱 크래시 없음</li>
+    </ul>
+    <div class="tags"><span class="tag tag-calc">계산</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-1002">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-1002</span>
+    <span class="scenario-title">네트워크 오류 시 동작</span>
+    <span class="scenario-priority priority-high">High</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">네트워크가 불안정하거나 Supabase가 접근 불가</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算, JIRA 생성, 설정 저장 등 API 호출 실행</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">사용자에게 명확한 에러 메시지 표시, 앱 크래시 없음</span></div>
+    <ul class="verify-list">
+      <li>네트워크 에러 시 사용자 친화적 메시지 표시</li>
+      <li>무한 로딩 스피너 없음 (타임아웃 처리)</li>
+      <li>앱이 정지하거나 크래시하지 않음</li>
+      <li>네트워크 복구 후 재시도 가능</li>
+    </ul>
+    <div class="tags"><span class="tag tag-ui">UI</span></div>
+  </div>
+</div>
+
+<div class="scenario" data-id="TC-1003">
+  <div class="scenario-header" onclick="toggleScenario(this)">
+    <div class="scenario-check" onclick="event.stopPropagation(); toggleCheck(this)"></div>
+    <span class="scenario-id">TC-1003</span>
+    <span class="scenario-title">세션 만료 후 동작</span>
+    <span class="scenario-priority priority-medium">Medium</span>
+  </div>
+  <div class="scenario-body">
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">장시간 방치하여 Supabase 세션이 만료됨</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">메인 화면에서 操作(계산, JIRA 등) 시도</span></div>
+    <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">자동 로그아웃 후 로그인 화면으로 이동, 또는 세션 자동 갱신</span></div>
+    <ul class="verify-list">
+      <li>세션 만료 시 적절한 처리 (리다이렉트 또는 자동 갱신)</li>
+      <li>데이터 손실 없음</li>
+      <li>재로그인 후 정상 동작</li>
+    </ul>
+    <div class="tags"><span class="tag tag-auth">인증</span></div>
+  </div>
+</div>
+
+<!-- ===== Footer ===== -->
+<div class="version-info">
+  <p>Azrael 수동 테스트 시나리오 v2.9 | 2026-02-02 | Phase 0~2 전 기능 커버</p>
+  <p>총 42개 시나리오 | 문의: jkcho@wemade.com</p>
+</div>
+
+</div>
+
+<!-- ===== JavaScript ===== -->
+<script>
+  // Toggle scenario body visibility
+  function toggleScenario(header) {
+    const body = header.nextElementSibling;
+    body.style.display = body.style.display === 'none' ? 'block' : 'none';
+  }
+
+  // Toggle check mark on scenario
+  function toggleCheck(el) {
+    el.classList.toggle('checked');
+    el.textContent = el.classList.contains('checked') ? '✓' : '';
+
+    const scenario = el.closest('.scenario');
+    if (el.classList.contains('checked')) {
+      scenario.classList.add('passed');
+    } else {
+      scenario.classList.remove('passed');
+    }
+
+    updateProgress();
+  }
+
+  // Toggle verify list item
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('.verify-list li')) {
+      e.target.closest('li').classList.toggle('checked');
+    }
+  });
+
+  // Update progress bar
+  function updateProgress() {
+    const total = document.querySelectorAll('.scenario-check').length;
+    const checked = document.querySelectorAll('.scenario-check.checked').length;
+    const pct = total > 0 ? Math.round((checked / total) * 100) : 0;
+
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = checked + ' / ' + total + ' 완료 (' + pct + '%)';
+  }
+
+  // Initialize - all scenarios expanded by default
+  document.querySelectorAll('.scenario-body').forEach(b => b.style.display = 'block');
+  updateProgress();
+</script>
+
+</body>
+</html>

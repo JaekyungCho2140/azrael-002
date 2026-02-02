@@ -37,7 +37,9 @@ nul
 .playwright-mcp/
 
 # 문서 및 내부 자료 (커밋 금지)
-docs/
+docs/*
+!docs/user-manual.html
+!docs/test-scenarios.html
 prd/
 plan.md
 talkwiththeuser/
