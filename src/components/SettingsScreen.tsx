@@ -1130,6 +1130,19 @@ export function SettingsScreen({
                 <Button onClick={handleAddEmailTemplate}>+ 새 템플릿</Button>
               </div>
 
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ marginRight: '1rem', fontWeight: 500 }}>프로젝트 선택:</label>
+                <select
+                  value={selectedProjectId}
+                  onChange={(e) => setSelectedProjectId(e.target.value)}
+                  className="project-dropdown"
+                >
+                  {projects?.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+
               {!selectedProjectId ? (
                 <div style={{ marginTop: '1rem', color: 'var(--azrael-gray-500)', fontSize: 'var(--text-sm)' }}>
                   프로젝트를 먼저 선택해주세요
