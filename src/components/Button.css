@@ -17,6 +17,7 @@
   justify-content: center;
   gap: 0.5rem;
   touch-action: manipulation;
+  white-space: nowrap;
 }
 
 .btn-primary {

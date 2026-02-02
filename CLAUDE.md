@@ -16,10 +16,11 @@ npm typecheck  # tsc --noEmit
 ## 아키텍처
 ```
 src/
-├── components/   # UI 컴포넌트 (19개)
-├── hooks/        # React Query 훅, useSupabase (6개)
+├── components/   # UI 컴포넌트 (24개, Email* 5개 추가)
+├── hooks/        # React Query 훅, useSupabase, useEmailTemplates (7개)
 ├── lib/
 │   ├── api/      # Supabase API 레이어 (5개)
+│   ├── email/    # 이메일 생성 엔진 (6개: generator, parser, formatters, sanitizer, clipboard, templates)
 │   ├── jira/     # JIRA 템플릿 헬퍼
 │   ├── businessDays.ts  # 영업일 계산 엔진
 │   └── storage.ts       # LocalStorage 유틸
@@ -51,7 +52,7 @@ supabase/
 ## PRD 참조 (Source of Truth)
 - 데이터 구조: `Azrael-PRD-Shared.md` §2
 - 계산 로직: `Azrael-PRD-Shared.md` §3
-- UI 명세: `Azrael-PRD-Phase0.md`, `Azrael-PRD-Phase1.md`
+- UI 명세: `Azrael-PRD-Phase0.md`, `Azrael-PRD-Phase1.md`, `Azrael-PRD-Phase2.md`
 - 디자인: `Azrael-PRD-Design.md`
 
 ## 배포
@@ -71,6 +72,6 @@ supabase/
 - ✅ Phase 1: JIRA 연동
 - ✅ Phase 1.7: 계산 결과 서버화, 부가 정보 관리 (2026-01-20)
 - ✅ Phase 1.8: JIRA 일감 존재 확인 (2026-01-21)
-- ⏳ Phase 2: 이메일 생성 (예정)
+- ✅ Phase 2: 이메일 생성 + UI/UX 감사 개선 (2026-02-02)
 - ⏳ Phase 3: 슬랙 연동 (예정)
 - ⏳ Phase 4: 프리셋 관리 (예정)

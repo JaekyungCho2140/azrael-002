@@ -52,7 +52,7 @@
 }
 
 .settings-nav-item.active {
-  background: white;
+  background: var(--azrael-orange-50);
   color: var(--azrael-orange-700);
   font-weight: var(--weight-semibold);
   border-left-color: var(--azrael-orange-500);
@@ -68,6 +68,7 @@
   font-size: var(--text-h3);
   color: var(--azrael-gray-900);
   margin-bottom: 1.5rem;
+  margin-top: 0;
 }
 
 .placeholder {

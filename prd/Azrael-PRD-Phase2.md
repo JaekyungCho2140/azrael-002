@@ -1,10 +1,10 @@
 # Azrael PRD - Phase 2: 이메일 생성
 
-**최종 업데이트**: 2026-01-30
-**버전**: 2.8 (8차 검증 반영)
+**최종 업데이트**: 2026-02-02
+**버전**: 2.9 (구현 완료 + UI/UX 감사 개선)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md) | [Azrael-PRD-Shared.md](./Azrael-PRD-Shared.md)
 
-**Phase 2 Status**: ✅ 설계 완료 (8차 검증 반영)
+**Phase 2 Status**: ✅ 구현 완료 (2026-02-02)
 
 ---
 
@@ -1923,6 +1923,8 @@ ALTER TABLE schedule_entries ADD COLUMN assignee TEXT DEFAULT '';
 | 2026-01-30 | 2.6 | 4개 에이전트 6차 검증 반영 (0C/6H/22M/42L → 중복 제거 후 38A+12B): **Regex**: 중첩 {{#if}} 감지 정확도 개선 ({{/if}} 경계 인식). **UI/UX**: 와이어프레임 날짜 `02-10` (MM-DD) 통일, 편집 모달에 테이블 선택 드롭다운 추가, 미리보기 300ms 디바운스, HTML 보기 토글 라벨 명시 (juice 변환 후 HTML), 사용자 정의 0개 시 라디오 비활성화, Firefox 경고 + [클립보드 복사] 비활성화, 모달 열기 시 상태 초기화, 템플릿 로딩 실패 UI. **Props**: EmailPreview/EmailTemplateSelector/EmailTemplateEditor Props 추가, useUpdateEmailTemplate 구현 명시, useCreateEmailTemplate data 타입 구체화. **DB**: seed body_template SQL dollar-quoting, seed 실패 시 상세 에러 메시지 + EXCEPTION 블록, Insert created_by null 허용, §4.2↔§6 참조 관계 명시. **Disclaimer**: 공백 전용 빈 취급 (trim+strip), renderDisclaimerHtml 처리 순서 명시. **보안**: sanitizer 테스트 시나리오 7건 추가. **문서**: sanitizer.ts 디렉토리 트리 추가, iosReviewDate=null 조건 해설, 중첩 {{#if}} 동작 설명 개선, 배포 체크리스트 추가 |
 | 2026-01-30 | 2.7 | 4개 에이전트 7차 검증 반영 (0C/12H/32M/20L → 중복 제거 후 39A+4B): **유효성 검증**: boolean 변수 단순 사용 경고, 닫히지 않은 {{/if}} 감지, TipTap HTML 깨진 변수 감지 (사용자 책임+경고 정책). **Modal**: 기존 Modal에 maxWidth prop 추가 (EmailGeneratorModal 800px, EditModal 1100px), EmailGeneratorModal 내부 상태 (emailResult/isGenerating), [클립보드 복사] 활성화 조건 명시, 복사 버튼 로딩 상태. **파이프라인**: generateEmail async→sync 변환, getEntriesByTableType children 평탄화 로직, sanitizer 테스트 파이프라인 단계 명확화 (sanitizer 출력 vs 최종 HTML). **DB**: seed EXCEPTION SQLSTATE 보존 (USING ERRCODE), 기존 마이그레이션 dollar-quoting 통일, 레이스 컨디션 방지 주석, is_built_in TypeScript 레벨 보호 전략. **UX**: 조건부 블록 삽입 시 기본 내용 포함, 템플릿 정렬 순서 (built-in 먼저+created_at DESC), 사용자 정의 드롭다운 초기 선택값, 설정 탭 프로젝트 변경 시 자동 갱신, TipTap key prop, 데스크톱 전용 명시. **기타**: 기본 템플릿 subject_template 표 추가, 플레인텍스트 `<a>` 변환 규칙, Gmail 호환성 합격 기준 구체화, EmailTemplate 날짜 필드 string 패턴 코멘트, schedule_entries saveCalculationResult 저장 로직 |
 | 2026-01-30 | 2.8 | 4개 에이전트 8차 검증 반영 (0C/17H/25M/25L → 중복 제거 후 28A+4B): **DB**: is_built_in NOT NULL DEFAULT false, update_updated_at_column() 의존성 001 마이그레이션으로 정정, RLS auth.email() 패턴 표준화 노트, Insert 타입 is_built_in 경고 주석, 배포 체크리스트 built-in 검증 SQL 추가. **타입/인터페이스**: TemplateCategory 타입 + 라디오-to-ID 매핑, Modal footer prop 보존, EmailGeneratorModal에 project prop 추가, Database 타입 기존 테이블 참조 노트. **파이프라인**: renderTemplate orphaned 블록 console.warn, renderDisclaimerHtml 내부 try/catch 노트, formatEmailDate Invalid Date 처리. **UX**: selectedTemplateId 초기화 useEffect 패턴, 모달 상태 리셋 구현 패턴, EditModal draft 상태 선언, useDebouncedValue 훅 패턴, TipTap key null 처리, normalizeHtml false positive 제한 노트. **정량화**: "즉시" → 500ms, 3초 성능 기준 data-testid 측정. **스토리**: Story 3 이름 유효성 엣지 케이스, Story 4 HTML 보기 post-juice 명확화. **플레인텍스트**: 빈 테이블/colspan 엣지 케이스, getEntriesByTableType dot-notation index. **정렬**: 3차 정렬 기준(name ASC) 추가, showIosReviewDate 형식 설명 보강. **호환성**: Gmail App 모바일 항목 제거 (데스크톱 전용). **EditModal**: onSave 콜백 뮤테이션 모달 내부 처리 명시, isGenerating useMemo 변환 노트 |
+
+| 2026-02-02 | 2.9 | **구현 완료 + UI/UX 감사 개선**: 이메일 생성 기능 전체 구현 완료. UI/UX 감사 반영 — 버튼 텍스트 개행 방지(`white-space: nowrap`), 설정 4개 탭 "추가" 버튼 우측 상단 통일(flex 헤더 패턴), 사이드바 활성 탭 배경색(`--azrael-orange-50`), 메인 input-section 컨테이너 `max-width` 800→960px 확대 + 버튼 수평/수직 중앙 정렬 |
 
 ---
 

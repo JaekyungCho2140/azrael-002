@@ -698,7 +698,10 @@ export function SettingsScreen({
           {/* 프로젝트 관리 */}
           {activeTab === 'projects' && (
             <div>
-              <h3>프로젝트 관리</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>프로젝트 관리</h3>
+                <Button onClick={handleAddProject}>+ 새 프로젝트 추가</Button>
+              </div>
 
               <table className="stages-table" style={{ marginTop: '1rem' }}>
                 <thead>
@@ -738,36 +741,33 @@ export function SettingsScreen({
                 </tbody>
               </table>
 
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                <Button onClick={handleAddProject}>
-                  + 새 프로젝트 추가
-                </Button>
-
-                {isAdmin && (
-                  <>
-                    <input
-                      type="file"
-                      accept=".csv"
-                      onChange={handleImportProjectsCSV}
-                      style={{ display: 'none' }}
-                      id="projects-csv-upload"
-                    />
-                    <Button
-                      variant="secondary"
-                      onClick={() => document.getElementById('projects-csv-upload')?.click()}
-                    >
-                      📁 프로젝트 불러오기 (CSV)
-                    </Button>
-                  </>
-                )}
-              </div>
+              {isAdmin && (
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImportProjectsCSV}
+                    style={{ display: 'none' }}
+                    id="projects-csv-upload"
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={() => document.getElementById('projects-csv-upload')?.click()}
+                  >
+                    📁 프로젝트 불러오기 (CSV)
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
           {/* 업무 단계 관리 */}
           {activeTab === 'stages' && (
             <div>
-              <h3>업무 단계 템플릿</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>업무 단계 템플릿</h3>
+                <Button onClick={handleAddStage}>+ 업무 단계 추가</Button>
+              </div>
 
               <div style={{ marginBottom: '1rem' }}>
                 <label style={{ marginRight: '1rem', fontWeight: 500 }}>프로젝트 선택:</label>
@@ -881,73 +881,61 @@ export function SettingsScreen({
                     </p>
                   )}
 
-                  <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                    <Button onClick={handleAddStage}>
-                      + 업무 단계 추가
-                    </Button>
+                  {isAdmin && (
+                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleImportStagesCSV}
+                        style={{ display: 'none' }}
+                        id="stages-csv-upload"
+                      />
+                      <Button
+                        variant="secondary"
+                        onClick={() => document.getElementById('stages-csv-upload')?.click()}
+                      >
+                        📁 업무 단계 불러오기 (CSV)
+                      </Button>
 
-                    {isAdmin && (
-                      <>
-                        <input
-                          type="file"
-                          accept=".csv"
-                          onChange={handleImportStagesCSV}
-                          style={{ display: 'none' }}
-                          id="stages-csv-upload"
-                        />
-                        <Button
-                          variant="secondary"
-                          onClick={() => document.getElementById('stages-csv-upload')?.click()}
-                        >
-                          📁 업무 단계 불러오기 (CSV)
-                        </Button>
-
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            if (!selectedTemplate) return;
-                            if (confirm('이 프로젝트의 모든 업무 단계를 삭제하시겠습니까?')) {
-                              saveTemplateMutation.mutate({
-                                ...selectedTemplate,
-                                stages: []
-                              });
-                            }
-                          }}
-                        >
-                          🗑️ 모두 제거
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          if (!selectedTemplate) return;
+                          if (confirm('이 프로젝트의 모든 업무 단계를 삭제하시겠습니까?')) {
+                            saveTemplateMutation.mutate({
+                              ...selectedTemplate,
+                              stages: []
+                            });
+                          }
+                        }}
+                      >
+                        🗑️ 모두 제거
+                      </Button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <>
                   <p style={{ color: 'var(--azrael-gray-500)', fontStyle: 'italic', margin: '1rem 0' }}>
                     이 프로젝트에 템플릿이 없습니다. 업무 단계를 추가하면 자동으로 생성됩니다.
                   </p>
-                  <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                    <Button onClick={handleAddStage}>
-                      + 업무 단계 추가
-                    </Button>
-
-                    {isAdmin && (
-                      <>
-                        <input
-                          type="file"
-                          accept=".csv"
-                          onChange={handleImportStagesCSV}
-                          style={{ display: 'none' }}
-                          id="stages-csv-upload-2"
-                        />
-                        <Button
-                          variant="secondary"
-                          onClick={() => document.getElementById('stages-csv-upload-2')?.click()}
-                        >
-                          📁 업무 단계 불러오기 (CSV)
-                        </Button>
-                      </>
-                    )}
-                  </div>
+                  {isAdmin && (
+                    <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleImportStagesCSV}
+                        style={{ display: 'none' }}
+                        id="stages-csv-upload-2"
+                      />
+                      <Button
+                        variant="secondary"
+                        onClick={() => document.getElementById('stages-csv-upload-2')?.click()}
+                      >
+                        📁 업무 단계 불러오기 (CSV)
+                      </Button>
+                    </div>
+                  )}
                 </>
               )}
             </div>
@@ -956,7 +944,10 @@ export function SettingsScreen({
           {/* 공휴일 관리 */}
           {activeTab === 'holidays' && (
             <div>
-              <h3>공휴일 관리</h3>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h3>공휴일 관리</h3>
+                <Button onClick={() => setHolidayModalOpen(true)}>+ 공휴일 수동 추가</Button>
+              </div>
 
               <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
                 <Button
@@ -966,7 +957,7 @@ export function SettingsScreen({
                   {isLoadingHolidays ? '불러오는 중...' : '🔄 공휴일 불러오기 (API)'}
                 </Button>
 
-                <span style={{ color: 'var(--azrael-gray-600)' }}>
+                <span style={{ color: 'var(--azrael-gray-600)', display: 'inline-flex', alignItems: 'center' }}>
                   올해: {new Date().getFullYear()}년
                 </span>
               </div>
@@ -1003,36 +994,30 @@ export function SettingsScreen({
                 </tbody>
               </table>
 
-              <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
-                <Button onClick={() => setHolidayModalOpen(true)}>
-                  + 공휴일 수동 추가
-                </Button>
+              {isAdmin && (
+                <div style={{ marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleImportHolidaysCSV}
+                    style={{ display: 'none' }}
+                    id="holidays-csv-upload"
+                  />
+                  <Button
+                    variant="secondary"
+                    onClick={() => document.getElementById('holidays-csv-upload')?.click()}
+                  >
+                    📁 공휴일 불러오기 (CSV)
+                  </Button>
 
-                {isAdmin && (
-                  <>
-                    <input
-                      type="file"
-                      accept=".csv"
-                      onChange={handleImportHolidaysCSV}
-                      style={{ display: 'none' }}
-                      id="holidays-csv-upload"
-                    />
-                    <Button
-                      variant="secondary"
-                      onClick={() => document.getElementById('holidays-csv-upload')?.click()}
-                    >
-                      📁 공휴일 불러오기 (CSV)
-                    </Button>
-
-                    <Button
-                      variant="ghost"
-                      onClick={handleClearAllHolidays}
-                    >
-                      🗑️ 모두 제거
-                    </Button>
-                  </>
-                )}
-              </div>
+                  <Button
+                    variant="ghost"
+                    onClick={handleClearAllHolidays}
+                  >
+                    🗑️ 모두 제거
+                  </Button>
+                </div>
+              )}
             </div>
           )}
 
