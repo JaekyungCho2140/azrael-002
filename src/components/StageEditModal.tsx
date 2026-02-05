@@ -155,7 +155,7 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       parentStageId: stage?.id,
       tableTargets: [...tableTargets],
       jiraSummaryTemplate: '{date} 업데이트 {taskName} {subtaskName}',
-      jiraSubtaskIssueType: '',  // 기본값: 배치명 사용
+      jiraSubtaskIssueType: '번역',  // 기본값: 번역
       // Phase 1.7: 부가 정보 필드 (기본값)
       description: '',
       assignee: '',
@@ -565,23 +565,23 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
                       Subtask 이슈 타입
                       <span
                         className="info-icon"
-                        title="JIRA에서 생성할 Subtask 이슈 타입. 예: 번역, 검수, PM(하위)"
+                        title="JIRA에서 생성할 Subtask 이슈 타입을 선택하세요."
                         style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
                       >
                         ?
                       </span>
                     </label>
-                    <input
-                      type="text"
+                    <select
                       className="form-input"
                       value={subtask.jiraSubtaskIssueType || ''}
                       onChange={(e) => updateSubtask(index, 'jiraSubtaskIssueType', e.target.value)}
-                      placeholder={subtask.name || '배치명과 동일'}
                       style={{ fontSize: 'var(--text-sm)' }}
-                    />
-                    <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)', marginTop: '0.25rem', display: 'block' }}>
-                      비워두면 배치명 사용
-                    </small>
+                    >
+                      <option value="번역">번역</option>
+                      <option value="PM(하위)">PM(하위)</option>
+                      <option value="검수">검수</option>
+                      <option value="Side Project(하위)">Side Project(하위)</option>
+                    </select>
                   </div>
 
                   {/* Phase 1.7: 하위 일감 부가 정보 */}

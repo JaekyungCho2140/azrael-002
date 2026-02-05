@@ -114,6 +114,42 @@ function isTableLine(line: string): boolean {
 }
 
 /**
+ * 체크박스 행인지 확인
+ * 형식: [ ] 미완료 항목  또는  [x] 완료 항목
+ */
+function isCheckboxLine(line: string): boolean {
+  const trimmed = line.trim();
+  return trimmed.startsWith('[ ] ') || trimmed.startsWith('[x] ') || trimmed.startsWith('[X] ');
+}
+
+/**
+ * 체크박스 행들을 ADF taskList 노드로 변환
+ */
+function parseCheckboxLines(lines: string[]): ADFNode {
+  let idCounter = 0;
+  const items: ADFNode[] = lines.map(line => {
+    const trimmed = line.trim();
+    const isDone = trimmed.startsWith('[x] ') || trimmed.startsWith('[X] ');
+    const text = trimmed.slice(4);
+    idCounter++;
+    return {
+      type: 'taskItem',
+      attrs: {
+        localId: `task-${Date.now()}-${idCounter}`,
+        state: isDone ? 'DONE' : 'TODO',
+      },
+      content: text ? [{ type: 'text', text }] : [],
+    };
+  });
+
+  return {
+    type: 'taskList',
+    attrs: { localId: `tasklist-${Date.now()}` },
+    content: items,
+  };
+}
+
+/**
  * 평문 텍스트를 ADF (Atlassian Document Format)로 변환
  * 테이블 마크업 지원
  */
@@ -130,7 +166,22 @@ function textToADF(text: string): ADFNode | null {
     const line = lines[i];
     const trimmedLine = line.trim();
 
-    if (isTableLine(trimmedLine)) {
+    if (isCheckboxLine(trimmedLine)) {
+      const checkboxLines: string[] = [];
+      while (i < lines.length) {
+        const currentLine = lines[i].trim();
+        if (isCheckboxLine(currentLine)) {
+          checkboxLines.push(currentLine);
+          i++;
+        } else if (currentLine === '') {
+          i++;
+          break;
+        } else {
+          break;
+        }
+      }
+      content.push(parseCheckboxLines(checkboxLines));
+    } else if (isTableLine(trimmedLine)) {
       const tableLines: string[] = [];
       while (i < lines.length) {
         const currentLine = lines[i].trim();

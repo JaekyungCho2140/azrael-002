@@ -112,6 +112,7 @@ export interface UserState {
   email: string;                 // 사용자 이메일
   lastProjectId: string;         // 마지막 사용 프로젝트 ID
   hasCompletedOnboarding: boolean; // 온보딩 완료 여부
+  showVisualization?: boolean;   // 간트 차트/캘린더 뷰 표시 여부 (기본값: true)
 }
 
 /**

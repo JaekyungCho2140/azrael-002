@@ -12,7 +12,7 @@ import { CalendarView } from './CalendarView';
 import { SettingsScreen } from './SettingsScreen';
 import { JiraPreviewModal } from './JiraPreviewModal';
 import { EmailGeneratorModal } from './EmailGeneratorModal';
-import { loadHolidays } from '../lib/storage';
+import { loadHolidays, getUserState } from '../lib/storage';
 import { useSaveCalculationResult, useJiraAssignees } from '../hooks/useSupabase';
 import { supabase } from '../lib/supabase';
 import {
@@ -60,6 +60,7 @@ export function MainScreen({
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showVisualization, setShowVisualization] = useState(true);
 
   // JIRA 관련 상태 (Phase 1)
   const [hasJiraConfig, setHasJiraConfig] = useState(false);
@@ -100,7 +101,15 @@ export function MainScreen({
     setHasEpicMapping(false);
   }, [currentProject.id]);
 
-  // Phase 4: 모든 편집 기능 제거 (읽기 전용 테이블)
+  // 시각화 설정 로드 (초기 + 설정 화면 닫힐 때 동기화)
+  useEffect(() => {
+    if (!showSettings) {
+      const userState = getUserState();
+      if (userState) {
+        setShowVisualization(userState.showVisualization ?? true);
+      }
+    }
+  }, [showSettings]);
 
   const handleCalculate = () => {
     if (!updateDate) {
@@ -342,13 +351,17 @@ export function MainScreen({
       const headsupSummary = currentProject.jiraHeadsupTemplate
         ? currentProject.jiraHeadsupTemplate.replace(/{date}/g, dateStr).replace(/{projectName}/g, currentProject.name).replace(/{headsUp}/g, headsUpStr)
         : `${dateStr} 업데이트 일정 헤즈업`;
+      const headsupStart = new Date(calculationResult.headsUpDate);
+      headsupStart.setHours(10, 0, 0, 0);
+      const headsupEnd = new Date(calculationResult.headsUpDate);
+      headsupEnd.setHours(18, 0, 0, 0);
       tasks.push({
         type: 'Task',  // 표준화: 미리보기 카운팅용
         issueTypeName: taskIssueType,
         summary: headsupSummary,
         jiraDescription: currentProject.jiraHeadsupDescription || undefined,
-        startDate: calculationResult.headsUpDate,
-        endDate: calculationResult.headsUpDate,
+        startDate: headsupStart,
+        endDate: headsupEnd,
         stageId: 'HEADSUP',
       });
 
@@ -704,13 +717,17 @@ export function MainScreen({
 
       // 헤즈업 Task
       const headsupMapping = existingTaskMappings.find(m => m.stageId === 'HEADSUP');
+      const updateHeadsupStart = new Date(calculationResult.headsUpDate);
+      updateHeadsupStart.setHours(10, 0, 0, 0);
+      const updateHeadsupEnd = new Date(calculationResult.headsUpDate);
+      updateHeadsupEnd.setHours(18, 0, 0, 0);
       updates.push({
         issueId: headsupMapping?.taskId,
         stageId: 'HEADSUP',
         summary: `${dateStr} 업데이트 일정 헤즈업`,
         description: currentProject.jiraHeadsupDescription || '',  // Phase 1.7: 헤즈업 설명
-        startDate: calculationResult.headsUpDate.toISOString(),
-        endDate: calculationResult.headsUpDate.toISOString(),
+        startDate: updateHeadsupStart.toISOString(),
+        endDate: updateHeadsupEnd.toISOString(),
         assignee: jiraConfig.accountId,
         issueType: 'Task' as const,
       });
@@ -983,11 +1000,13 @@ export function MainScreen({
           />
 
           {/* 간트 차트 1 */}
-          <GanttChart
-            entries={calculationResult.table1Entries}
-            chartId="gantt-table1"
-            color="#FF9800"
-          />
+          {showVisualization && (
+            <GanttChart
+              entries={calculationResult.table1Entries}
+              chartId="gantt-table1"
+              color="#FF9800"
+            />
+          )}
 
           {/* 테이블 2 */}
           <ScheduleTable
@@ -997,11 +1016,13 @@ export function MainScreen({
           />
 
           {/* 간트 차트 2 */}
-          <GanttChart
-            entries={calculationResult.table2Entries}
-            chartId="gantt-table2"
-            color="#009688"
-          />
+          {showVisualization && (
+            <GanttChart
+              entries={calculationResult.table2Entries}
+              chartId="gantt-table2"
+              color="#009688"
+            />
+          )}
 
           {/* 테이블 3 */}
           <ScheduleTable
@@ -1011,19 +1032,23 @@ export function MainScreen({
           />
 
           {/* 간트 차트 3 */}
-          <GanttChart
-            entries={calculationResult.table3Entries}
-            chartId="gantt-table3"
-            color="#673AB7"
-          />
+          {showVisualization && (
+            <GanttChart
+              entries={calculationResult.table3Entries}
+              chartId="gantt-table3"
+              color="#673AB7"
+            />
+          )}
 
           {/* 캘린더 뷰 */}
-          <CalendarView
-            table1Entries={calculationResult.table1Entries}
-            table2Entries={calculationResult.table2Entries}
-            table3Entries={calculationResult.table3Entries}
-            updateDate={calculationResult.updateDate}
-          />
+          {showVisualization && (
+            <CalendarView
+              table1Entries={calculationResult.table1Entries}
+              table2Entries={calculationResult.table2Entries}
+              table3Entries={calculationResult.table3Entries}
+              updateDate={calculationResult.updateDate}
+            />
+          )}
         </div>
       )}
 

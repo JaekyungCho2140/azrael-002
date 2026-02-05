@@ -26,6 +26,7 @@ import {
   useSyncApiHolidays,
 } from '../hooks/useSupabase';
 import { formatDateLocal } from '../lib/businessDays';
+import { getUserState, saveUserState } from '../lib/storage';
 import {
   useEmailTemplates,
   useDeleteEmailTemplate,
@@ -49,6 +50,7 @@ export function SettingsScreen({
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId);
   const [isLoadingHolidays, setIsLoadingHolidays] = useState(false);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [showVisualization, setShowVisualization] = useState(true);
 
   // 관리자 권한 확인 (jkcho@wemade.com만 CSV 기능 사용 가능)
   const isAdmin = currentUserEmail === 'jkcho@wemade.com';
@@ -60,6 +62,12 @@ export function SettingsScreen({
         setCurrentUserEmail(user.email);
       }
     });
+
+    // 시각화 설정 로드
+    const userState = getUserState();
+    if (userState) {
+      setShowVisualization(userState.showVisualization ?? true);
+    }
 
     // JIRA 설정 로드 (Phase 1)
     const savedJiraConfig = localStorage.getItem('azrael:jiraConfig');
@@ -110,6 +118,16 @@ export function SettingsScreen({
   const [jiraErrorMessage, setJiraErrorMessage] = useState('');
 
   const selectedTemplate = templates?.find(t => t.projectId === selectedProjectId);
+
+  // 시각화 토글
+  const handleToggleVisualization = () => {
+    const newValue = !showVisualization;
+    setShowVisualization(newValue);
+    const userState = getUserState();
+    if (userState) {
+      saveUserState({ ...userState, showVisualization: newValue });
+    }
+  };
 
   // 프로젝트 추가
   const handleAddProject = () => {
@@ -758,6 +776,21 @@ export function SettingsScreen({
                   </Button>
                 </div>
               )}
+
+              {/* 시각화 표시 설정 */}
+              <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--azrael-gray-50)', borderRadius: '8px' }}>
+                <label className="form-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={showVisualization}
+                    onChange={handleToggleVisualization}
+                  />
+                  <span>간트 차트 / 캘린더 뷰 표시</span>
+                </label>
+                <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)', marginTop: '0.25rem', display: 'block' }}>
+                  비활성화하면 메인 화면에서 간트 차트와 캘린더가 숨겨집니다.
+                </small>
+              </div>
             </div>
           )}
 

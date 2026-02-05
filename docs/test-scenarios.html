@@ -605,7 +605,7 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트가 선택되고, 업무 단계가 설정된 상태</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">업데이트일에 <code>2026-03-10</code> 입력 후 "計算" 버튼 클릭</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">업데이트일에 <code>2026-03-10</code> 입력 후 "계산" 버튼 클릭</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">3개의 스케줄 테이블이 생성되어 결과 화면에 표시됨</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">헤즈업 날짜가 HeadsUp Offset 영업일만큼 과거 날짜로 표시됨</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">간트 차트 3개와 캘린더 뷰가 함께 표시됨</span></div>
@@ -631,7 +631,7 @@
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">공휴일이 등록된 상태 (예: 2026-03-01 삼일절)</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">업무 단계에 역산 offset이 설정됨</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">공휴일을 포함하는 날짜 범위의 업데이트일로 計算 실행</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">공휴일을 포함하는 날짜 범위의 업데이트일로 계산 실행</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">계산 결과의 날짜가 공휴일을 건너뛰어 정확한 영업일에 해당</span></div>
     <ul class="verify-list">
       <li>등록된 공휴일 날짜가 결과에 포함되지 않음</li>
@@ -651,10 +651,10 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">iOS 심사일이 <strong>활성화</strong>된 프로젝트 선택</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 실행</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">계산 실행</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">헤즈업 날짜와 함께 iOS 심사일이 별도 표시됨</span></div>
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">iOS 심사일이 <strong>비활성화</strong>된 프로젝트 선택</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 실행</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">계산 실행</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">iOS 심사일 필드가 표시되지 않음</span></div>
     <ul class="verify-list">
       <li>활성화된 프로젝트: iOS 심사일 날짜 표시 및 offset 역산 정확</li>
@@ -672,10 +672,10 @@
     <span class="scenario-priority priority-high">High</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트 A에서 計算 완료</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트 A에서 계산 완료</span></div>
     <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">헤더 드롭다운에서 프로젝트 B로 전환</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">프로젝트 B의 마지막 계산 결과가 표시되거나, 없으면 초기 입력 화면</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">프로젝트 B에서 새 업데이트일로 計算 실행</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">프로젝트 B에서 새 업데이트일로 계산 실행</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">프로젝트 B의 업무 단계 기준으로 결과 생성</span></div>
     <ul class="verify-list">
       <li>프로젝트 전환 시 이전 프로젝트 결과 유지 (A로 복귀 시 확인)</li>
@@ -722,7 +722,7 @@
     <span class="scenario-priority priority-high">High</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">계산 완료 상태</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 1에 #, 배치명, 마감, 테이블전달, 설명, 담당자 컬럼 표시</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">마감/전달 날짜가 MM/DD(요) HH:MM 형식</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">테이블 하단에 면책 조항(Disclaimer) 표시</span></div>
@@ -745,7 +745,7 @@
     <span class="scenario-priority priority-high">High</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">하위 일감이 있는 업무 단계로 計算 완료</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">하위 일감이 있는 업무 단계로 계산 완료</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 2/3에 상위 단계는 "1", 하위 단계는 "1.1", "1.2" 형태로 순번 표시</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">하위 일감 행은 "ㄴ" 접두어와 들여쓰기 적용</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">JIRA 설명 및 JIRA 담당자 컬럼이 추가로 표시</span></div>
@@ -768,7 +768,7 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">업무 단계 A는 Table 1, 2에만 대상 / 단계 B는 Table 2, 3에만 대상</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 실행</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">계산 실행</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">테이블 1에 단계 A만 표시, 테이블 3에 단계 B만 표시, 테이블 2에 A+B 모두 표시</span></div>
     <ul class="verify-list">
       <li>각 테이블에 해당 대상 업무 단계만 표시됨</li>
@@ -787,7 +787,7 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">프로젝트 면책 조항에 HTML 태그 포함 (예: <code>&lt;b&gt;</code>, <code>&lt;r&gt;</code>, <code>&lt;u&gt;</code>)</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 결과의 테이블 1 하단 확인</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">계산 결과의 테이블 1 하단 확인</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">볼드(<code>&lt;b&gt;</code>), 빨간색(<code>&lt;r&gt;</code>), 밑줄(<code>&lt;u&gt;</code>) 등이 올바르게 렌더링됨</span></div>
     <ul class="verify-list">
       <li>&lt;b&gt;텍스트&lt;/b&gt; → 볼드체</li>
@@ -816,7 +816,7 @@
     <span class="scenario-priority priority-medium">Medium</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">계산 완료 상태</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">3개 간트 차트가 테이블 아래 각각 표시</span></div>
     <ul class="verify-list">
       <li>간트 1: 주황색(#FF9800), 테이블 1 데이터</li>
@@ -837,7 +837,7 @@
     <span class="scenario-priority priority-medium">Medium</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">계산 완료 상태</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">월간 캘린더에 3개 테이블의 일정이 색상별로 오버레이</span></div>
     <ul class="verify-list">
       <li>캘린더 월간 그리드 표시</li>
@@ -856,7 +856,7 @@
     <span class="scenario-priority priority-low">Low</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">하위 일감이 있는 업무 단계로 計算 완료</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">하위 일감이 있는 업무 단계로 계산 완료</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">간트 차트에서 상위 일감이 하위 일감을 포함하는 구조로 표시</span></div>
     <ul class="verify-list">
       <li>상위 업무 막대가 하위 업무 범위를 포함</li>
@@ -883,7 +883,7 @@
     <span class="scenario-priority priority-high">High</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 결과 테이블이 표시된 상태</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">계산 결과 테이블이 표시된 상태</span></div>
     <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">테이블 옆 📋 복사 버튼 클릭</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">"복사 성공!" 토스트 메시지 표시</span></div>
     <div class="gwt gwt-and"><span class="gwt-label">AND</span><span class="gwt-text">클립보드에 PNG 이미지 저장됨</span></div>
@@ -979,7 +979,7 @@
     <span class="scenario-priority priority-critical">Critical</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 + JIRA 설정 완료 + 테스트 프로젝트 키 설정</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">계산 완료 + JIRA 설정 완료 + 테스트 프로젝트 키 설정</span></div>
     <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"JIRA 생성" 클릭 → 미리보기 확인 → "확인" 클릭</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">JIRA에 Epic, Task, Subtask가 올바르게 생성됨</span></div>
     <ul class="verify-list">
@@ -1091,7 +1091,7 @@
     <span class="scenario-priority priority-high">High</span>
   </div>
   <div class="scenario-body">
-    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">計算 완료 상태</span></div>
+    <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">계산 완료 상태</span></div>
     <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">"✉️ 이메일 복사" 버튼 클릭</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">이메일 생성 모달 표시, Table 2가 기본 선택</span></div>
     <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">Table 1 / Table 3으로 변경</span></div>
@@ -1356,7 +1356,7 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">브라우저 너비 1280px 이상</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">메인 화면의 4개 액션 버튼 (計算, JIRA 생성, JIRA 업데이트, ✉️ 이메일 복사) 확인</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">메인 화면의 4개 액션 버튼 (계산, JIRA 생성, JIRA 업데이트, ✉️ 이메일 복사) 확인</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">모든 버튼 텍스트가 한 줄로 표시, 컨테이너(960px) 내에 수용</span></div>
     <ul class="verify-list">
       <li>4개 버튼 텍스트 모두 줄바꿈 없이 1줄 표시</li>
@@ -1427,7 +1427,7 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">선택된 프로젝트에 업무 단계가 0개인 상태</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算 버튼 클릭</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">계산 버튼 클릭</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">적절한 안내 메시지 (예: "업무 단계를 먼저 설정하세요")</span></div>
     <ul class="verify-list">
       <li>에러 메시지 또는 안내 경고 표시</li>
@@ -1447,7 +1447,7 @@
   </div>
   <div class="scenario-body">
     <div class="gwt gwt-given"><span class="gwt-label">GIVEN</span><span class="gwt-text">네트워크가 불안정하거나 Supabase가 접근 불가</span></div>
-    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">計算, JIRA 생성, 설정 저장 등 API 호출 실행</span></div>
+    <div class="gwt gwt-when"><span class="gwt-label">WHEN</span><span class="gwt-text">계산, JIRA 생성, 설정 저장 등 API 호출 실행</span></div>
     <div class="gwt gwt-then"><span class="gwt-label">THEN</span><span class="gwt-text">사용자에게 명확한 에러 메시지 표시, 앱 크래시 없음</span></div>
     <ul class="verify-list">
       <li>네트워크 에러 시 사용자 친화적 메시지 표시</li>
