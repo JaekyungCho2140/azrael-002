@@ -149,9 +149,35 @@ function parseCheckboxLines(lines: string[]): ADFNode {
   };
 }
 
+function isHorizontalRule(line: string): boolean {
+  return /^[-*_]{3,}$/.test(line.trim());
+}
+
+function isBulletLine(line: string): boolean {
+  const trimmed = line.trim();
+  return trimmed.startsWith('- ') || trimmed.startsWith('* ');
+}
+
+function parseBulletLines(lines: string[]): ADFNode {
+  const items: ADFNode[] = lines.map(line => {
+    const text = line.trim().slice(2);
+    return {
+      type: 'listItem',
+      content: [{
+        type: 'paragraph',
+        content: text ? [{ type: 'text', text }] : [],
+      }],
+    };
+  });
+  return {
+    type: 'bulletList',
+    content: items,
+  };
+}
+
 /**
  * 평문 텍스트를 ADF (Atlassian Document Format)로 변환
- * 테이블 마크업 지원
+ * 지원 마크업: 테이블, 체크박스, 구분선(---), 글머리 기호(- / *)
  */
 function textToADF(text: string): ADFNode | null {
   if (!text || text.trim() === '') {
@@ -200,6 +226,28 @@ function textToADF(text: string): ADFNode | null {
       if (tableNode) {
         content.push(tableNode);
       }
+    }
+    // 구분선 감지 (---, ***, ___)
+    else if (isHorizontalRule(trimmedLine)) {
+      content.push({ type: 'rule' });
+      i++;
+    }
+    // 글머리 기호 블록 감지 (- item, * item)
+    else if (isBulletLine(trimmedLine)) {
+      const bulletLines: string[] = [];
+      while (i < lines.length) {
+        const currentLine = lines[i].trim();
+        if (isBulletLine(currentLine)) {
+          bulletLines.push(currentLine);
+          i++;
+        } else if (currentLine === '') {
+          i++;
+          break;
+        } else {
+          break;
+        }
+      }
+      content.push(parseBulletLines(bulletLines));
     } else {
       content.push({
         type: 'paragraph',
