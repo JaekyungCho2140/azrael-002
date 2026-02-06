@@ -6,6 +6,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { textToADF } from '../_shared/adf.ts';
+import { JIRA_RATE_LIMIT_DELAY_MS } from '../_shared/constants.ts';
 
 interface CreateJiraRequest {
   projectKey: string;
@@ -115,7 +116,7 @@ serve(async (req) => {
     });
     console.log(`Epic 생성 성공: ${epicKey} (key: ${epicKey}, id: ${epicId})`);
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
 
     // ========================================
     // 2단계: Task만 생성 (부모: Epic)
@@ -173,7 +174,7 @@ serve(async (req) => {
       });
       console.log(`Task 생성 성공: ${taskData.key} (stageId: ${task.stageId})`);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
     }
 
     // ========================================
@@ -255,7 +256,7 @@ serve(async (req) => {
                 stageId: subtask.stageId,
               });
               console.log(`Subtask 생성 성공 (assignee 제외): ${subtaskData.key} (부모: ${parentTask.key})`);
-              await new Promise((resolve) => setTimeout(resolve, 100));
+              await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
               continue; // 재시도 성공, 다음 Subtask로
             }
           }
@@ -286,7 +287,7 @@ serve(async (req) => {
       });
       console.log(`Subtask 생성 성공: ${subtaskData.key} (부모: ${parentTask.key})`);
 
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
     }
 
     console.log(`전체 생성 완료: Epic(1) + Task(${taskItems.length}) + Subtask(${subtaskItems.length})`);
@@ -346,7 +347,7 @@ async function rollbackCreatedIssues(
       }
 
       // Rate Limit 회피
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
     } catch (err) {
       console.error(`롤백 중 에러 (${issue.key}):`, err);
     }

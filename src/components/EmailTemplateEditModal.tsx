@@ -27,6 +27,7 @@ import type {
   TableType,
   EmailGenerationResult,
 } from '../types';
+import { DEBOUNCE_DELAY_MS, TOAST_DURATION_MS, MAX_TEMPLATE_NAME_LENGTH } from '../constants';
 import './EmailTemplateEditModal.css';
 
 // ============================================================
@@ -129,7 +130,7 @@ export function EmailTemplateEditModal({
   // ─── 300ms 디바운스 미리보기 ───
   const [debouncedBody, setDebouncedBody] = useState(bodyTemplate);
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedBody(bodyTemplate), 300);
+    const timer = setTimeout(() => setDebouncedBody(bodyTemplate), DEBOUNCE_DELAY_MS);
     return () => clearTimeout(timer);
   }, [bodyTemplate]);
 
@@ -169,8 +170,8 @@ export function EmailTemplateEditModal({
 
   // ─── 이름 유효성 검사 ───
   useEffect(() => {
-    if (name.length > 50) {
-      setNameError('이름은 50자 이내로 입력해주세요');
+    if (name.length > MAX_TEMPLATE_NAME_LENGTH) {
+      setNameError(`이름은 ${MAX_TEMPLATE_NAME_LENGTH}자 이내로 입력해주세요`);
     } else {
       setNameError('');
     }
@@ -183,7 +184,7 @@ export function EmailTemplateEditModal({
       setNameError('이름을 입력해주세요');
       return;
     }
-    if (name.length > 50) {
+    if (name.length > MAX_TEMPLATE_NAME_LENGTH) {
       return;
     }
 
@@ -255,7 +256,7 @@ export function EmailTemplateEditModal({
   // ─── 토스트 자동 해제 ───
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
+      const timer = setTimeout(() => setToast(null), TOAST_DURATION_MS);
       return () => clearTimeout(timer);
     }
   }, [toast]);
@@ -295,8 +296,8 @@ export function EmailTemplateEditModal({
               className="form-input"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="템플릿 이름 (최대 50자)"
-              maxLength={50}
+              placeholder={`템플릿 이름 (최대 ${MAX_TEMPLATE_NAME_LENGTH}자)`}
+              maxLength={MAX_TEMPLATE_NAME_LENGTH}
               autoFocus={!template}
             />
           </label>

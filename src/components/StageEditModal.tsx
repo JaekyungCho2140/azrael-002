@@ -9,6 +9,7 @@ import { Modal } from './Modal';
 import { Button } from './Button';
 import { WorkStage } from '../types';
 import { useJiraAssignees } from '../hooks/useSupabase';
+import { DEFAULT_STAGE_OFFSET, DEFAULT_WORK_START_TIME, DEFAULT_WORK_END_TIME, MAX_SUBTASK_COUNT } from '../constants';
 
 interface StageEditModalProps {
   isOpen: boolean;
@@ -20,10 +21,10 @@ interface StageEditModalProps {
 
 export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSave }: StageEditModalProps) {
   const [name, setName] = useState('');
-  const [startOffsetDays, setStartOffsetDays] = useState(10);
-  const [endOffsetDays, setEndOffsetDays] = useState(10);
-  const [startTime, setStartTime] = useState('09:00');
-  const [endTime, setEndTime] = useState('18:00');
+  const [startOffsetDays, setStartOffsetDays] = useState(DEFAULT_STAGE_OFFSET);
+  const [endOffsetDays, setEndOffsetDays] = useState(DEFAULT_STAGE_OFFSET);
+  const [startTime, setStartTime] = useState(DEFAULT_WORK_START_TIME);
+  const [endTime, setEndTime] = useState(DEFAULT_WORK_END_TIME);
   const [tableTargets, setTableTargets] = useState<('table1' | 'table2' | 'table3')[]>(['table1', 'table2', 'table3']);
   const [jiraSummaryTemplate, setJiraSummaryTemplate] = useState('');
 
@@ -70,10 +71,10 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
       setSubtasks(existingSubtasks || []);
     } else {
       setName('');
-      setStartOffsetDays(10);
-      setEndOffsetDays(10);
-      setStartTime('09:00');
-      setEndTime('18:00');
+      setStartOffsetDays(DEFAULT_STAGE_OFFSET);
+      setEndOffsetDays(DEFAULT_STAGE_OFFSET);
+      setStartTime(DEFAULT_WORK_START_TIME);
+      setEndTime(DEFAULT_WORK_END_TIME);
       setTableTargets(['table1', 'table2', 'table3']);
       setJiraSummaryTemplate('');
       // Phase 1.7: 부가 정보 초기화
@@ -98,8 +99,8 @@ export function StageEditModal({ isOpen, onClose, stage, existingSubtasks, onSav
     }
 
     // 하위 일감 개수 검증 (Phase 0.5)
-    if (subtasks.length > 9) {
-      alert('하위 일감은 최대 9개까지 추가할 수 있습니다.');
+    if (subtasks.length > MAX_SUBTASK_COUNT) {
+      alert(`하위 일감은 최대 ${MAX_SUBTASK_COUNT}개까지 추가할 수 있습니다.`);
       return;
     }
 

@@ -6,6 +6,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { textToADF } from '../_shared/adf.ts';
+import { JIRA_RATE_LIMIT_DELAY_MS } from '../_shared/constants.ts';
 
 interface UpdateJiraRequest {
   epicId: string;
@@ -91,7 +92,7 @@ serve(async (req) => {
       throw new Error(`Epic 업데이트 실패: ${errorText}`);
     }
 
-    await new Promise((resolve) => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
 
     // 2. Tasks 업데이트 또는 생성
     for (const update of updates) {
@@ -165,7 +166,7 @@ serve(async (req) => {
       }
 
       // Rate Limit 회피
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, JIRA_RATE_LIMIT_DELAY_MS));
     }
 
     // 성공 응답

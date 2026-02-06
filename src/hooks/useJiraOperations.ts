@@ -4,8 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Project, CalculationResult, WorkTemplate } from '../types';
-import { loadHolidays } from '../lib/storage';
+import { Project, CalculationResult, WorkTemplate, Holiday } from '../types';
 import {
   calculateDateTimeFromStage,
 } from '../lib/businessDays';
@@ -32,6 +31,7 @@ interface UseJiraOperationsParams {
   templates: WorkTemplate[];
   calculationResult: CalculationResult | null;
   currentUserEmail: string;
+  holidays: Holiday[];
 }
 
 export function useJiraOperations({
@@ -39,6 +39,7 @@ export function useJiraOperations({
   templates,
   calculationResult,
   currentUserEmail,
+  holidays,
 }: UseJiraOperationsParams) {
   const [hasJiraConfig, setHasJiraConfig] = useState(false);
   const [hasEpicMapping, setHasEpicMapping] = useState(false);
@@ -176,8 +177,6 @@ export function useJiraOperations({
       });
 
       // Ext./Int. Tasks - WorkStage 기준으로 직접 생성
-      const holidays = loadHolidays();
-
       template.stages
         .filter(stage => stage.depth === 0)
         .filter(stage =>
@@ -507,8 +506,6 @@ export function useJiraOperations({
       else createdCount++;
 
       // Ext./Int. Tasks
-      const holidays = loadHolidays();
-
       template.stages
         .filter(stage => stage.depth === 0)
         .filter(stage =>

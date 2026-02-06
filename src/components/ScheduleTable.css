@@ -139,10 +139,10 @@ tr.subtask td:nth-child(3) {
 .editable input {
   width: 100%;
   padding: 0.5rem;
-  border: 2px solid #2196F3;  /* 파란색 */
+  border: 2px solid var(--azrael-info);
   border-radius: 4px;
   font-size: var(--text-sm);
-  box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+  box-shadow: 0 0 0 4px var(--azrael-info-light);
 }
 
 .action-buttons {
@@ -198,15 +198,15 @@ tr.subtask td:nth-child(3) {
 }
 
 .disclaimer .fmt-red {
-  color: #DC2626; /* Tailwind red-600 */
+  color: var(--azrael-error);
 }
 
 .disclaimer .fmt-green {
-  color: #16A34A; /* Tailwind green-600 */
+  color: var(--azrael-success);
 }
 
 .disclaimer .fmt-blue {
-  color: #2563EB; /* Tailwind blue-600 */
+  color: var(--azrael-info);
 }
 
 .disclaimer .fmt-underline {

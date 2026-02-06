@@ -38,12 +38,25 @@
 }
 
 .settings-nav-item {
+  /* Button reset for accessibility */
+  width: 100%;
+  background: none;
+  border: none;
+  border-left: 3px solid transparent;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+  /* Original styles */
   padding: 0.875rem 1.5rem;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, border-left-color 0.15s ease;
-  border-left: 3px solid transparent;
   color: var(--azrael-gray-700);
   font-weight: var(--weight-regular);
+}
+
+.settings-nav-item:focus-visible {
+  outline: 2px solid var(--azrael-orange-500);
+  outline-offset: -2px;
 }
 
 .settings-nav-item:hover {

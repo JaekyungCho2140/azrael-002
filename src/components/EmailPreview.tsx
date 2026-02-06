@@ -10,6 +10,7 @@
  */
 
 import { useState } from 'react';
+import { COPY_FEEDBACK_DURATION_MS } from '../constants';
 
 // ============================================================
 // Props
@@ -39,7 +40,7 @@ export function EmailPreview({
   const handleCopySubject = () => {
     onCopySubject();
     setSubjectCopied(true);
-    setTimeout(() => setSubjectCopied(false), 2000);
+    setTimeout(() => setSubjectCopied(false), COPY_FEEDBACK_DURATION_MS);
   };
 
   return (

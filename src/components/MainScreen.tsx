@@ -12,8 +12,8 @@ import { CalendarView } from './CalendarView';
 import { SettingsScreen } from './SettingsScreen';
 import { JiraPreviewModal } from './JiraPreviewModal';
 import { EmailGeneratorModal } from './EmailGeneratorModal';
-import { loadHolidays, getUserState } from '../lib/storage';
-import { useSaveCalculationResult, useJiraAssignees } from '../hooks/useSupabase';
+import { getUserState } from '../lib/storage';
+import { useSaveCalculationResult, useJiraAssignees, useHolidays } from '../hooks/useSupabase';
 import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
@@ -54,12 +54,16 @@ export function MainScreen({
   // JIRA 담당자 목록 조회 (이름 매핑용)
   const { data: jiraAssignees = [] } = useJiraAssignees();
 
+  // Supabase에서 공휴일 조회
+  const { data: holidays = [] } = useHolidays();
+
   // JIRA 작업 훅
   const jira = useJiraOperations({
     currentProject,
     templates,
     calculationResult,
     currentUserEmail,
+    holidays,
   });
 
   // 사용자 이메일 가져오기
@@ -105,10 +109,8 @@ export function MainScreen({
       return;
     }
 
-    const currentHolidays = loadHolidays();
-
-    const headsUpDate = calculateHeadsUpDate(updateDateObj, currentProject, currentHolidays);
-    const iosReviewDate = calculateIosReviewDate(updateDateObj, currentProject, currentHolidays);
+    const headsUpDate = calculateHeadsUpDate(updateDateObj, currentProject, holidays);
+    const iosReviewDate = calculateIosReviewDate(updateDateObj, currentProject, holidays);
 
     const createEntries = (stages: any[], tableTarget: 'table1' | 'table2' | 'table3'): ScheduleEntry[] => {
       const directParents = stages.filter(s => s.depth === 0 && s.tableTargets.includes(tableTarget));
@@ -133,7 +135,7 @@ export function MainScreen({
           const { startDateTime, endDateTime } = calculateDateTimeFromStage(
             updateDateObj,
             stage,
-            currentHolidays
+            holidays
           );
 
           const entry: ScheduleEntry = {
@@ -161,7 +163,7 @@ export function MainScreen({
               const { startDateTime: childStart, endDateTime: childEnd } = calculateDateTimeFromStage(
                 updateDateObj,
                 childStage,
-                currentHolidays
+                holidays
               );
 
               return {

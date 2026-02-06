@@ -2,6 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
+import { QUERY_RETRY_COUNT } from './constants'
 import './styles/index.css'
 import 'frappe-gantt/dist/frappe-gantt.css'
 
@@ -16,7 +17,7 @@ if (import.meta.env.DEV) {
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: QUERY_RETRY_COUNT,
       refetchOnWindowFocus: false,
     },
   },

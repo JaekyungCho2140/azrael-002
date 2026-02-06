@@ -8,6 +8,7 @@ import Gantt from 'frappe-gantt';
 import { ScheduleEntry } from '../types';
 import { formatTime, formatDateLocal } from '../lib/businessDays';
 import { CopyImageButton } from './CopyImageButton';
+import { GANTT_BAR_HEIGHT, GANTT_BAR_CORNER_RADIUS, GANTT_PADDING } from '../constants';
 import './GanttChart.css';
 
 interface GanttChartProps {
@@ -61,9 +62,9 @@ export function GanttChart({ entries, collapsedParentIds = new Set(), chartId, c
         view_mode: 'Day',
         date_format: 'YYYY-MM-DD',
         arrow_curve: 5,
-        bar_height: 30,
-        bar_corner_radius: 3,
-        padding: 18,
+        bar_height: GANTT_BAR_HEIGHT,
+        bar_corner_radius: GANTT_BAR_CORNER_RADIUS,
+        padding: GANTT_PADDING,
         custom_popup_html: function(task: any) {
           const entry = entryMap.get(task.id);
           if (!entry) {

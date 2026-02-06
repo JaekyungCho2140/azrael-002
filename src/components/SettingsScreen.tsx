@@ -62,39 +62,59 @@ export function SettingsScreen({
       </div>
 
       <div className="settings-layout">
-        {/* Sidebar */}
-        <div className="settings-sidebar">
-          <div
+        {/* Sidebar - Tab Navigation */}
+        <nav className="settings-sidebar" role="tablist" aria-label="설정 메뉴">
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'projects'}
+            aria-controls="settings-panel-projects"
             className={`settings-nav-item ${activeTab === 'projects' ? 'active' : ''}`}
             onClick={() => setActiveTab('projects')}
           >
             프로젝트
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'stages'}
+            aria-controls="settings-panel-stages"
             className={`settings-nav-item ${activeTab === 'stages' ? 'active' : ''}`}
             onClick={() => setActiveTab('stages')}
           >
             업무 단계
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'holidays'}
+            aria-controls="settings-panel-holidays"
             className={`settings-nav-item ${activeTab === 'holidays' ? 'active' : ''}`}
             onClick={() => setActiveTab('holidays')}
           >
             공휴일
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'jira'}
+            aria-controls="settings-panel-jira"
             className={`settings-nav-item ${activeTab === 'jira' ? 'active' : ''}`}
             onClick={() => setActiveTab('jira')}
           >
             JIRA 연동
-          </div>
-          <div
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'emailTemplates'}
+            aria-controls="settings-panel-emailTemplates"
             className={`settings-nav-item ${activeTab === 'emailTemplates' ? 'active' : ''}`}
             onClick={() => setActiveTab('emailTemplates')}
           >
             이메일 템플릿
-          </div>
-        </div>
+          </button>
+        </nav>
 
         {/* Content */}
         <div className="settings-content">

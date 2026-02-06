@@ -8,6 +8,7 @@ import { useState, useEffect, useId } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { Project } from '../types';
+import { DEFAULT_HEADSUP_OFFSET, DEFAULT_IOS_REVIEW_OFFSET, MAX_DISCLAIMER_LENGTH } from '../constants';
 
 interface ProjectEditModalProps {
   isOpen: boolean;
@@ -18,9 +19,9 @@ interface ProjectEditModalProps {
 
 export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEditModalProps) {
   const [name, setName] = useState('');
-  const [headsUpOffset, setHeadsUpOffset] = useState(10);
+  const [headsUpOffset, setHeadsUpOffset] = useState(DEFAULT_HEADSUP_OFFSET);
   const [showIosReviewDate, setShowIosReviewDate] = useState(false);
-  const [iosReviewOffset, setIosReviewOffset] = useState(7);
+  const [iosReviewOffset, setIosReviewOffset] = useState(DEFAULT_IOS_REVIEW_OFFSET);
   const [disclaimer, setDisclaimer] = useState('');
 
   // JIRA 관련 필드 (Phase 0.5 + Phase 1 + Phase 1.5 + Phase 1.7)
@@ -47,7 +48,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setName(project.name);
       setHeadsUpOffset(project.headsUpOffset);
       setShowIosReviewDate(project.showIosReviewDate);
-      setIosReviewOffset(project.iosReviewOffset || 7);
+      setIosReviewOffset(project.iosReviewOffset || DEFAULT_IOS_REVIEW_OFFSET);
       setDisclaimer(project.disclaimer);
       setJiraProjectKey(project.jiraProjectKey || '');
       setJiraEpicTemplate(project.jiraEpicTemplate || '');
@@ -56,9 +57,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraTaskIssueType(project.jiraTaskIssueType || '');
     } else {
       setName('');
-      setHeadsUpOffset(10);
+      setHeadsUpOffset(DEFAULT_HEADSUP_OFFSET);
       setShowIosReviewDate(false);
-      setIosReviewOffset(7);
+      setIosReviewOffset(DEFAULT_IOS_REVIEW_OFFSET);
       setDisclaimer('');
       setJiraProjectKey('');
       setJiraEpicTemplate('');
@@ -162,12 +163,12 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           className="form-input"
           value={disclaimer}
           onChange={(e) => setDisclaimer(e.target.value)}
-          placeholder="테이블 하단에 표시될 메모 (최대 6줄/600자)"
+          placeholder={`테이블 하단에 표시될 메모 (최대 6줄/${MAX_DISCLAIMER_LENGTH}자)`}
           rows={4}
-          maxLength={600}
+          maxLength={MAX_DISCLAIMER_LENGTH}
         />
         <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
-          {disclaimer.length}/600자
+          {disclaimer.length}/{MAX_DISCLAIMER_LENGTH}자
         </small>
       </div>
 

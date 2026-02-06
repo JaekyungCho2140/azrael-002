@@ -36,6 +36,7 @@ import type {
   CalculationResult,
   EmailGenerationResult,
 } from '../types';
+import { TOAST_DURATION_MS } from '../constants';
 import './EmailGeneratorModal.css';
 
 // ============================================================
@@ -171,7 +172,7 @@ export function EmailGeneratorModal({
   // ─── 토스트 자동 해제 ───
   useEffect(() => {
     if (toast) {
-      const timer = setTimeout(() => setToast(null), 3000);
+      const timer = setTimeout(() => setToast(null), TOAST_DURATION_MS);
       return () => clearTimeout(timer);
     }
   }, [toast]);

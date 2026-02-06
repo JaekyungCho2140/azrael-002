@@ -30,12 +30,16 @@
   /* Semantic Colors */
   --azrael-success: #4CAF50;
   --azrael-success-light: #E8F5E9;
+  --azrael-success-dark: #388E3C;
   --azrael-error: #F44336;
   --azrael-error-light: #FFEBEE;
+  --azrael-error-dark: #D32F2F;
   --azrael-warning: #FFC107;
   --azrael-warning-light: #FFF8E1;
+  --azrael-warning-dark: #F57F17;
   --azrael-info: #2196F3;
   --azrael-info-light: #E3F2FD;
+  --azrael-info-dark: #1976D2;
 
   /* Chart Colors */
   --chart-table1: #FF9800;
