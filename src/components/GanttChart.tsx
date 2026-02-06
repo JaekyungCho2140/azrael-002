@@ -9,6 +9,7 @@ import { ScheduleEntry } from '../types';
 import { formatTime, formatDateLocal } from '../lib/businessDays';
 import { CopyImageButton } from './CopyImageButton';
 import { GANTT_BAR_HEIGHT, GANTT_BAR_CORNER_RADIUS, GANTT_PADDING } from '../constants';
+import '../../node_modules/frappe-gantt/dist/frappe-gantt.css';
 import './GanttChart.css';
 
 interface GanttChartProps {

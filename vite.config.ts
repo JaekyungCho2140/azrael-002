@@ -7,6 +7,17 @@ export default defineConfig({
   server: {
     port: 3000
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom'],
+          'supabase': ['@supabase/supabase-js'],
+          'query': ['@tanstack/react-query'],
+        },
+      },
+    },
+  },
   css: {
     preprocessorOptions: {
       scss: {

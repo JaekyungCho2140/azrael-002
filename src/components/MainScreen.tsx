@@ -3,15 +3,17 @@
  * 참조: prd/Azrael-PRD-Phase0.md §4 메인 화면
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Project, CalculationResult, WorkTemplate, ScheduleEntry } from '../types';
 import { Button } from './Button';
 import { ScheduleTable } from './ScheduleTable';
-import { GanttChart } from './GanttChart';
-import { CalendarView } from './CalendarView';
-import { SettingsScreen } from './SettingsScreen';
-import { JiraPreviewModal } from './JiraPreviewModal';
-import { EmailGeneratorModal } from './EmailGeneratorModal';
+
+// 무거운 컴포넌트는 lazy loading (번들 크기 최적화)
+const GanttChart = lazy(() => import('./GanttChart').then(m => ({ default: m.GanttChart })));
+const CalendarView = lazy(() => import('./CalendarView').then(m => ({ default: m.CalendarView })));
+const SettingsScreen = lazy(() => import('./SettingsScreen').then(m => ({ default: m.SettingsScreen })));
+const JiraPreviewModal = lazy(() => import('./JiraPreviewModal').then(m => ({ default: m.JiraPreviewModal })));
+const EmailGeneratorModal = lazy(() => import('./EmailGeneratorModal').then(m => ({ default: m.EmailGeneratorModal })));
 import { getUserState } from '../lib/storage';
 import { useSaveCalculationResult, useJiraAssignees, useHolidays } from '../hooks/useSupabase';
 import { supabase } from '../lib/supabase';
@@ -221,11 +223,13 @@ export function MainScreen({
   // 설정 화면 표시
   if (showSettings) {
     return (
-      <SettingsScreen
-        currentProjectId={currentProject.id}
-        onClose={() => setShowSettings(false)}
-        calculationResult={calculationResult}
-      />
+      <Suspense fallback={<div className="lazy-loading">설정을 불러오는 중...</div>}>
+        <SettingsScreen
+          currentProjectId={currentProject.id}
+          onClose={() => setShowSettings(false)}
+          calculationResult={calculationResult}
+        />
+      </Suspense>
     );
   }
 
@@ -337,11 +341,13 @@ export function MainScreen({
 
           {/* 간트 차트 1 */}
           {showVisualization && (
-            <GanttChart
-              entries={calculationResult.table1Entries}
-              chartId="gantt-table1"
-              color="#FF9800"
-            />
+            <Suspense fallback={null}>
+              <GanttChart
+                entries={calculationResult.table1Entries}
+                chartId="gantt-table1"
+                color="#FF9800"
+              />
+            </Suspense>
           )}
 
           {/* 테이블 2 */}
@@ -353,11 +359,13 @@ export function MainScreen({
 
           {/* 간트 차트 2 */}
           {showVisualization && (
-            <GanttChart
-              entries={calculationResult.table2Entries}
-              chartId="gantt-table2"
-              color="#009688"
-            />
+            <Suspense fallback={null}>
+              <GanttChart
+                entries={calculationResult.table2Entries}
+                chartId="gantt-table2"
+                color="#009688"
+              />
+            </Suspense>
           )}
 
           {/* 테이블 3 */}
@@ -369,45 +377,55 @@ export function MainScreen({
 
           {/* 간트 차트 3 */}
           {showVisualization && (
-            <GanttChart
-              entries={calculationResult.table3Entries}
-              chartId="gantt-table3"
-              color="#673AB7"
-            />
+            <Suspense fallback={null}>
+              <GanttChart
+                entries={calculationResult.table3Entries}
+                chartId="gantt-table3"
+                color="#673AB7"
+              />
+            </Suspense>
           )}
 
           {/* 캘린더 뷰 */}
           {showVisualization && (
-            <CalendarView
-              table1Entries={calculationResult.table1Entries}
-              table2Entries={calculationResult.table2Entries}
-              table3Entries={calculationResult.table3Entries}
-              updateDate={calculationResult.updateDate}
-            />
+            <Suspense fallback={null}>
+              <CalendarView
+                table1Entries={calculationResult.table1Entries}
+                table2Entries={calculationResult.table2Entries}
+                table3Entries={calculationResult.table3Entries}
+                updateDate={calculationResult.updateDate}
+              />
+            </Suspense>
           )}
         </div>
       )}
 
       {/* JIRA 미리보기 모달 (Phase 1) */}
       {jira.jiraPreviewData && (
-        <JiraPreviewModal
-          isOpen={jira.jiraPreviewOpen}
-          onClose={() => jira.setJiraPreviewOpen(false)}
-          onConfirm={jira.handleConfirmJiraCreate}
-          epic={jira.jiraPreviewData.epic}
-          tasks={jira.jiraPreviewData.tasks}
-          isCreating={jira.isCreatingJira}
-        />
+        <Suspense fallback={null}>
+          <JiraPreviewModal
+            isOpen={jira.jiraPreviewOpen}
+            onClose={() => jira.setJiraPreviewOpen(false)}
+            onConfirm={jira.handleConfirmJiraCreate}
+            epic={jira.jiraPreviewData.epic}
+            tasks={jira.jiraPreviewData.tasks}
+            isCreating={jira.isCreatingJira}
+          />
+        </Suspense>
       )}
 
-      <EmailGeneratorModal
-        isOpen={showEmailModal}
-        onClose={() => setShowEmailModal(false)}
-        projectId={currentProject.id}
-        project={currentProject}
-        updateDate={new Date(updateDate.split(' ')[0])}
-        calculationResult={calculationResult}
-      />
+      {showEmailModal && (
+        <Suspense fallback={null}>
+          <EmailGeneratorModal
+            isOpen={showEmailModal}
+            onClose={() => setShowEmailModal(false)}
+            projectId={currentProject.id}
+            project={currentProject}
+            updateDate={new Date(updateDate.split(' ')[0])}
+            calculationResult={calculationResult}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

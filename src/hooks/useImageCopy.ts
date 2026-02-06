@@ -5,7 +5,8 @@
  */
 
 import { useState } from 'react';
-import html2canvas from 'html2canvas';
+
+// html2canvas는 사용 시점에 동적 import (번들 크기 최적화)
 
 export function useImageCopy() {
   const [isLoading, setIsLoading] = useState(false);
@@ -49,6 +50,7 @@ export function useImageCopy() {
       });
 
       // html2canvas로 캡처 (scale: 2 for Retina)
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
@@ -119,6 +121,7 @@ export function useImageCopy() {
       const originalOverflow = element.style.overflow;
       element.style.overflow = 'visible';
 
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,

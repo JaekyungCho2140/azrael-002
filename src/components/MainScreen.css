@@ -3,6 +3,15 @@
  * 참조: prd/Azrael-PRD-Design.md §7.3
  */
 
+.lazy-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  color: var(--azrael-gray-500);
+  font-size: var(--text-base);
+}
+
 .main-screen {
   min-height: 100vh;
   background: var(--azrael-gray-50);

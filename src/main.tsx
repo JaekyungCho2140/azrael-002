@@ -4,7 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import App from './App.tsx'
 import { QUERY_RETRY_COUNT } from './constants'
 import './styles/index.css'
-import 'frappe-gantt/dist/frappe-gantt.css'
+// frappe-gantt CSS는 GanttChart 컴포넌트에서 lazy load
 
 // 개발 모드: CSV 임포트 함수 로드
 if (import.meta.env.DEV) {
