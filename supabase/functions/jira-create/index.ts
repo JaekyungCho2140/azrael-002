@@ -71,23 +71,52 @@ function parseTableMarkup(tableLines: string[]): ADFNode | null {
   if (tableLines.length === 0) return null;
 
   const tableRows: ADFNode[] = [];
+  let headerColumnCount = -1; // 첫 헤더 행의 컬럼 수 (미확정: -1)
 
   for (const line of tableLines) {
     const trimmedLine = line.trim();
     if (!trimmedLine) continue;
 
-    // 헤더 행 감지: ||...||
-    const isHeader = trimmedLine.startsWith('||') && trimmedLine.endsWith('||');
+    // 헤더 행 후보: ||...||
+    const looksLikeHeader = trimmedLine.startsWith('||') && trimmedLine.endsWith('||');
+
+    // 데이터 행으로 해석했을 때의 셀 수 (|...|)
+    const dataInner = trimmedLine.slice(1, -1);
+    const dataCells = dataInner.split('|').map(c => c.trim());
+    const dataColumnCount = dataCells.length;
+
+    // 실제 헤더인지 판별:
+    // - 헤더 형식(||...||)이고
+    // - 아직 첫 헤더가 없거나, 데이터 행으로 해석했을 때 컬럼 수가 기존 헤더와 불일치
+    let isHeader: boolean;
+    if (looksLikeHeader) {
+      if (headerColumnCount === -1) {
+        // 첫 행: 헤더로 확정
+        isHeader = true;
+      } else {
+        // 후속 행: 데이터 행 해석의 컬럼 수가 헤더와 일치하면 데이터 행
+        isHeader = dataColumnCount !== headerColumnCount;
+      }
+    } else {
+      isHeader = false;
+    }
 
     let cells: string[];
     if (isHeader) {
       // ||헤더1|헤더2|| → ['헤더1', '헤더2']
       const inner = trimmedLine.slice(2, -2); // 앞뒤 || 제거
       cells = inner.split('|').map(c => c.trim());
+      // 첫 헤더 행이면 컬럼 수 확정
+      if (headerColumnCount === -1) {
+        headerColumnCount = cells.length;
+      }
     } else if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
       // |내용1|내용2| → ['내용1', '내용2']
-      const inner = trimmedLine.slice(1, -1); // 앞뒤 | 제거
-      cells = inner.split('|').map(c => c.trim());
+      cells = dataCells;
+      // 헤더 없이 데이터 행만 있는 경우 컬럼 수 확정
+      if (headerColumnCount === -1) {
+        headerColumnCount = cells.length;
+      }
     } else {
       continue; // 유효하지 않은 행
     }

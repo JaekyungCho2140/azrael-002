@@ -299,7 +299,10 @@ export function SettingsScreen({
 
     saveTemplateMutation.mutate(updatedTemplate, {
       onError: (err: any) => {
-        alert(`업무 단계 삭제 실패: ${err.message}`);
+        const message = err.message?.includes('fk_parent_stage')
+          ? '하위 일감이 존재하는 업무 단계는 삭제할 수 없습니다. 하위 일감을 먼저 삭제해주세요.'
+          : `업무 단계 삭제 실패: ${err.message}`;
+        alert(message);
       },
     });
   };

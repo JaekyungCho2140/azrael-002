@@ -52,20 +52,46 @@ function parseTableMarkup(tableLines: string[]): ADFNode | null {
   if (tableLines.length === 0) return null;
 
   const tableRows: ADFNode[] = [];
+  let headerColumnCount = -1; // 첫 헤더 행의 컬럼 수 (미확정: -1)
 
   for (const line of tableLines) {
     const trimmedLine = line.trim();
     if (!trimmedLine) continue;
 
-    const isHeader = trimmedLine.startsWith('||') && trimmedLine.endsWith('||');
+    // 헤더 행 후보: ||...||
+    const looksLikeHeader = trimmedLine.startsWith('||') && trimmedLine.endsWith('||');
+
+    // 데이터 행으로 해석했을 때의 셀 수 (|...|)
+    const dataInner = trimmedLine.slice(1, -1);
+    const dataCells = dataInner.split('|').map(c => c.trim());
+    const dataColumnCount = dataCells.length;
+
+    // 실제 헤더인지 판별:
+    // - 헤더 형식(||...||)이고
+    // - 아직 첫 헤더가 없거나, 데이터 행으로 해석했을 때 컬럼 수가 기존 헤더와 불일치
+    let isHeader: boolean;
+    if (looksLikeHeader) {
+      if (headerColumnCount === -1) {
+        isHeader = true;
+      } else {
+        isHeader = dataColumnCount !== headerColumnCount;
+      }
+    } else {
+      isHeader = false;
+    }
 
     let cells: string[];
     if (isHeader) {
       const inner = trimmedLine.slice(2, -2);
       cells = inner.split('|').map(c => c.trim());
+      if (headerColumnCount === -1) {
+        headerColumnCount = cells.length;
+      }
     } else if (trimmedLine.startsWith('|') && trimmedLine.endsWith('|')) {
-      const inner = trimmedLine.slice(1, -1);
-      cells = inner.split('|').map(c => c.trim());
+      cells = dataCells;
+      if (headerColumnCount === -1) {
+        headerColumnCount = cells.length;
+      }
     } else {
       continue;
     }
