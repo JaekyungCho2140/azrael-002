@@ -1,56 +1,74 @@
 # Azrael - L10n 일정 관리 도구
 
-**Phase 1.7 완료**: 계산 결과 서버화 및 부가 정보 관리
+**Phase 2 완료**: 이메일 생성, 번들 최적화, 코드 리팩토링 완료
 
 웹 기반 L10n 일정 계산 및 JIRA 연동 도구입니다.
 
 ---
 
-## 🎯 핵심 기능
+## 핵심 기능
 
-### Phase 0 - 기본 일정 관리 ✅
-- ✅ **영업일 역산 계산**: 업데이트일 기준 영업일 자동 계산 (주말/공휴일 제외)
-- ✅ **3개 테이블 출력**: 일정표, Ext. 일정표, Int. 일정표
-- ✅ **간트 차트 시각화**: Frappe Gantt 기반 3개 차트
-- ✅ **캘린더 뷰**: FullCalendar 기반 월간 캘린더
-- ✅ **이미지 복사**: html2canvas 기반 클립보드 복사 (Retina 2배 해상도)
-- ✅ **프로젝트 관리**: 9개 기본 프로젝트 + 사용자 추가 프로젝트
-- ✅ **공휴일 관리**: 공공데이터포털 API 연동 + 수동 추가
+### Phase 0 - 기본 일정 관리
+- **영업일 역산 계산**: 업데이트일 기준 영업일 자동 계산 (주말/공휴일 제외)
+- **3개 테이블 출력**: 일정표, Ext. 일정표, Int. 일정표
+- **간트 차트 시각화**: Frappe Gantt 기반 3개 차트
+- **캘린더 뷰**: FullCalendar 기반 월간 캘린더
+- **이미지 복사**: html2canvas 기반 클립보드 복사 (Retina 2배 해상도)
+- **프로젝트 관리**: 기본 프로젝트 + 사용자 추가 프로젝트
+- **공휴일 관리**: 공공데이터포털 API 연동 + 수동 추가
 
-### Phase 0.5 - 하위 일감 템플릿 ✅
-- ✅ **하위 일감 시스템**: 최대 9개 하위 일감 템플릿
-- ✅ **계층 구조**: 부모-자식 관계 (최대 2단계)
-- ✅ **JIRA Summary 템플릿**: 변수 기반 동적 Summary 생성
+### Phase 0.5 - 하위 일감 템플릿
+- **하위 일감 시스템**: 최대 9개 하위 일감 템플릿
+- **계층 구조**: 부모-자식 관계 (최대 2단계)
+- **JIRA Summary 템플릿**: 변수 기반 동적 Summary 생성
 
-### Phase 1 - JIRA 연동 ✅
-- ✅ **JIRA Epic/Task/Subtask 자동 생성**: 3단계 분리 로직
-- ✅ **JIRA 업데이트**: 기존 일감 날짜/내용 업데이트
-- ✅ **이슈 타입 설정**: 프로젝트별, 업무 단계별 커스텀 가능
-- ✅ **Supabase Edge Functions**: jira-create, jira-update
+### Phase 1 - JIRA 연동
+- **JIRA Epic/Task/Subtask 자동 생성**: 3단계 분리 로직
+- **JIRA 업데이트**: 기존 일감 날짜/내용 업데이트
+- **이슈 타입 설정**: 프로젝트별, 업무 단계별 커스텀 가능
+- **Supabase Edge Functions**: jira-create, jira-update, jira-check
 
-### Phase 1.7 - 계산 결과 서버화 및 부가 정보 관리 ✅ (2026-01-20)
-- ✅ **계산 결과 서버 저장**: 프로젝트 + 업데이트일별 팀 공유
-- ✅ **부가 정보 템플릿 관리**: 설명, 담당자, JIRA 설명, JIRA 담당자
-- ✅ **JIRA 담당자 시스템**: 5명 매핑, 드롭다운, 이름 표시
-- ✅ **읽기 전용 테이블**: 완전한 읽기 전용 일정표
-- ✅ **이미지 복사 최적화**: 필요한 열만 선택적 복사
-- ✅ **JIRA Description ADF 변환**: 평문 → Atlassian Document Format
+### Phase 1.7 - 계산 결과 서버화 및 부가 정보 관리 (2026-01-20)
+- **계산 결과 서버 저장**: 프로젝트 + 업데이트일별 팀 공유
+- **부가 정보 템플릿 관리**: 설명, 담당자, JIRA 설명, JIRA 담당자
+- **JIRA 담당자 시스템**: 5명 매핑, 드롭다운, 이름 표시
+- **읽기 전용 테이블**: 완전한 읽기 전용 일정표
+- **이미지 복사 최적화**: 필요한 열만 선택적 복사
+- **JIRA Description ADF 변환**: 평문 → Atlassian Document Format
+
+### Phase 1.8 - JIRA 일감 존재 확인 (2026-01-21)
+- **JIRA 일감 존재 확인**: jira-check Edge Function으로 중복 생성 방지
+
+### Phase 2 - 이메일 생성 + UI/UX 개선 (2026-02-02)
+- **이메일 생성**: 템플릿 기반 일정 안내 이메일 자동 생성 & 클립보드 복사
+- **이메일 템플릿 관리**: 프로젝트별 이메일 템플릿 CRUD (Tiptap 리치 에디터)
+- **변수 시스템**: `{{updateDate}}`, `{{table}}`, `{{disclaimer}}` 등 자동 치환
+- **조건부 블록**: `{{#if showIosReviewDate}}...{{/if}}`
+- **Gmail/Outlook 호환**: 인라인 CSS, 테이블 속성 호환
+- **유료화 상품 협의 일정**: Offset 기반 자동 계산 + Disclaimer 변수
+
+### 코드 품질 개선 (2026-02-06)
+- **컴포넌트 분할**: SettingsScreen 5탭 분리, MainScreen JIRA 로직 훅 추출
+- **번들 최적화**: 코드 스플리팅으로 초기 로드 78% 감소 (~120KB gzip)
+- **접근성 개선**: ARIA 속성, 키보드 내비게이션
+- **디자인 토큰 통일**: CSS 변수 기반 일관된 스타일링
 
 ---
 
-## 🏗️ 기술 스택
+## 기술 스택
 
 ### 프론트엔드
-- **Framework**: React 18 + TypeScript + Vite
-- **상태 관리**: React Query (서버 상태)
+- **Framework**: React 18.3 + TypeScript 5.6 + Vite 5.4
+- **상태 관리**: React Query 5.90
 - **데이터베이스**: Supabase PostgreSQL
 - **인증**: Google OAuth + Supabase Auth
-- **Charts**: Frappe Gantt v1.0.3, FullCalendar v6
-- **Utils**: html2canvas v1.4.1
+- **Charts**: Frappe Gantt v1.0.4, FullCalendar v6.1
+- **이메일 에디터**: Tiptap 3.18 (리치 텍스트)
+- **Utils**: html2canvas v1.4.1, juice v11.1 (CSS 인라이너)
 
 ### 백엔드
 - **BaaS**: Supabase (PostgreSQL + Auth + Edge Functions)
-- **Edge Functions**: Deno (jira-create, jira-update)
+- **Edge Functions**: Deno (jira-create, jira-update, jira-check)
 - **RLS**: Row Level Security (읽기: 전체, 쓰기: 화이트리스트 5명)
 
 ### 배포
@@ -60,7 +78,7 @@
 
 ---
 
-## 🚀 시작하기
+## 시작하기
 
 ### 1. 의존성 설치
 
@@ -96,25 +114,30 @@ VITE_HOLIDAY_API_KEY=your-api-key
 npm run dev
 ```
 
-브라우저에서 http://localhost:5173 접속
+브라우저에서 http://localhost:3000 접속
 
 ### 4. Supabase 마이그레이션 (최초 1회)
 
 Supabase Dashboard → SQL Editor에서 순서대로 실행:
 1. `supabase/migrations/001_initial_schema.sql`
 2. `supabase/migrations/002_calculation_results.sql`
-3. `supabase/migrations/003_jira_assignees.sql`
-4. `supabase/migrations/004_work_stages_extension.sql`
+3. `supabase/migrations/002_phase0_5_and_phase1_jira_integration.sql`
+4. `supabase/migrations/003_jira_assignees.sql`
+5. `supabase/migrations/004_work_stages_extension.sql`
+6. `supabase/migrations/005_headsup_description.sql`
+7. `supabase/migrations/006_phase2_email_templates.sql`
+8. `supabase/migrations/006b_phase2_schedule_entries_extension.sql`
+9. `supabase/migrations/007_paid_product_offset.sql`
 
 ---
 
-## 📋 명령어
+## 명령어
 
 ```bash
-npm run dev        # 개발 서버
+npm run dev        # 개발 서버 (포트 3000)
 npm run build      # 프로덕션 빌드
 npm run preview    # 빌드 미리보기
-npm test           # 단위 테스트
+npm test           # 단위 테스트 (Vitest, 110개)
 npm run typecheck  # TypeScript 타입 체크
 ```
 
@@ -123,55 +146,77 @@ npm run typecheck  # TypeScript 타입 체크
 ```bash
 supabase functions deploy jira-create   # jira-create 배포
 supabase functions deploy jira-update   # jira-update 배포
+supabase functions deploy jira-check    # jira-check 배포
 ```
 
 ---
 
-## 🗂️ 프로젝트 구조
+## 프로젝트 구조
 
 ```
 azrael-002/
 ├── src/
-│   ├── components/       # UI 컴포넌트 (19개)
+│   ├── components/       # UI 컴포넌트 (29개)
 │   │   ├── MainScreen.tsx
 │   │   ├── ScheduleTable.tsx
-│   │   ├── StageEditModal.tsx
+│   │   ├── EmailGeneratorModal.tsx
 │   │   ├── JiraPreviewModal.tsx
+│   │   ├── settings/           # 설정 탭 컴포넌트 (5개)
+│   │   │   ├── SettingsProjectsTab.tsx
+│   │   │   ├── SettingsStagesTab.tsx
+│   │   │   ├── SettingsHolidaysTab.tsx
+│   │   │   ├── SettingsJiraTab.tsx
+│   │   │   └── SettingsEmailTemplatesTab.tsx
 │   │   └── ...
-│   ├── hooks/            # React Hooks (6개)
+│   ├── hooks/            # React Hooks (5개)
 │   │   ├── useSupabase.ts      # React Query 훅
+│   │   ├── useJiraOperations.ts
+│   │   ├── useEmailTemplates.ts
 │   │   ├── useImageCopy.ts
-│   │   └── ...
+│   │   └── useToast.ts
 │   ├── lib/
-│   │   ├── api/          # Supabase API 레이어 (5개)
+│   │   ├── api/          # Supabase API 레이어 (6개)
 │   │   │   ├── projects.ts
 │   │   │   ├── templates.ts
 │   │   │   ├── holidays.ts
 │   │   │   ├── jira.ts
-│   │   │   └── calculations.ts
+│   │   │   ├── calculations.ts
+│   │   │   └── emailTemplates.ts
+│   │   ├── email/        # 이메일 생성 엔진 (6개)
+│   │   │   ├── emailGenerator.ts
+│   │   │   ├── templateParser.ts
+│   │   │   ├── formatters.ts
+│   │   │   ├── sanitizer.ts
+│   │   │   ├── clipboard.ts
+│   │   │   └── templates.ts
 │   │   ├── jira/         # JIRA 템플릿 헬퍼
-│   │   ├── businessDays.ts
-│   │   ├── storage.ts
-│   │   └── supabase.ts   # Supabase 클라이언트
-│   ├── types/            # TypeScript 타입
+│   │   ├── businessDays.ts  # 영업일 계산 엔진
+│   │   ├── storage.ts       # LocalStorage 유틸
+│   │   └── supabase.ts      # Supabase 클라이언트
+│   ├── types/            # TypeScript 타입 (5개)
 │   │   ├── index.ts
 │   │   ├── supabase.ts
-│   │   └── supabase-generated.ts
+│   │   ├── supabase-generated.ts
+│   │   ├── event-calendar.d.ts
+│   │   └── frappe-gantt.d.ts
+│   ├── constants.ts      # 프론트엔드 상수 (16개)
 │   └── scripts/          # 마이그레이션 스크립트
 ├── supabase/
-│   ├── migrations/       # DB 스키마 (5개)
-│   └── functions/        # Edge Functions (2개)
+│   ├── migrations/       # DB 스키마 (9개)
+│   └── functions/        # Edge Functions (3개)
 │       ├── jira-create/
-│       └── jira-update/
-├── prd/                  # PRD 문서 (8개)
-├── docs/                 # 개발 문서
+│       ├── jira-update/
+│       ├── jira-check/
+│       └── _shared/      # 공유 모듈 (adf.ts, constants.ts)
+├── prd/                  # PRD 문서 (9개)
+├── docs/                 # 사용자 매뉴얼, 테스트 시나리오
 ├── CLAUDE.md             # 개발 가이드
 └── README.md
 ```
 
 ---
 
-## 📐 아키텍처 원칙
+## 아키텍처 원칙
 
 ### 데이터 흐름
 
@@ -183,9 +228,10 @@ azrael-002/
 [React Query] ← Supabase API
     ├─ Projects, Templates, WorkStages, Holidays (팀 공유)
     ├─ CalculationResults, ScheduleEntries (팀 공유)
-    └─ JiraAssignees (팀 공유)
+    ├─ JiraAssignees, EmailTemplates (팀 공유)
+    └─ UserState, JiraConfig (LocalStorage, 개인)
     ↓
-[MainScreen] → 계산 → 테이블 출력 → JIRA 생성
+[MainScreen] → 계산 → 테이블 출력 → JIRA 생성 / 이메일 복사
     ↓
 [Edge Functions] → JIRA API
 ```
@@ -209,9 +255,14 @@ azrael-002/
    - LocalStorage 직접 접근 금지
    - Date 직렬화: JSON.parse 후 수동 복원
 
+5. **번들 최적화**
+   - 코드 스플리팅: lazy() + Suspense로 주요 컴포넌트 지연 로드
+   - 벤더 청크 분리: react-vendor, supabase, query
+   - 동적 import: html2canvas (클릭 시점 로드)
+
 ---
 
-## 🧪 테스트
+## 테스트
 
 ### 단위 테스트
 
@@ -219,30 +270,30 @@ azrael-002/
 npm test
 ```
 
-**커버리지** (15개 테스트):
-- ✅ 영업일 역산 계산
-- ✅ 날짜 형식 변환
-- ✅ LocalStorage Date 직렬화
-- ✅ 하위 일감 계층 구조
+**110개 테스트** (3개 테스트 파일):
+- businessDays.test.ts: 영업일 역산 계산, 날짜 형식 변환, 유료화 상품일 계산
+- storage.test.ts: LocalStorage Date 직렬화, 하위 일감 계층 구조
+- email.test.ts: 이메일 생성, 템플릿 파싱, 변수 치환, Gmail/Outlook 호환성, 클립보드
 
 ### 통합 테스트
 
-테스트 시나리오: `docs/test-scenarios.md`
+테스트 시나리오: `docs/test-scenarios.html`
 
 ---
 
-## 📊 성능 지표
+## 성능 지표
 
 - **계산 성능**: < 1초
 - **렌더링**: < 1초 (3개 테이블 + 3개 차트 + 캘린더)
-- **빌드 크기**:
-  - JS: 861KB (gzip: 241KB)
-  - CSS: 24KB (gzip: 5KB)
-- **빌드 시간**: ~1.3초
+- **빌드 크기** (코드 스플리팅 적용):
+  - 초기 로드: ~120KB gzip (index + react-vendor + supabase)
+  - 전체: ~560KB gzip (26개 청크)
+  - CSS: ~39KB (10개 파일, gzip ~11KB)
+- **빌드 시간**: ~2초
 
 ---
 
-## 🔐 보안 및 권한
+## 보안 및 권한
 
 ### RLS (Row Level Security)
 
@@ -266,16 +317,19 @@ npm test
 
 ---
 
-## 🛠️ 개발 가이드
+## 개발 가이드
 
 ### Edge Functions 배포
 
 ```bash
 # jira-create 배포
-supabase functions deploy jira-create
+supabase functions deploy jira-create --no-verify-jwt
 
 # jira-update 배포
-supabase functions deploy jira-update
+supabase functions deploy jira-update --no-verify-jwt
+
+# jira-check 배포
+supabase functions deploy jira-check --no-verify-jwt
 ```
 
 **주의**: Edge Functions는 자동 배포되지 않으므로, 코드 변경 시 수동 배포 필요
@@ -288,48 +342,51 @@ supabase functions deploy jira-update
 
 ---
 
-## 📚 참조 문서
+## 참조 문서
 
 - **개발 가이드**: [CLAUDE.md](./CLAUDE.md)
 - **빠른 시작**: [QUICK_START.md](./QUICK_START.md)
-- **테스트 시나리오**: [docs/test-scenarios.md](./docs/test-scenarios.md)
+- **사용자 매뉴얼**: [docs/user-manual.html](./docs/user-manual.html)
+- **테스트 시나리오**: [docs/test-scenarios.html](./docs/test-scenarios.html)
 - **PRD 문서**: [prd/](./prd/)
   - [Master PRD](./prd/Azrael-PRD-Master.md)
   - [Shared Specs](./prd/Azrael-PRD-Shared.md)
   - [Phase 0](./prd/Azrael-PRD-Phase0.md)
   - [Phase 1](./prd/Azrael-PRD-Phase1.md)
+  - [Phase 2](./prd/Azrael-PRD-Phase2.md)
+  - [Design](./prd/Azrael-PRD-Design.md)
 
 ---
 
-## 🌐 배포 정보
+## 배포 정보
 
 **프로덕션**: https://azrael-002.vercel.app
 
 **최신 배포**:
-- 프론트엔드: 커밋 43aee9d (2026-01-20)
-- Edge Functions: v11 (2026-01-20)
-- DB: 4개 마이그레이션 완료
+- 프론트엔드: 커밋 695223d (2026-02-06)
+- Edge Functions: jira-create, jira-update, jira-check
+- DB: 9개 마이그레이션 완료
 
 **Git Repository**: https://github.com/JaekyungCho2140/azrael-002
 
 ---
 
-## 🐛 알려진 이슈
+## 알려진 이슈
 
-**없음** (모든 테스트 통과)
+**없음** (테스트 110/110 통과, TypeScript 체크 통과)
 
 ---
 
-## 📄 라이선스
+## 라이선스
 
 MIT License
 
 ---
 
-## 👥 기여자
+## 기여자
 
 L10n팀 내부 프로젝트
 
 ---
 
-**최종 업데이트**: 2026-01-20 (Phase 1.7 완료)
+**최종 업데이트**: 2026-02-06 (Phase 2 완료 + 코드 품질 개선)

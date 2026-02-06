@@ -1,7 +1,7 @@
 # Azrael PRD - Shared Components
 
-**최종 업데이트**: 2026-01-21
-**버전**: 3.1 (Phase 1.8 반영)
+**최종 업데이트**: 2026-02-06
+**버전**: 3.2 (Phase 2 완료 + 유료화 상품 협의 일정 반영)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md)
 
 ---
@@ -46,6 +46,7 @@
 |------|------|-----------|
 | **헤즈업** | 유관부서 및 협력업체에 일정을 사전 공유하는 날짜 | 프로젝트별 Offset 설정 (업데이트일 - N영업일) |
 | **iOS 심사일** | iOS 앱스토어 심사 제출 예정일 | 프로젝트별 Offset 설정 (업데이트일 - M영업일) |
+| **유료화 상품 협의 일정** | 유료화 상품 관련 협의를 시작해야 하는 날짜 | 프로젝트별 Offset 설정 (업데이트일 - K영업일), 선택적 |
 
 ### 1.4. 테이블 용어
 
@@ -56,7 +57,7 @@
 | **설명** | 사용자 입력 텍스트 필드 | 편집 가능 |
 | **담당자** | 사용자 입력 텍스트 필드 | 편집 가능 |
 | **JIRA 설명** | JIRA 일감 생성 시 설명 필드에 포함될 내용 | 편집 가능 |
-| **Disclaimer** | 테이블 하단 메모 (프로젝트별 저장, 최대 600자) | 커스텀 서식 태그 지원: `<b>`, `<r>`, `<g>`, `<bl>`, `<u>` |
+| **Disclaimer** | 테이블 하단 메모 (프로젝트별 저장, 최대 600자) | 커스텀 서식 태그 지원: `<b>`, `<r>`, `<g>`, `<bl>`, `<u>`. 변수 치환 지원: `{updateDate}`, `{headsUp}`, `{iosReviewDate}`, `{paidProductDate}` |
 
 ### 1.5. 하위 일감 용어
 
@@ -87,6 +88,8 @@ interface Project {
   jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿
   jiraHeadsupDescription?: string; // JIRA 헤즈업 Task 설명 (ADF 테이블 마크업 지원)
   jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (기본값: "PM(표준)")
+  paidProductOffset?: number;    // 유료화 상품 협의 일정 Offset (영업일, 선택적)
+  showPaidProductDate: boolean;  // 유료화 상품 협의 일정 표시 여부
 }
 ```
 
@@ -167,6 +170,7 @@ interface CalculationResult {
   updateDate: Date;              // 업데이트일
   headsUpDate: Date;             // 계산된 헤즈업 날짜
   iosReviewDate?: Date;          // 계산된 iOS 심사일
+  paidProductDate?: Date;        // 계산된 유료화 상품 협의 일정
   table1Entries: ScheduleEntry[]; // 테이블 1 엔트리
   table2Entries: ScheduleEntry[]; // 테이블 2 (Ext.) 엔트리
   table3Entries: ScheduleEntry[]; // 테이블 3 (Int.) 엔트리
@@ -238,6 +242,8 @@ CREATE TABLE projects (
   heads_up_offset INTEGER NOT NULL,
   ios_review_offset INTEGER,
   show_ios_review_date BOOLEAN NOT NULL DEFAULT false,
+  paid_product_offset INTEGER,
+  show_paid_product_date BOOLEAN NOT NULL DEFAULT false,
   template_id TEXT NOT NULL,
   disclaimer TEXT DEFAULT '',
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -470,7 +476,7 @@ function formatUpdateDate(date: Date): string {
 
 | 라이브러리 | 용도 | 버전 | 라이선스 |
 |-----------|------|------|----------|
-| **Frappe Gantt** | 간트 차트 | 0.6.1+ | MIT |
+| **Frappe Gantt** | 간트 차트 | 1.0.4 | MIT |
 | **FullCalendar** | 캘린더 | 6.1.20+ | MIT |
 | **html2canvas** | 이미지 복사 | 1.4.1+ | MIT |
 | **@react-oauth/google** | Google OAuth | 0.13.4 | MIT |
@@ -698,6 +704,7 @@ CREATE TABLE calculation_results (
   update_date DATE NOT NULL,
   heads_up_date DATE NOT NULL,
   ios_review_date DATE,
+  paid_product_date DATE,
   calculated_at TIMESTAMPTZ NOT NULL,
   calculated_by TEXT NOT NULL,
   UNIQUE(project_id, update_date)
@@ -772,6 +779,18 @@ function textToADF(text: string) {
 - 색상 태그는 중복 불가 (하나의 텍스트에 하나의 색상)
 - 굵게/밑줄은 다른 태그와 중첩 가능
 - 줄바꿈: `\n` → `<br/>`
+- T1 설명란에서도 동일한 서식 태그 사용 가능 (`parseCustomFormat()` 적용)
+
+### 12.5. Disclaimer 변수 치환
+
+Disclaimer 텍스트에서 아래 변수를 사용하면 계산된 날짜로 자동 치환됩니다 (`substituteDisclaimerVariables()`):
+
+| 변수 | 설명 | 형식 |
+|------|------|------|
+| `{updateDate}` | 업데이트일 | `MM/DD(요일)` |
+| `{headsUp}` | 헤즈업 날짜 | `MM/DD(요일)` |
+| `{iosReviewDate}` | iOS 심사일 | `MM/DD(요일)` (없으면 빈 문자열) |
+| `{paidProductDate}` | 유료화 상품 협의 일정 | `MM/DD(요일)` (없으면 빈 문자열) |
 
 ---
 

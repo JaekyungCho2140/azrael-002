@@ -1,7 +1,7 @@
 # Azrael PRD - Phase 0: 일정 계산 및 시각화
 
-**최종 업데이트**: 2026-01-21
-**버전**: 2.1
+**최종 업데이트**: 2026-02-06
+**버전**: 2.2
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md) | [Azrael-PRD-Shared.md](./Azrael-PRD-Shared.md)
 
 **Phase 0 Status**: ✅ 완료
@@ -220,6 +220,7 @@ LY/GL
 [상단 날짜]
   헤즈업: MM/DD(요일)
   iOS 심사일: MM/DD(요일) (조건부)
+  유료화 상품 협의일: MM/DD(요일) (조건부)
 
 [테이블 1: YY-MM-DD 업데이트 일정표]
   #, 배치, 마감, 테이블 전달, 설명, 담당자
@@ -284,7 +285,7 @@ LY/GL
 
 ### 6.1. 라이브러리
 
-**선정**: Frappe Gantt (v0.6.1)
+**선정**: Frappe Gantt (v1.0.4)
 **라이선스**: MIT
 **의존성**: Zero dependencies
 

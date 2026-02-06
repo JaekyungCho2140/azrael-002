@@ -1,7 +1,7 @@
 # Azrael PRD - Phase 2: 이메일 생성
 
-**최종 업데이트**: 2026-02-02
-**버전**: 2.9 (구현 완료 + UI/UX 감사 개선)
+**최종 업데이트**: 2026-02-06
+**버전**: 3.0 (유료화 상품 협의 일정 변수 추가)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md) | [Azrael-PRD-Shared.md](./Azrael-PRD-Shared.md)
 
 **Phase 2 Status**: ✅ 구현 완료 (2026-02-02)
@@ -179,7 +179,9 @@ Phase 2는 **이메일 생성** 기능을 구현합니다.
 | `{table}` | 선택한 테이블 (HTML) | HTML (§2.2) | 본문 전용 | |
 | `{disclaimer}` | 프로젝트 Disclaimer | HTML (§2.7) | 본문 전용 + **조건부 블록** (`{{#if}}`) | |
 | `{projectName}` | 프로젝트 이름 | 문자열 | 제목 / 본문 | M4/GL |
+| `{paidProductDate}` | 유료화 상품 협의 날짜 | `MM/DD(요일)` | 본문 전용 | 01/20(월) |
 | `{showIosReviewDate}` | iOS 심사일 표시 여부 | boolean (`project.showIosReviewDate && iosReviewDate != null`으로 계산 — §4.4 context 참조) | **조건부 블록 전용** (`{{#if}}`) | true/false |
+| `{showPaidProductDate}` | 유료화 상품 협의 일정 표시 여부 | boolean (`project.showPaidProductDate && paidProductDate != null`으로 계산) | **조건부 블록 전용** (`{{#if}}`) | true/false |
 
 > **⚠️ 변수 명명 규칙 통일** (m9)
 > - JIRA 템플릿과 동일하게 **영어 변수명** 사용
@@ -209,11 +211,12 @@ Phase 2는 **이메일 생성** 기능을 구현합니다.
 // ⚠️ §2.4 이메일 템플릿 변수 테이블과 동기화 필수
 const VALID_VARIABLES = [
   'updateDate', 'updateDateShort', 'headsUp', 'iosReviewDate',
-  'table', 'disclaimer', 'projectName', 'showIosReviewDate'
+  'paidProductDate', 'table', 'disclaimer', 'projectName',
+  'showIosReviewDate', 'showPaidProductDate',
 ];
 
 // v2.7: boolean 전용 변수 — 조건부 블록({{#if}})에서만 사용해야 하는 변수
-const BOOLEAN_ONLY_VARIABLES = ['showIosReviewDate'];
+const BOOLEAN_ONLY_VARIABLES = ['showIosReviewDate', 'showPaidProductDate'];
 
 function validateTemplate(template: string): string[] {
   const warnings: string[] = [];
@@ -1232,10 +1235,12 @@ function generateEmail(
     updateDateShort,
     headsUp,
     iosReviewDate,
+    paidProductDate,                          // v3.0: 유료화 상품 협의 일정 변수 추가
     table: tableHtml,
     disclaimer: disclaimerHtml || null,       // v2.5: 빈 문자열 → null ({{#if disclaimer}} 조건부 블록 평가용)
     projectName: project.name,
     showIosReviewDate: project.showIosReviewDate && iosReviewDate != null,
+    showPaidProductDate: project.showPaidProductDate && paidProductDate != null, // v3.0
   };
 
   // 5. 템플릿 렌더링 (entity 디코딩 → 조건부 → 변수 순서 — §2.5 renderTemplate 참조)

@@ -3,35 +3,37 @@
 ## 스택
 React 18 + TypeScript + Vite
 **Supabase** (PostgreSQL + Auth + Edge Functions) | **React Query** (서버 상태 관리)
-Frappe Gantt, Event Calendar, html2canvas
+Frappe Gantt 1.0.4, FullCalendar 6.1, html2canvas, Tiptap 3.18
 
 ## 명령어
 ```bash
-npm dev        # 개발 서버
-npm build      # 프로덕션 빌드
-npm test       # Vitest
-npm typecheck  # tsc --noEmit
+npm run dev        # 개발 서버 (포트 3000)
+npm run build      # 프로덕션 빌드
+npm test           # Vitest (110개 테스트)
+npm run typecheck  # tsc --noEmit
 ```
 
 ## 아키텍처
 ```
 src/
-├── components/   # UI 컴포넌트 (24개, Email* 5개 추가)
-├── hooks/        # React Query 훅, useSupabase, useEmailTemplates (7개)
+├── components/   # UI 컴포넌트 (29개, settings/ 5개 포함)
+├── hooks/        # React Hooks (5개: useSupabase, useJiraOperations, useEmailTemplates, useImageCopy, useToast)
 ├── lib/
-│   ├── api/      # Supabase API 레이어 (5개)
+│   ├── api/      # Supabase API 레이어 (6개: projects, templates, holidays, jira, calculations, emailTemplates)
 │   ├── email/    # 이메일 생성 엔진 (6개: generator, parser, formatters, sanitizer, clipboard, templates)
 │   ├── jira/     # JIRA 템플릿 헬퍼
 │   ├── businessDays.ts  # 영업일 계산 엔진
 │   └── storage.ts       # LocalStorage 유틸
-└── types/        # PRD Shared.md §2 인터페이스
+├── types/        # PRD Shared.md §2 인터페이스 (5개)
+└── constants.ts  # 프론트엔드 상수 (16개)
 
 supabase/
-├── migrations/   # DB 스키마 (5개)
+├── migrations/   # DB 스키마 (9개)
 └── functions/    # Edge Functions (3개)
     ├── jira-create/
     ├── jira-update/
-    └── jira-check/
+    ├── jira-check/
+    └── _shared/  # 공유 모듈 (adf.ts, constants.ts)
 ```
 
 ## 핵심 규칙
@@ -46,7 +48,7 @@ supabase/
 - 오류 발생 시 PRD 문서 참조
 
 ## 데이터 저장 전략
-- **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees
+- **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees, EmailTemplates
 - **LocalStorage (개인)**: UserState, JiraConfig
 
 ## PRD 참조 (Source of Truth)
@@ -57,14 +59,20 @@ supabase/
 
 ## 배포
 - **프론트엔드**: Git push → Vercel 자동 배포
-- **Edge Functions**: `supabase functions deploy [function-name]` (수동)
+- **Edge Functions**: `supabase functions deploy [function-name] --no-verify-jwt` (수동)
 - **DB 마이그레이션**: Supabase Dashboard SQL Editor (최초 1회)
 
 ## 테스트
-- Vitest + React Testing Library
+- Vitest + React Testing Library (110개 테스트, 3개 파일)
 - Playwright MCP를 활용해 최대한 자동 테스트
 - LocalStorage는 jsdom mock으로 자동화
 - OAuth, 이미지 복사는 수동 검증 필요
+
+## 번들 최적화
+- 코드 스플리팅: lazy() + Suspense (GanttChart, CalendarView, SettingsScreen, EmailGeneratorModal, JiraPreviewModal)
+- 동적 import: html2canvas (useImageCopy 클릭 시점)
+- manualChunks: react-vendor, supabase, query
+- 초기 로드 ~120KB gzip (전체 ~560KB gzip)
 
 ## Phase 완료 상태
 - ✅ Phase 0: 영업일 계산 및 시각화
@@ -73,5 +81,6 @@ supabase/
 - ✅ Phase 1.7: 계산 결과 서버화, 부가 정보 관리 (2026-01-20)
 - ✅ Phase 1.8: JIRA 일감 존재 확인 (2026-01-21)
 - ✅ Phase 2: 이메일 생성 + UI/UX 감사 개선 (2026-02-02)
+- ✅ 코드 품질 개선: 컴포넌트 분할, 번들 최적화, 접근성, 디자인 토큰 (2026-02-06)
 - ⏳ Phase 3: 슬랙 연동 (예정)
 - ⏳ Phase 4: 프리셋 관리 (예정)

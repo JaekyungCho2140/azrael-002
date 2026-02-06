@@ -325,7 +325,7 @@
   <div class="nav-logo">
     <span>🐱</span>
     <h2>Azrael</h2>
-    <p>사용자 매뉴얼 v2.9</p>
+    <p>사용자 매뉴얼 v3.0</p>
   </div>
 
   <div class="nav-section">시작하기</div>
@@ -351,6 +351,10 @@
   <div class="nav-section">이메일</div>
   <a href="#email-generate">이메일 생성</a>
   <a href="#email-templates">이메일 템플릿</a>
+
+  <div class="nav-section">고급 기능</div>
+  <a href="#paid-product">유료화 상품 협의 일정</a>
+  <a href="#format-tags">설명란 서식 태그</a>
 
   <div class="nav-section">설정</div>
   <a href="#settings-projects">프로젝트 관리</a>
@@ -509,6 +513,7 @@
     <ul>
       <li><strong>헤즈업 날짜</strong>: 프로젝트 설정의 HeadsUp Offset 영업일만큼 역산</li>
       <li><strong>iOS 심사일</strong>: 프로젝트에서 활성화한 경우만 표시</li>
+      <li><strong>유료화 상품 협의 일정</strong>: 프로젝트에서 활성화한 경우만 표시</li>
       <li><strong>3개 스케줄 테이블</strong>: 각 업무 단계별 마감일 &amp; 전달일</li>
     </ul>
   </li>
@@ -736,6 +741,7 @@
     <tr><td><code>{{projectName}}</code></td><td>프로젝트 이름</td><td>M4/GL</td></tr>
     <tr><td><code>{{table}}</code></td><td>선택된 스케줄 테이블 HTML</td><td>(테이블 렌더링)</td></tr>
     <tr><td><code>{{disclaimer}}</code></td><td>프로젝트 면책 조항</td><td>(HTML 텍스트)</td></tr>
+    <tr><td><code>{{paidProductDate}}</code></td><td>유료화 상품 협의 일정</td><td>02/05(수)</td></tr>
   </tbody>
 </table>
 
@@ -743,6 +749,9 @@
 <p>iOS 심사일 등 선택적 정보는 조건부 렌더링으로 처리합니다:</p>
 <p><code>{{#if showIosReviewDate}}iOS 심사일: {{iosReviewDate}}{{/if}}</code></p>
 <p>→ iOS 심사일이 활성화된 프로젝트에서만 표시됩니다.</p>
+
+<p><code>{{#if showPaidProductDate}}유료화 상품 협의: {{paidProductDate}}{{/if}}</code></p>
+<p>→ 유료화 상품 협의 일정이 활성화된 프로젝트에서만 표시됩니다.</p>
 
 <!-- ===== 14. 설정 - 프로젝트 ===== -->
 <h2 id="settings-projects">14. 프로젝트 관리</h2>
@@ -762,7 +771,9 @@
       <li><strong>HeadsUp Offset</strong>: 헤즈업 날짜 역산 영업일 수</li>
       <li><strong>iOS 심사일 표시</strong>: 토글로 활성화/비활성화</li>
       <li><strong>iOS Review Offset</strong>: iOS 심사일 역산 영업일 수 (활성화 시)</li>
-      <li><strong>면책 조항</strong>: 테이블 하단에 표시될 HTML 텍스트</li>
+      <li><strong>유료화 상품 협의 일정 표시</strong>: 토글로 활성화/비활성화</li>
+      <li><strong>유료화 상품 Offset</strong>: 유료화 상품 협의 일정 역산 영업일 수 (활성화 시)</li>
+      <li><strong>면책 조항</strong>: 테이블 하단에 표시될 HTML 텍스트 (서식 태그 사용 가능)</li>
     </ul>
   </li>
   <li><strong>JIRA 설정</strong> (선택):
@@ -883,8 +894,66 @@
 <h3>기본 제공 템플릿</h3>
 <p>각 프로젝트에는 기본 제공 템플릿이 자동 생성됩니다. 이 템플릿은 보기/편집은 가능하지만 삭제할 수 없습니다.</p>
 
-<!-- ===== 19. 용어 사전 ===== -->
+<!-- ===== 19. 유료화 상품 협의 일정 ===== -->
+<h2 id="paid-product">19. 유료화 상품 협의 일정 <span class="badge badge-new">신규</span></h2>
+
+<p>업데이트일 기준으로 유료화 상품 협의 일정을 자동 역산할 수 있습니다.</p>
+
+<h3>설정 방법</h3>
+<ol>
+  <li><strong>설정</strong> → <strong>프로젝트 관리</strong>에서 프로젝트를 선택합니다.</li>
+  <li><strong>"유료화 상품 협의 일정 표시"</strong> 체크박스를 활성화합니다.</li>
+  <li><strong>Offset</strong> 값을 입력합니다 (업데이트일로부터 역산할 영업일 수).</li>
+  <li><strong>"저장"</strong>을 클릭합니다.</li>
+</ol>
+
+<h3>결과 확인</h3>
+<ul>
+  <li>메인 화면에서 계산 후, <strong>날짜 요약 섹션</strong>에 유료화 상품 협의 일정이 표시됩니다.</li>
+  <li>Disclaimer 텍스트에서 <code>{paidProductDate}</code> 변수를 사용하면 자동 치환됩니다.</li>
+  <li>이메일 템플릿에서 <code>{{#if showPaidProductDate}}</code> 조건부 블록으로 사용할 수 있습니다.</li>
+</ul>
+
+<div class="callout callout-tip">
+  <strong>💡 Disclaimer 변수</strong>
+  프로젝트 면책 조항에서 사용할 수 있는 변수: <code>{updateDate}</code>, <code>{headsUp}</code>, <code>{iosReviewDate}</code>, <code>{paidProductDate}</code>
+</div>
+
+<!-- ===== 20. 설명란 서식 태그 ===== -->
+<h2 id="format-tags">20. 설명란 서식 태그 <span class="badge badge-new">신규</span></h2>
+
+<p>T1 테이블의 설명란과 프로젝트 Disclaimer에서 아래 서식 태그를 사용할 수 있습니다.</p>
+
+<table>
+  <thead>
+    <tr><th>태그</th><th>효과</th><th>예시 입력</th><th>결과</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>&lt;b&gt;텍스트&lt;/b&gt;</code></td><td>굵게 (Bold)</td><td><code>&lt;b&gt;중요&lt;/b&gt;</code></td><td><strong>중요</strong></td></tr>
+    <tr><td><code>&lt;r&gt;텍스트&lt;/r&gt;</code></td><td>빨간색</td><td><code>&lt;r&gt;긴급&lt;/r&gt;</code></td><td style="color:#DC2626;">긴급</td></tr>
+    <tr><td><code>&lt;g&gt;텍스트&lt;/g&gt;</code></td><td>초록색</td><td><code>&lt;g&gt;완료&lt;/g&gt;</code></td><td style="color:#16A34A;">완료</td></tr>
+    <tr><td><code>&lt;bl&gt;텍스트&lt;/bl&gt;</code></td><td>파란색</td><td><code>&lt;bl&gt;참고&lt;/bl&gt;</code></td><td style="color:#2563EB;">참고</td></tr>
+    <tr><td><code>&lt;u&gt;텍스트&lt;/u&gt;</code></td><td>밑줄</td><td><code>&lt;u&gt;주의&lt;/u&gt;</code></td><td><u>주의</u></td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <strong>💡 태그 조합</strong>
+  태그를 중첩하여 사용할 수 있습니다. 예: <code>&lt;b&gt;&lt;r&gt;빨간 굵은 글씨&lt;/r&gt;&lt;/b&gt;</code>
+</div>
+
+<div class="callout callout-warn">
+  <strong>⚠️ 이메일에서의 서식</strong>
+  이메일 생성 시에도 설명란의 서식 태그가 자동으로 HTML로 변환됩니다. Gmail, Outlook 등 주요 이메일 클라이언트에서 올바르게 표시됩니다.
+</div>
+
+<!-- ===== 부록 A. 용어 사전 ===== -->
 <h2 id="glossary">부록 A. 용어 사전</h2>
+
+<div class="callout callout-tip">
+  <strong>💡 Phase 2 신규 기능 용어</strong>
+  유료화 상품 협의 일정, 설명란 서식 태그는 위의 19~20절을 참조하세요.
+</div>
 
 <table>
   <thead>
@@ -901,6 +970,8 @@
     <tr><td><strong>업무 단계</strong></td><td>WorkStage</td><td>하나의 작업 단위. 1개 업무 단계 = 1개 JIRA Task</td></tr>
     <tr><td><strong>하위 일감</strong></td><td>Subtask</td><td>업무 단계 아래의 세부 작업 (최대 9개/단계)</td></tr>
     <tr><td><strong>Epic</strong></td><td>Epic</td><td>JIRA 최상위 일감 컨테이너 (1개 업데이트 = 1개 Epic)</td></tr>
+    <tr><td><strong>유료화 상품 협의 일정</strong></td><td>Paid Product Date</td><td>업데이트일 기준 유료화 상품 협의 마감일 (Offset 역산)</td></tr>
+    <tr><td><strong>서식 태그</strong></td><td>Format Tags</td><td>설명란에서 사용하는 커스텀 서식 (&lt;b&gt;, &lt;r&gt;, &lt;g&gt;, &lt;bl&gt;, &lt;u&gt;)</td></tr>
   </tbody>
 </table>
 
@@ -929,10 +1000,11 @@
     <tr><td>공휴일 수동 추가</td><td>⚙️ 설정 &gt; 공휴일 탭 &gt; + 공휴일 수동 추가</td></tr>
     <tr><td>JIRA 연결</td><td>⚙️ 설정 &gt; JIRA 탭</td></tr>
     <tr><td>이메일 템플릿 관리</td><td>⚙️ 설정 &gt; 이메일 템플릿 탭</td></tr>
+    <tr><td>유료화 상품 협의 일정 설정</td><td>⚙️ 설정 &gt; 프로젝트 탭 &gt; 편집 &gt; 유료화 상품 체크</td></tr>
   </tbody>
 </table>
 
-<!-- ===== 21. FAQ ===== -->
+<!-- ===== FAQ ===== -->
 <h2 id="faq">부록 C. FAQ</h2>
 
 <h4>Q. 다른 PC에서 로그인했는데 JIRA가 작동하지 않아요.</h4>
@@ -957,7 +1029,7 @@
 <p>"JIRA 업데이트" 실행 시 시스템이 Epic 존재 여부를 확인합니다. 삭제된 경우 정리 옵션과 함께 새로 생성을 안내합니다.</p>
 
 <div class="version-info">
-  <p>Azrael 사용자 매뉴얼 v2.9 | 2026-02-02 | Phase 0~2 Complete</p>
+  <p>Azrael 사용자 매뉴얼 v3.0 | 2026-02-06 | Phase 0~2 Complete + 코드 품질 개선</p>
   <p>문의: L10n팀 관리자 또는 jkcho@wemade.com</p>
 </div>
 

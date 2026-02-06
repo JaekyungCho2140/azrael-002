@@ -2,8 +2,8 @@
 
 **프로젝트명**: Azrael
 **작성일**: 2026-01-09
-**최종 업데이트**: 2026-01-26
-**버전**: 4.0 (Phase 2~4 분할)
+**최종 업데이트**: 2026-02-06
+**버전**: 5.0 (Phase 2 완료 + 코드 품질 개선)
 **작성자**: L10n팀 (Claude Code 협업)
 
 ---
@@ -23,7 +23,7 @@
 - **[Azrael-PRD-Phase1.md](./Azrael-PRD-Phase1.md)**: Phase 1 - JIRA 연동 (✅ 완료)
   - Phase 1.7 - 계산 결과 서버화 및 부가 정보 관리
   - Phase 1.8 - JIRA 일감 존재 확인 (jira-check)
-- **[Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)**: Phase 2 - 이메일 생성 (예정)
+- **[Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)**: Phase 2 - 이메일 생성 (✅ 완료)
 - **[Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)**: Phase 3 - 슬랙 메시지 발신 (예정)
 - **[Azrael-PRD-Phase4.md](./Azrael-PRD-Phase4.md)**: Phase 4 - 프리셋 관리 (예정)
 
@@ -179,13 +179,14 @@
 | **JIRA 업데이트 버튼 조건부 활성화** | 실제 JIRA 일감 존재 시에만 활성화 | ✅ 완료 |
 | **사용자 JIRA 인증 정보 사용** | 일감 소유자 본인 확인 가능 | ✅ 완료 |
 
-### 3.3. Phase 2: 이메일 생성 (계획)
+### 3.3. Phase 2: 이메일 생성 (✅ 완료)
 
 | 기능 | 설명 | 상태 |
 |------|------|------|
-| **이메일 템플릿 시스템** | disclaimer + 본문 구조, 커스텀 태그 서식 | 📋 설계 완료 |
-| **이메일 발신 버튼** | 클립보드 복사 또는 mailto: 연동 | 📋 설계 완료 |
-| **이메일 미리보기** | 생성된 이메일 본문 확인 모달 | 📋 설계 완료 |
+| **이메일 템플릿 시스템** | Tiptap 리치 텍스트 에디터, 변수 치환, 조건부 블록 | ✅ 완료 |
+| **이메일 복사** | HTML + 플레인텍스트 동시 클립보드 복사 | ✅ 완료 |
+| **이메일 미리보기** | 생성된 이메일 본문 확인 모달 | ✅ 완료 |
+| **유료화 상품 협의 일정** | 프로젝트별 Offset 설정, Disclaimer/이메일 변수 | ✅ 완료 |
 
 자세한 내용은 **[Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)** 참조
 
@@ -228,7 +229,7 @@ Phase 1.7: 계산 결과 서버화 ✅ 완료 (2026-01-20)
     ↓
 Phase 1.8: JIRA 일감 확인 ✅ 완료 (2026-01-21)
     ↓
-Phase 2: 이메일 생성 (예정)
+Phase 2: 이메일 생성 ✅ 완료 (2026-02-02)
     ↓
 Phase 3: 슬랙 메시지 발신 (예정)
     ↓
@@ -312,12 +313,32 @@ Phase 4: 프리셋 관리 (예정)
    - 존재하지 않으면 버튼 비활성화 + 툴팁 표시
    - 존재하면 정상 업데이트 가능
 
-### 4.5. Phase 2~4 개발 방향
+### 4.5. Phase 2 완료 내역 (2026-02-02)
 
-**Phase 2: 이메일 생성** (📋 설계 완료)
-- 이메일 템플릿 시스템 (disclaimer + 본문)
-- 커스텀 태그 서식 (`<b>`, `<r>`, `<disclaimer>` 등)
-- 클립보드 복사 또는 mailto: 연동
+**완료일**: 2026-02-02
+**Git Commit**: 695223d (코드 품질 개선 포함, 2026-02-06)
+**배포**: https://azrael-002.vercel.app
+
+**주요 구현**:
+1. ✅ 이메일 템플릿 시스템
+   - Tiptap 3.18 리치 텍스트 에디터 (프로젝트별 CRUD)
+   - 변수 치환: `{updateDate}`, `{table}`, `{disclaimer}`, `{paidProductDate}` 등
+   - 조건부 블록: `{{#if showIosReviewDate}}...{{/if}}`
+   - HTML + 플레인텍스트 동시 클립보드 복사
+
+2. ✅ 유료화 상품 협의 일정
+   - 프로젝트별 Offset 설정 (영업일 수)
+   - CalculationResult에 paidProductDate 추가
+   - Disclaimer/이메일 변수: `{paidProductDate}`
+
+3. ✅ 코드 품질 개선 (2026-02-06)
+   - 컴포넌트 분할: SettingsScreen 5개 탭, MainScreen useJiraOperations 훅
+   - 번들 최적화: 1,719KB → ~560KB (78% 감소, lazy load + code splitting)
+   - Frappe Gantt 0.6.1 → 1.0.4 업그레이드
+   - ADF 코드 중복 제거 (~560줄 삭제)
+   - 매직 넘버 상수화, CSS 토큰 통일, 접근성 개선
+
+### 4.6. Phase 3~4 개발 방향
 
 **Phase 3: 슬랙 메시지 발신** (📋 설계 완료)
 - Slack User OAuth Token 방식 (사용자 계정 메시지)
@@ -446,7 +467,7 @@ Phase 4: 프리셋 관리 (예정)
 **배포 URL**: https://azrael-002.vercel.app
 **Git Repository**: https://github.com/JaekyungCho2140/azrael-002
 **최초 배포**: 2026-01-13
-**최신 배포**: 2026-01-21 (Phase 1.8)
+**최신 배포**: 2026-02-06 (Phase 2 + 코드 품질 개선)
 
 **환경 변수** (Vercel 설정):
 ```env
@@ -471,6 +492,8 @@ VITE_HOLIDAY_API_KEY=*** (설정됨)
 | 2026-01-20 | 3.0 | Phase 1.7 완료 반영, 부가 정보 관리, 계산 결과 서버화 | L10n팀 + Claude |
 | 2026-01-21 | 3.1 | Phase 1.8 완료 반영, JIRA 일감 존재 확인, PRD 문서 최신화 | L10n팀 + Claude |
 | 2026-01-26 | 4.0 | Phase 2~4 분할 (이메일, 슬랙, 프리셋), 상세 설계 완료 | L10n팀 + Claude |
+| 2026-02-02 | 4.5 | Phase 2 구현 완료 반영 | L10n팀 + Claude |
+| 2026-02-06 | 5.0 | 코드 품질 개선, 유료화 상품 협의 일정, PRD 최신화 | L10n팀 + Claude |
 
 ### 12.2. 승인 이력
 
@@ -482,6 +505,7 @@ VITE_HOLIDAY_API_KEY=*** (설정됨)
 | Phase 1 배포 승인 | | 2026-01-19 | ✅ |
 | Phase 1.7 배포 승인 | | 2026-01-20 | ✅ |
 | Phase 1.8 배포 승인 | | 2026-01-21 | ✅ |
+| Phase 2 배포 승인 | | 2026-02-02 | ✅ |
 
 ---
 
