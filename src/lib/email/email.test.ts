@@ -86,6 +86,7 @@ const mockProject: Project = {
   headsUpOffset: 5,
   showIosReviewDate: true,
   iosReviewOffset: 3,
+  showPaidProductDate: false,
   templateId: 'tmpl-default',
   disclaimer: '<r>주의</r> 일정 변경 가능',
 };

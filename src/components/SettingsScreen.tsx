@@ -6,16 +6,18 @@
  * 리팩토링: 탭별 컴포넌트 분리 (오케스트레이터 패턴)
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Button } from './Button';
 import { supabase } from '../lib/supabase';
 import { useProjects, useTemplates } from '../hooks/useSupabase';
-import { SettingsProjectsTab } from './settings/SettingsProjectsTab';
-import { SettingsStagesTab } from './settings/SettingsStagesTab';
-import { SettingsHolidaysTab } from './settings/SettingsHolidaysTab';
-import { SettingsJiraTab } from './settings/SettingsJiraTab';
-import { SettingsEmailTemplatesTab } from './settings/SettingsEmailTemplatesTab';
 import './SettingsScreen.css';
+
+// 탭 컴포넌트 lazy loading (SettingsScreen 청크 분할)
+const SettingsProjectsTab = lazy(() => import('./settings/SettingsProjectsTab').then(m => ({ default: m.SettingsProjectsTab })));
+const SettingsStagesTab = lazy(() => import('./settings/SettingsStagesTab').then(m => ({ default: m.SettingsStagesTab })));
+const SettingsHolidaysTab = lazy(() => import('./settings/SettingsHolidaysTab').then(m => ({ default: m.SettingsHolidaysTab })));
+const SettingsJiraTab = lazy(() => import('./settings/SettingsJiraTab').then(m => ({ default: m.SettingsJiraTab })));
+const SettingsEmailTemplatesTab = lazy(() => import('./settings/SettingsEmailTemplatesTab').then(m => ({ default: m.SettingsEmailTemplatesTab })));
 
 interface SettingsScreenProps {
   currentProjectId: string;
@@ -118,41 +120,43 @@ export function SettingsScreen({
 
         {/* Content */}
         <div className="settings-content">
-          {activeTab === 'projects' && projects && (
-            <SettingsProjectsTab
-              selectedProjectId={selectedProjectId}
-              onSelectedProjectIdChange={setSelectedProjectId}
-              isAdmin={isAdmin}
-              projects={projects}
-            />
-          )}
+          <Suspense fallback={<div className="settings-tab-loading">불러오는 중...</div>}>
+            {activeTab === 'projects' && projects && (
+              <SettingsProjectsTab
+                selectedProjectId={selectedProjectId}
+                onSelectedProjectIdChange={setSelectedProjectId}
+                isAdmin={isAdmin}
+                projects={projects}
+              />
+            )}
 
-          {activeTab === 'stages' && projects && (
-            <SettingsStagesTab
-              selectedProjectId={selectedProjectId}
-              onSelectedProjectIdChange={setSelectedProjectId}
-              isAdmin={isAdmin}
-              projects={projects}
-              selectedTemplate={selectedTemplate}
-            />
-          )}
+            {activeTab === 'stages' && projects && (
+              <SettingsStagesTab
+                selectedProjectId={selectedProjectId}
+                onSelectedProjectIdChange={setSelectedProjectId}
+                isAdmin={isAdmin}
+                projects={projects}
+                selectedTemplate={selectedTemplate}
+              />
+            )}
 
-          {activeTab === 'holidays' && (
-            <SettingsHolidaysTab isAdmin={isAdmin} />
-          )}
+            {activeTab === 'holidays' && (
+              <SettingsHolidaysTab isAdmin={isAdmin} />
+            )}
 
-          {activeTab === 'jira' && (
-            <SettingsJiraTab currentUserEmail={currentUserEmail} />
-          )}
+            {activeTab === 'jira' && (
+              <SettingsJiraTab currentUserEmail={currentUserEmail} />
+            )}
 
-          {activeTab === 'emailTemplates' && projects && (
-            <SettingsEmailTemplatesTab
-              selectedProjectId={selectedProjectId}
-              onSelectedProjectIdChange={setSelectedProjectId}
-              projects={projects}
-              calculationResult={calculationResult ?? null}
-            />
-          )}
+            {activeTab === 'emailTemplates' && projects && (
+              <SettingsEmailTemplatesTab
+                selectedProjectId={selectedProjectId}
+                onSelectedProjectIdChange={setSelectedProjectId}
+                projects={projects}
+                calculationResult={calculationResult ?? null}
+              />
+            )}
+          </Suspense>
         </div>
       </div>
     </div>

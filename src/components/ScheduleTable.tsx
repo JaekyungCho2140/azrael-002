@@ -16,11 +16,11 @@ interface ScheduleTableProps {
 }
 
 /**
- * Disclaimer 커스텀 서식 파싱
+ * 커스텀 서식 파싱 (Disclaimer, 설명 등 공통 사용)
  * 지원 태그: <b></b> 굵게, <r></r> 빨강, <g></g> 초록, <bl></bl> 파랑, <u></u> 밑줄
  * 색상 태그는 중복 불가, 나머지는 중복 가능
  */
-function parseDisclaimerFormat(text: string): string {
+function parseCustomFormat(text: string): string {
   // 태그 매핑 (순서 중요: 더 긴 태그 먼저 처리)
   const tagMap: Array<[RegExp, string, string]> = [
     [/<bl>(.*?)<\/bl>/gs, '<span class="fmt-blue">', '</span>'],
@@ -81,7 +81,7 @@ export function ScheduleTable({
 
           {/* 설명 - Phase 1.7: 읽기 전용 (WorkStage 템플릿에서만 편집) */}
           <td className="copy-include readonly col-text col-description">
-            <span dangerouslySetInnerHTML={{ __html: (entry.description || '').replace(/\n/g, '<br/>') }} />
+            <span dangerouslySetInnerHTML={{ __html: parseCustomFormat(entry.description || '') }} />
           </td>
 
           {/* 담당자 (테이블 1) 또는 JIRA 설명 (테이블 2/3) - Phase 1.7: 읽기 전용 */}
@@ -161,7 +161,7 @@ export function ScheduleTable({
       {disclaimer && type === 'table1' && (
         <div
           className="disclaimer"
-          dangerouslySetInnerHTML={{ __html: parseDisclaimerFormat(disclaimer) }}
+          dangerouslySetInnerHTML={{ __html: parseCustomFormat(disclaimer) }}
         />
       )}
     </div>

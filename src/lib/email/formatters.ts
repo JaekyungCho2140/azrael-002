@@ -11,6 +11,7 @@
 
 import type { CalculationResult, ScheduleEntry, TableType } from '../../types';
 import { formatTableDate } from '../businessDays';
+import { renderDisclaimerHtml } from './sanitizer';
 
 // ============================================================
 // 날짜 포맷터
@@ -168,12 +169,13 @@ export function formatTableHtml(
  */
 function buildCells(entry: ScheduleEntry, tableType: TableType): string {
   const td = (value: string) => `<td style="${STYLES.td}">${escapeHtml(value)}</td>`;
+  const tdHtml = (html: string) => `<td style="${STYLES.td}">${html}</td>`;
 
   const index = String(entry.index);
   const stageName = entry.stageName;
   const start = formatTableDate(entry.startDateTime);
   const end = formatTableDate(entry.endDateTime);
-  const description = entry.description || '';
+  const descriptionHtml = renderDisclaimerHtml(entry.description || '');
 
   if (tableType === 'table1') {
     const assignee = entry.assignee || '';
@@ -183,7 +185,7 @@ function buildCells(entry: ScheduleEntry, tableType: TableType): string {
       td(start),    // 마감
       td(end),      // 테이블 전달
       td(assignee), // 담당자
-      td(description),
+      tdHtml(descriptionHtml),
     ].join('');
   }
 
@@ -193,7 +195,7 @@ function buildCells(entry: ScheduleEntry, tableType: TableType): string {
     td(stageName),
     td(start),       // HO
     td(end),         // HB
-    td(description),
+    tdHtml(descriptionHtml),
   ].join('');
 }
 

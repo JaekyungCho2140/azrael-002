@@ -16,6 +16,7 @@ export const MAX_SUBTASK_COUNT = 9;
 // ── 프로젝트 기본값 ──
 export const DEFAULT_HEADSUP_OFFSET = 10;
 export const DEFAULT_IOS_REVIEW_OFFSET = 7;
+export const DEFAULT_PAID_PRODUCT_OFFSET = 5;
 export const DEFAULT_STAGE_OFFSET = 10;
 export const DEFAULT_WORK_START_TIME = '09:00';
 export const DEFAULT_WORK_END_TIME = '18:00';

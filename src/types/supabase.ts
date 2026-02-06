@@ -50,6 +50,8 @@ export interface Database {
           heads_up_offset: number;
           ios_review_offset: number | null;
           show_ios_review_date: boolean;
+          paid_product_offset: number | null;
+          show_paid_product_date: boolean;
           template_id: string;
           disclaimer: string;
           jira_project_key: string | null;
@@ -67,6 +69,8 @@ export interface Database {
           heads_up_offset: number;
           ios_review_offset?: number | null;
           show_ios_review_date?: boolean;
+          paid_product_offset?: number | null;
+          show_paid_product_date?: boolean;
           template_id: string;
           disclaimer?: string;
           jira_project_key?: string | null;
@@ -84,6 +88,8 @@ export interface Database {
           heads_up_offset?: number;
           ios_review_offset?: number | null;
           show_ios_review_date?: boolean;
+          paid_product_offset?: number | null;
+          show_paid_product_date?: boolean;
           template_id?: string;
           disclaimer?: string;
           jira_project_key?: string | null;
@@ -209,6 +215,7 @@ export interface Database {
           update_date: string;
           heads_up_date: string;
           ios_review_date: string | null;
+          paid_product_date: string | null;
           calculated_at: string;
           calculated_by: string;
         };
@@ -218,6 +225,7 @@ export interface Database {
           update_date: string;
           heads_up_date: string;
           ios_review_date?: string | null;
+          paid_product_date?: string | null;
           calculated_at?: string;
           calculated_by: string;
         };
@@ -227,6 +235,7 @@ export interface Database {
           update_date?: string;
           heads_up_date?: string;
           ios_review_date?: string | null;
+          paid_product_date?: string | null;
           calculated_at?: string;
           calculated_by?: string;
         };

@@ -192,24 +192,24 @@ tr.subtask td:nth-child(3) {
   color: var(--azrael-gray-900);
 }
 
-/* Disclaimer 커스텀 서식 */
-.disclaimer .fmt-bold {
+/* 커스텀 서식 (Disclaimer + 설명 셀 공통) */
+.table-container .fmt-bold {
   font-weight: bold;
 }
 
-.disclaimer .fmt-red {
+.table-container .fmt-red {
   color: var(--azrael-error);
 }
 
-.disclaimer .fmt-green {
+.table-container .fmt-green {
   color: var(--azrael-success);
 }
 
-.disclaimer .fmt-blue {
+.table-container .fmt-blue {
   color: var(--azrael-info);
 }
 
-.disclaimer .fmt-underline {
+.table-container .fmt-underline {
   text-decoration: underline;
 }
 

@@ -20,7 +20,9 @@ import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
   calculateIosReviewDate,
+  calculatePaidProductDate,
   calculateDateTimeFromStage,
+  substituteDisclaimerVariables,
   formatUpdateDate,
   formatDateOnly
 } from '../lib/businessDays';
@@ -113,6 +115,7 @@ export function MainScreen({
 
     const headsUpDate = calculateHeadsUpDate(updateDateObj, currentProject, holidays);
     const iosReviewDate = calculateIosReviewDate(updateDateObj, currentProject, holidays);
+    const paidProductDate = calculatePaidProductDate(updateDateObj, currentProject, holidays);
 
     const createEntries = (stages: any[], tableTarget: 'table1' | 'table2' | 'table3'): ScheduleEntry[] => {
       const directParents = stages.filter(s => s.depth === 0 && s.tableTargets.includes(tableTarget));
@@ -199,6 +202,7 @@ export function MainScreen({
       updateDate: updateDateObj,
       headsUpDate,
       iosReviewDate: iosReviewDate || undefined,
+      paidProductDate: paidProductDate || undefined,
       table1Entries,
       table2Entries,
       table3Entries,
@@ -329,6 +333,14 @@ export function MainScreen({
                 </span>
               </div>
             )}
+            {calculationResult.paidProductDate && (
+              <div className="date-item date-item-right">
+                <span className="date-label">유료화 상품 협의</span>
+                <span className="date-value">
+                  {formatDateOnly(calculationResult.paidProductDate)}
+                </span>
+              </div>
+            )}
           </div>
 
           {/* 테이블 1 */}
@@ -336,7 +348,7 @@ export function MainScreen({
             title={`${calculationResult.updateDate.getFullYear().toString().substring(2)}-${String(calculationResult.updateDate.getMonth() + 1).padStart(2, '0')}-${String(calculationResult.updateDate.getDate()).padStart(2, '0')} 업데이트 일정표`}
             entries={calculationResult.table1Entries}
             type="table1"
-            disclaimer={currentProject.disclaimer}
+            disclaimer={substituteDisclaimerVariables(currentProject.disclaimer, calculationResult)}
           />
 
           {/* 간트 차트 1 */}

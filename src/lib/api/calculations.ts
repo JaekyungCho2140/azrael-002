@@ -87,6 +87,7 @@ export async function fetchCalculationResult(
       updateDate: new Date(calcData.update_date),
       headsUpDate: new Date(calcData.heads_up_date),
       iosReviewDate: calcData.ios_review_date ? new Date(calcData.ios_review_date) : undefined,
+      paidProductDate: calcData.paid_product_date ? new Date(calcData.paid_product_date) : undefined,
       table1Entries: buildEntries('table1'),
       table2Entries: buildEntries('table2'),
       table3Entries: buildEntries('table3'),
@@ -113,6 +114,7 @@ export async function saveCalculationResult(
     const updateDateStr = formatDateLocal(result.updateDate);
     const headsUpDateStr = formatDateLocal(result.headsUpDate);
     const iosReviewDateStr = result.iosReviewDate ? formatDateLocal(result.iosReviewDate) : null;
+    const paidProductDateStr = result.paidProductDate ? formatDateLocal(result.paidProductDate) : null;
 
     // 1. calculation_results UPSERT
     const { data: calcData, error: calcError } = await supabase
@@ -123,6 +125,7 @@ export async function saveCalculationResult(
           update_date: updateDateStr,
           heads_up_date: headsUpDateStr,
           ios_review_date: iosReviewDateStr,
+          paid_product_date: paidProductDateStr,
           calculated_by: userEmail,
         },
         {

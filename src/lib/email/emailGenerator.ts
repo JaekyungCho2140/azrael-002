@@ -33,6 +33,7 @@ import {
   formatTableHtml,
   htmlToPlainText,
 } from './formatters';
+import { substituteDisclaimerVariables } from '../businessDays';
 import { renderDisclaimerHtml } from './sanitizer';
 
 // ============================================================
@@ -80,13 +81,19 @@ export function generateEmail(
   const iosReviewDate = calcResult.iosReviewDate
     ? formatEmailDate(calcResult.iosReviewDate)
     : null;
+  const paidProductDate = calcResult.paidProductDate
+    ? formatEmailDate(calcResult.paidProductDate)
+    : null;
 
   // 2. 테이블 HTML 생성 (children 평탄화 포함)
   const entries = getEntriesByTableType(calcResult, request.tableType);
   const tableHtml = formatTableHtml(entries, request.tableType);
 
-  // 3. Disclaimer HTML 렌더링
-  const disclaimerHtml = renderDisclaimerHtml(project.disclaimer);
+  // 3. Disclaimer 변수 치환 + HTML 렌더링
+  const disclaimerWithVars = substituteDisclaimerVariables(
+    project.disclaimer, calcResult, formatEmailDate
+  );
+  const disclaimerHtml = renderDisclaimerHtml(disclaimerWithVars);
 
   // 4. 템플릿 변수 컨텍스트 구성
   const context: TemplateContext = {
@@ -98,6 +105,8 @@ export function generateEmail(
     disclaimer: disclaimerHtml || null, // v2.5: 빈 문자열 → null ({{#if disclaimer}} 평가용)
     projectName: project.name,
     showIosReviewDate: project.showIosReviewDate && iosReviewDate != null,
+    paidProductDate,
+    showPaidProductDate: project.showPaidProductDate && paidProductDate != null,
   };
 
   // 5. 템플릿 렌더링 (entity 디코딩 → 조건부 → 변수 순서 — §2.5)

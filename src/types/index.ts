@@ -13,6 +13,8 @@ export interface Project {
   headsUpOffset: number;         // 헤즈업 Offset (영업일)
   iosReviewOffset?: number;      // iOS 심사일 Offset (영업일, 선택적)
   showIosReviewDate: boolean;    // iOS 심사일 표시 여부
+  paidProductOffset?: number;    // 유료화 상품 협의 일정 Offset (영업일, 선택적)
+  showPaidProductDate: boolean;  // 유료화 상품 협의 일정 표시 여부
   templateId: string;            // 업무 단계 템플릿 ID
   disclaimer: string;            // 테이블 하단 Disclaimer 메모 (최대 6줄/600자, HTML)
   jiraProjectKey?: string;       // JIRA 프로젝트 키 (Phase 1, 예: "L10NM4")
@@ -88,6 +90,7 @@ export interface CalculationResult {
   updateDate: Date;              // 업데이트일
   headsUpDate: Date;             // 계산된 헤즈업 날짜
   iosReviewDate?: Date;          // 계산된 iOS 심사일
+  paidProductDate?: Date;        // 계산된 유료화 상품 협의 일정
   table1Entries: ScheduleEntry[]; // 테이블 1 엔트리
   table2Entries: ScheduleEntry[]; // 테이블 2 (Ext.) 엔트리
   table3Entries: ScheduleEntry[]; // 테이블 3 (Int.) 엔트리
@@ -204,14 +207,15 @@ export interface EmailGenerationResult {
  */
 export const VALID_TEMPLATE_VARIABLES = [
   'updateDate', 'updateDateShort', 'headsUp', 'iosReviewDate',
-  'table', 'disclaimer', 'projectName', 'showIosReviewDate',
+  'paidProductDate', 'table', 'disclaimer', 'projectName',
+  'showIosReviewDate', 'showPaidProductDate',
 ] as const;
 
 /**
  * boolean 전용 변수 — 조건부 블록({{#if}})에서만 사용
  * 참조: Azrael-PRD-Phase2.md §2.4 (v2.7)
  */
-export const BOOLEAN_ONLY_VARIABLES = ['showIosReviewDate'] as const;
+export const BOOLEAN_ONLY_VARIABLES = ['showIosReviewDate', 'showPaidProductDate'] as const;
 
 /**
  * LocalStorage 키 상수
@@ -230,13 +234,13 @@ export const STORAGE_KEYS = {
  * 참조: Azrael-PRD-Shared.md §5.3
  */
 export const DEFAULT_PROJECTS: Project[] = [
-  { id: "M4_GL", name: "M4/GL", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_M4_GL", disclaimer: "" },
-  { id: "NC_GL_1week", name: "NC/GL (1주)", headsUpOffset: 7, showIosReviewDate: false, templateId: "template_NC_GL_1week", disclaimer: "" },
-  { id: "NC_GL_2week", name: "NC/GL (2주)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_NC_GL_2week", disclaimer: "" },
-  { id: "FB_GL_CDN", name: "FB/GL (CDN)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_GL_CDN", disclaimer: "" },
-  { id: "FB_GL_APP", name: "FB/GL (APP)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_GL_APP", disclaimer: "" },
-  { id: "FB_JP_CDN", name: "FB/JP (CDN)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_JP_CDN", disclaimer: "" },
-  { id: "FB_JP_APP", name: "FB/JP (APP)", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_FB_JP_APP", disclaimer: "" },
-  { id: "LY_GL", name: "LY/GL", headsUpOffset: 10, showIosReviewDate: false, templateId: "template_LY_GL", disclaimer: "" },
-  { id: "MONTHLY", name: "월말정산", headsUpOffset: 5, showIosReviewDate: false, templateId: "template_MONTHLY", disclaimer: "" }
+  { id: "M4_GL", name: "M4/GL", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_M4_GL", disclaimer: "" },
+  { id: "NC_GL_1week", name: "NC/GL (1주)", headsUpOffset: 7, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_NC_GL_1week", disclaimer: "" },
+  { id: "NC_GL_2week", name: "NC/GL (2주)", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_NC_GL_2week", disclaimer: "" },
+  { id: "FB_GL_CDN", name: "FB/GL (CDN)", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_FB_GL_CDN", disclaimer: "" },
+  { id: "FB_GL_APP", name: "FB/GL (APP)", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_FB_GL_APP", disclaimer: "" },
+  { id: "FB_JP_CDN", name: "FB/JP (CDN)", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_FB_JP_CDN", disclaimer: "" },
+  { id: "FB_JP_APP", name: "FB/JP (APP)", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_FB_JP_APP", disclaimer: "" },
+  { id: "LY_GL", name: "LY/GL", headsUpOffset: 10, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_LY_GL", disclaimer: "" },
+  { id: "MONTHLY", name: "월말정산", headsUpOffset: 5, showIosReviewDate: false, showPaidProductDate: false, templateId: "template_MONTHLY", disclaimer: "" }
 ];

@@ -8,7 +8,7 @@ import { useState, useEffect, useId } from 'react';
 import { Modal } from './Modal';
 import { Button } from './Button';
 import { Project } from '../types';
-import { DEFAULT_HEADSUP_OFFSET, DEFAULT_IOS_REVIEW_OFFSET, MAX_DISCLAIMER_LENGTH } from '../constants';
+import { DEFAULT_HEADSUP_OFFSET, DEFAULT_IOS_REVIEW_OFFSET, DEFAULT_PAID_PRODUCT_OFFSET, MAX_DISCLAIMER_LENGTH } from '../constants';
 
 interface ProjectEditModalProps {
   isOpen: boolean;
@@ -22,6 +22,8 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const [headsUpOffset, setHeadsUpOffset] = useState(DEFAULT_HEADSUP_OFFSET);
   const [showIosReviewDate, setShowIosReviewDate] = useState(false);
   const [iosReviewOffset, setIosReviewOffset] = useState(DEFAULT_IOS_REVIEW_OFFSET);
+  const [showPaidProductDate, setShowPaidProductDate] = useState(false);
+  const [paidProductOffset, setPaidProductOffset] = useState(DEFAULT_PAID_PRODUCT_OFFSET);
   const [disclaimer, setDisclaimer] = useState('');
 
   // JIRA 관련 필드 (Phase 0.5 + Phase 1 + Phase 1.5 + Phase 1.7)
@@ -36,6 +38,8 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const headsUpOffsetId = useId();
   const showIosReviewDateId = useId();
   const iosReviewOffsetId = useId();
+  const showPaidProductDateId = useId();
+  const paidProductOffsetId = useId();
   const disclaimerId = useId();
   const jiraProjectKeyId = useId();
   const jiraEpicTemplateId = useId();
@@ -49,6 +53,8 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setHeadsUpOffset(project.headsUpOffset);
       setShowIosReviewDate(project.showIosReviewDate);
       setIosReviewOffset(project.iosReviewOffset || DEFAULT_IOS_REVIEW_OFFSET);
+      setShowPaidProductDate(project.showPaidProductDate);
+      setPaidProductOffset(project.paidProductOffset || DEFAULT_PAID_PRODUCT_OFFSET);
       setDisclaimer(project.disclaimer);
       setJiraProjectKey(project.jiraProjectKey || '');
       setJiraEpicTemplate(project.jiraEpicTemplate || '');
@@ -60,6 +66,8 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setHeadsUpOffset(DEFAULT_HEADSUP_OFFSET);
       setShowIosReviewDate(false);
       setIosReviewOffset(DEFAULT_IOS_REVIEW_OFFSET);
+      setShowPaidProductDate(false);
+      setPaidProductOffset(DEFAULT_PAID_PRODUCT_OFFSET);
       setDisclaimer('');
       setJiraProjectKey('');
       setJiraEpicTemplate('');
@@ -81,6 +89,8 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       headsUpOffset,
       iosReviewOffset: showIosReviewDate ? iosReviewOffset : undefined,
       showIosReviewDate,
+      paidProductOffset: showPaidProductDate ? paidProductOffset : undefined,
+      showPaidProductDate,
       templateId: project?.templateId || `template_${Date.now()}`,
       disclaimer,
       jiraProjectKey: jiraProjectKey.trim() || undefined,
@@ -153,6 +163,35 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
             onChange={(e) => setIosReviewOffset(Number(e.target.value))}
             min="0"
           />
+        </div>
+      )}
+
+      <div className="form-group">
+        <label className="form-checkbox">
+          <input
+            id={showPaidProductDateId}
+            type="checkbox"
+            checked={showPaidProductDate}
+            onChange={(e) => setShowPaidProductDate(e.target.checked)}
+          />
+          <span>유료화 상품 협의 일정 표시</span>
+        </label>
+      </div>
+
+      {showPaidProductDate && (
+        <div className="form-group">
+          <label className="form-label" htmlFor={paidProductOffsetId}>유료화 상품 협의 일정 Offset (영업일 전)</label>
+          <input
+            id={paidProductOffsetId}
+            type="number"
+            className="form-input"
+            value={paidProductOffset}
+            onChange={(e) => setPaidProductOffset(Number(e.target.value))}
+            min="0"
+          />
+          <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+            Disclaimer에서 {'{paidProductDate}'} 변수로 사용 가능
+          </small>
         </div>
       )}
 

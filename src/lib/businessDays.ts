@@ -119,6 +119,37 @@ export function calculateIosReviewDate(
 }
 
 /**
+ * 유료화 상품 협의 일정 계산
+ * 업데이트일 기준 N 영업일 역산
+ */
+export function calculatePaidProductDate(
+  updateDate: Date,
+  project: Project,
+  holidays: Holiday[]
+): Date | null {
+  if (!project.showPaidProductDate || !project.paidProductOffset) {
+    return null;
+  }
+  return calculateBusinessDate(updateDate, project.paidProductOffset, holidays);
+}
+
+/**
+ * Disclaimer 텍스트의 변수 치환
+ * {updateDate}, {headsUp}, {iosReviewDate}, {paidProductDate} → 날짜 형식
+ */
+export function substituteDisclaimerVariables(
+  disclaimer: string,
+  dates: { updateDate: Date; headsUpDate: Date; iosReviewDate?: Date; paidProductDate?: Date },
+  dateFormatter: (d: Date) => string = formatDateOnly
+): string {
+  return disclaimer
+    .replace(/\{updateDate\}/g, dateFormatter(dates.updateDate))
+    .replace(/\{headsUp\}/g, dateFormatter(dates.headsUpDate))
+    .replace(/\{iosReviewDate\}/g, dates.iosReviewDate ? dateFormatter(dates.iosReviewDate) : '')
+    .replace(/\{paidProductDate\}/g, dates.paidProductDate ? dateFormatter(dates.paidProductDate) : '');
+}
+
+/**
  * Date → 테이블 출력 형식 변환
  * 참조: Azrael-PRD-Shared.md §3.4
  *
