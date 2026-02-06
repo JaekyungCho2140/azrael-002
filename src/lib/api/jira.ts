@@ -46,7 +46,7 @@ export async function fetchEpicMapping(
 ): Promise<EpicMapping | null> {
   const dateStr = updateDate.toISOString().split('T')[0]; // YYYY-MM-DD
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jira_epic_mappings')
     .select('*')
     .eq('project_id', projectId)
@@ -87,7 +87,7 @@ export async function createEpicMappingPending(
 
   const dateStr = updateDate.toISOString().split('T')[0];
 
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jira_epic_mappings')
     .insert({
       project_id: projectId,
@@ -120,7 +120,7 @@ export async function updateEpicMapping(
   epicKey: string,
   epicUrl?: string
 ): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('jira_epic_mappings')
     .update({
       epic_id: epicId,
@@ -139,7 +139,7 @@ export async function updateEpicMapping(
  * Epic 매핑 삭제 (롤백 시)
  */
 export async function deleteEpicMapping(id: string): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('jira_epic_mappings')
     .delete()
     .eq('id', id);
@@ -154,7 +154,7 @@ export async function deleteEpicMapping(id: string): Promise<void> {
  * Task 매핑 조회 (Epic ID로)
  */
 export async function fetchTaskMappings(epicMappingId: string): Promise<TaskMapping[]> {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jira_task_mappings')
     .select('*')
     .eq('epic_mapping_id', epicMappingId)
@@ -183,7 +183,7 @@ export async function fetchTaskMappings(epicMappingId: string): Promise<TaskMapp
  * Task 매핑 일괄 생성
  */
 export async function createTaskMappings(mappings: Omit<TaskMapping, 'id' | 'createdAt' | 'updatedAt'>[]): Promise<void> {
-  const { error } = await (supabase as any)
+  const { error } = await supabase
     .from('jira_task_mappings')
     .insert(
       mappings.map((m) => ({
@@ -200,32 +200,6 @@ export async function createTaskMappings(mappings: Omit<TaskMapping, 'id' | 'cre
   if (error) {
     console.error('Failed to create task mappings:', error);
     throw new Error(`Task 매핑 생성 실패: ${error.message}`);
-  }
-}
-
-/**
- * Task 매핑 업데이트 (신규 Task 추가 시)
- */
-export async function updateTaskMapping(
-  epicMappingId: string,
-  stageId: string,
-  taskId: string,
-  taskKey: string
-): Promise<void> {
-  const { error } = await (supabase as any)
-    .from('jira_task_mappings')
-    .upsert({
-      epic_mapping_id: epicMappingId,
-      stage_id: stageId,
-      task_id: taskId,
-      task_key: taskKey,
-      is_headsup: stageId === 'HEADSUP',
-      issue_type: 'Task', // 일단 Task로 (Subtask는 별도 처리)
-    });
-
-  if (error) {
-    console.error('Failed to update task mapping:', error);
-    throw new Error(`Task 매핑 업데이트 실패: ${error.message}`);
   }
 }
 
@@ -298,7 +272,7 @@ export async function checkJiraIssueExists(
  * Phase 1.7: jira_assignees 테이블에서 활성화된 담당자 조회
  */
 export async function fetchJiraAssignees() {
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from('jira_assignees')
     .select('*')
     .eq('is_active', true)

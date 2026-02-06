@@ -31,8 +31,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
         throw new Error('Google 인증 토큰을 받지 못했습니다.');
       }
 
-      console.log('✅ Google 인증 성공');
-
       // 2. Supabase 세션 생성
       const { session } = await signInWithGoogleToken(idToken);
       const email = session?.user?.email;
@@ -40,8 +38,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
       if (!email) {
         throw new Error('이메일 정보를 가져올 수 없습니다.');
       }
-
-      console.log('✅ Supabase 세션 생성 완료:', email);
 
       // 3. 화이트리스트 검증
       const allowedUsers = import.meta.env.VITE_ALLOWED_USERS?.split(',') || [];
@@ -51,8 +47,6 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
         await supabase.auth.signOut();
         return;
       }
-
-      console.log('✅ 화이트리스트 검증 완료');
 
       // 4. 로그인 완료
       onLogin(email);

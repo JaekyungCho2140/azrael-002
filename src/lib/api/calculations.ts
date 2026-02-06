@@ -21,7 +21,7 @@ export async function fetchCalculationResult(
     const updateDateStr = formatDateLocal(updateDate);
 
     // 1. calculation_results 조회
-    const { data: calcData, error: calcError } = await (supabase as any)
+    const { data: calcData, error: calcError } = await supabase
       .from('calculation_results')
       .select('*')
       .eq('project_id', projectId)
@@ -32,7 +32,7 @@ export async function fetchCalculationResult(
     if (!calcData) return null;
 
     // 2. schedule_entries 조회 (3개 테이블)
-    const { data: entriesData, error: entriesError } = await (supabase as any)
+    const { data: entriesData, error: entriesError } = await supabase
       .from('schedule_entries')
       .select('*')
       .eq('calculation_id', calcData.id)
@@ -115,7 +115,7 @@ export async function saveCalculationResult(
     const iosReviewDateStr = result.iosReviewDate ? formatDateLocal(result.iosReviewDate) : null;
 
     // 1. calculation_results UPSERT
-    const { data: calcData, error: calcError } = await (supabase as any)
+    const { data: calcData, error: calcError } = await supabase
       .from('calculation_results')
       .upsert(
         {
@@ -145,7 +145,7 @@ export async function saveCalculationResult(
     ) => {
       for (const entry of entries) {
         // 부모 저장
-        const { data: parentData, error: parentError } = await (supabase as any)
+        const { data: parentData, error: parentError } = await supabase
           .from('schedule_entries')
           .insert({
             calculation_id: calcData.id,
@@ -175,7 +175,7 @@ export async function saveCalculationResult(
             parent_id: parentData.id,  // 부모 UUID
           }));
 
-          const { error: childrenError } = await (supabase as any)
+          const { error: childrenError } = await supabase
             .from('schedule_entries')
             .insert(childrenToInsert);
 

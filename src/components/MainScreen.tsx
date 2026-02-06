@@ -246,7 +246,6 @@ export function MainScreen({
     fetchEpicMapping(currentProject.id, updateDateObj).then(epicMapping => {
       const hasMapping = !!(epicMapping && epicMapping.epicId !== 'PENDING');
       setHasEpicMapping(hasMapping);
-      console.log('[handleCalculate] Epic 매핑 확인:', hasMapping, epicMapping?.epicKey);
     }).catch(err => {
       console.error('[handleCalculate] Epic 매핑 확인 실패:', err);
       setHasEpicMapping(false);
@@ -531,17 +530,6 @@ export function MainScreen({
       });
 
       // 4. Edge Function 호출
-      console.log('=== 프론트엔드: Edge Function 요청 데이터 ===');
-      console.log('프로젝트 키:', requestData.projectKey);
-      console.log('Epic:', requestData.epic);
-      console.log('Tasks 개수:', requestData.tasks.length);
-      console.log('Tasks 상세:', requestData.tasks.map((t: any) => ({
-        type: t.type,
-        issueTypeName: t.issueTypeName,
-        summary: t.summary,
-        stageId: t.stageId,
-        parentStageId: t.parentStageId
-      })));
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -590,7 +578,6 @@ export function MainScreen({
         .filter((i: any) => {
           // 중복된 stageId는 첫 번째만 저장
           if (seenStageIds.has(i.stageId)) {
-            console.log(`중복 stageId 스킵: ${i.stageId} (${i.key})`);
             return false;
           }
           seenStageIds.add(i.stageId);
@@ -663,13 +650,10 @@ export function MainScreen({
       }
 
       // 3. JIRA API로 Epic 실제 존재 여부 확인
-      console.log('[handleUpdateJira] Epic 존재 확인:', epicMapping.epicKey);
       const checkResult = await checkJiraIssueExists(epicMapping.epicKey, {
         email: currentUserEmail,  // Basic Auth에는 실제 이메일 필요
         apiToken: jiraConfig.apiToken,
       });
-      console.log('[handleUpdateJira] checkResult:', checkResult);
-
       if (checkResult.errorCode === 'UNAUTHORIZED') {
         setIsJiraLoading(false);
         alert('JIRA 인증에 실패했습니다.\n설정 → JIRA 연동 탭에서 API Token을 확인해주세요.');
@@ -685,7 +669,6 @@ export function MainScreen({
       if (!checkResult.exists) {
         // Epic이 JIRA에서 삭제됨 → 매핑 정리 후 재생성 안내
         setJiraLoadingMessage('매핑 정리 중...');
-        console.log('[handleUpdateJira] Epic 삭제됨, 매핑 정리');
         await deleteEpicMapping(epicMapping.id!);
         setIsJiraLoading(false);
         alert(

@@ -394,9 +394,9 @@ export function SettingsScreen({
           if (columns.length < 4) continue;
 
           const name = columns[0].trim();
-          const headsUpOffset = parseInt(columns[1].trim());
+          const headsUpOffset = parseInt(columns[1].trim(), 10);
           const showIosReviewDate = columns[2].trim().toUpperCase() === 'TRUE';
-          const iosReviewOffset = parseInt(columns[3].trim());
+          const iosReviewOffset = parseInt(columns[3].trim(), 10);
 
           const id = name.replace(/\//g, '_').replace(/\s*\(([^)]+)\)/, '_$1').replace(/\s+/g, '_');
 
@@ -440,8 +440,8 @@ export function SettingsScreen({
 
           const projectName = columns[0].trim();
           const stageName = columns[1].trim();
-          const startOffset = parseInt(columns[2].trim());
-          const endOffset = parseInt(columns[3].trim());
+          const startOffset = parseInt(columns[2].trim(), 10);
+          const endOffset = parseInt(columns[3].trim(), 10);
           const startTime = columns[4].trim();
           const endTime = columns[5].trim();
           const tableTargetsStr = columns[6].trim();

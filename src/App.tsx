@@ -41,7 +41,6 @@ function App() {
   useEffect(() => {
     // 현재 세션 확인
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('📱 세션 확인:', session?.user?.email || '없음');
       setSession(session);
       setIsLoadingSession(false);
 
@@ -54,7 +53,6 @@ function App() {
     // 세션 변경 감지
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        console.log('📱 세션 변경:', _event, session?.user?.email || '없음');
         setSession(session);
 
         // 로그아웃 이벤트 처리
@@ -119,7 +117,6 @@ function App() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      console.log('✅ 로그아웃 완료');
       // 상태는 onAuthStateChange에서 자동 처리됨
     } catch (err: any) {
       console.error('❌ 로그아웃 실패:', err);

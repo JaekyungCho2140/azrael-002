@@ -550,7 +550,7 @@ serve(async (req) => {
               });
               console.log(`Subtask 생성 성공 (assignee 제외): ${subtaskData.key} (부모: ${parentTask.key})`);
               await new Promise((resolve) => setTimeout(resolve, 100));
-              return; // 재시도 성공, 다음 Subtask로
+              continue; // 재시도 성공, 다음 Subtask로
             }
           }
         } catch (parseError) {

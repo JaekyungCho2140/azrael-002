@@ -17,18 +17,6 @@ export interface TemplateVars {
 }
 
 /**
- * 유효한 변수 목록
- */
-export const VALID_VARIABLES = [
-  'date',
-  'headsUp',
-  'projectName',
-  'taskName',
-  'subtaskName',
-  'stageName',
-];
-
-/**
  * 템플릿 변수 치환
  * @param template - 템플릿 문자열 (예: "{date} 업데이트 {taskName}")
  * @param vars - 치환할 변수 값
@@ -42,32 +30,6 @@ export function applyTemplate(template: string, vars: TemplateVars): string {
     .replace(/{taskName}/g, vars.taskName)
     .replace(/{subtaskName}/g, vars.subtaskName || '')
     .replace(/{stageName}/g, vars.stageName);
-}
-
-/**
- * 템플릿 검증
- * @param template - 검증할 템플릿 문자열
- * @returns 검증 결과 (유효 여부, 유효하지 않은 변수 목록)
- */
-export function validateTemplate(template: string): {
-  valid: boolean;
-  invalidVars: string[];
-} {
-  const varRegex = /{(\w+)}/g;
-  const invalidVars: string[] = [];
-  let match;
-
-  while ((match = varRegex.exec(template)) !== null) {
-    const varName = match[1];
-    if (!VALID_VARIABLES.includes(varName)) {
-      invalidVars.push(varName);
-    }
-  }
-
-  return {
-    valid: invalidVars.length === 0,
-    invalidVars,
-  };
 }
 
 /**
