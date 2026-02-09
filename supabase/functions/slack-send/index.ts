@@ -69,7 +69,7 @@ serve(async (req) => {
     let slackResponse: Response;
 
     if (imageBase64) {
-      // ─── 이미지 첨부 발신: files.uploadV2 ───
+      // ─── 이미지 첨부 발신: files.uploadV2 (3단계 프로세스) ───
       console.log('[이미지 첨부] base64 length:', imageBase64.length);
 
       // base64 디코딩
@@ -81,27 +81,71 @@ serve(async (req) => {
       const imageBlob = new Blob([bytes], { type: 'image/png' });
       console.log('[이미지 첨부] Blob size:', imageBlob.size, 'bytes');
 
-      // FormData 생성
-      const formData = new FormData();
-      formData.append('channels', channelId);
-      formData.append('file', imageBlob, 'schedule-table.png');
-      formData.append('initial_comment', message);
-      if (threadTs) {
-        formData.append('thread_ts', threadTs);
-      }
-      console.log('[이미지 첨부] FormData 생성 완료, thread_ts:', threadTs || 'none');
+      // Step 1: 업로드 URL 획득
+      const filename = 'schedule-table.png';
+      const filesize = imageBlob.size;
+      console.log('[Step 1] 요청 - filename:', filename, ', length:', filesize);
 
-      // files.upload API 호출 (legacy API지만 여전히 작동)
-      slackResponse = await fetch('https://slack.com/api/files.upload', {
+      // FormData 사용 (Slack API는 JSON이 아닌 form-data 기대)
+      const uploadUrlFormData = new FormData();
+      uploadUrlFormData.append('filename', filename);
+      uploadUrlFormData.append('length', filesize.toString());
+
+      const uploadUrlResponse = await fetch('https://slack.com/api/files.getUploadURLExternal', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${tokenData.access_token}`,
         },
-        body: formData,
+        body: uploadUrlFormData,
       });
 
-      slackResult = await slackResponse.json();
-      console.log('[이미지 첨부] Slack API 응답:', JSON.stringify(slackResult));
+      const uploadUrlResult = await uploadUrlResponse.json();
+      console.log('[Step 1] getUploadURLExternal 응답:', JSON.stringify(uploadUrlResult));
+
+      if (!uploadUrlResult.ok) {
+        slackResult = uploadUrlResult;
+      } else {
+        // Step 2: 파일 업로드
+        const uploadResponse = await fetch(uploadUrlResult.upload_url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+          },
+          body: imageBlob,
+        });
+
+        if (!uploadResponse.ok) {
+          console.error('[Step 2] 파일 업로드 실패:', uploadResponse.status);
+          slackResult = { ok: false, error: 'file_upload_failed' };
+        } else {
+          console.log('[Step 2] 파일 업로드 성공');
+
+          // Step 3: 업로드 완료 및 메시지 발신
+          const completeResponse = await fetch('https://slack.com/api/files.completeUploadExternal', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${tokenData.access_token}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              files: [
+                {
+                  id: uploadUrlResult.file_id,
+                  title: 'schedule-table.png',
+                },
+              ],
+              channel_id: channelId,
+              initial_comment: message,
+              thread_ts: threadTs,
+            }),
+          });
+
+          slackResult = await completeResponse.json();
+          console.log('[Step 3] completeUploadExternal 응답:', JSON.stringify(slackResult));
+        }
+      }
+
+      slackResponse = new Response('', { status: slackResult.ok ? 200 : 400 });
     } else {
       // ─── 텍스트 전용 발신: chat.postMessage ───
       const slackBody: Record<string, unknown> = {
