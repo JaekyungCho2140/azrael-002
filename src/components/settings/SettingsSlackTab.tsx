@@ -18,6 +18,7 @@ interface SettingsSlackTabProps {
   currentUserEmail: string;
   currentUserId: string;
   selectedProjectId: string;
+  onSelectedProjectIdChange: (id: string) => void;
   projects: Project[];
 }
 
@@ -25,6 +26,7 @@ export function SettingsSlackTab({
   currentUserEmail,
   currentUserId,
   selectedProjectId,
+  onSelectedProjectIdChange,
   projects,
 }: SettingsSlackTabProps) {
   const [isOAuthPending, setIsOAuthPending] = useState(false);
@@ -229,9 +231,16 @@ export function SettingsSlackTab({
           <h4 style={{ marginBottom: '1rem' }}>채널 매핑</h4>
 
           <div style={{ marginBottom: '1rem' }}>
-            <label style={{ marginRight: '1rem', fontWeight: 500 }}>
-              프로젝트: {selectedProject?.name}
-            </label>
+            <label style={{ marginRight: '1rem', fontWeight: 500 }}>프로젝트 선택:</label>
+            <select
+              value={selectedProjectId}
+              onChange={(e) => onSelectedProjectIdChange(e.target.value)}
+              className="project-dropdown"
+            >
+              {projects?.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>

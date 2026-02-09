@@ -7,9 +7,17 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// HTML 응답 헬퍼 (UTF-8 인코딩 보장)
+// HTML 응답 헬퍼 (UTF-8 BOM 포함, 인코딩 보장)
 function htmlResponse(html: string, status = 200): Response {
-  return new Response(html, {
+  // UTF-8 BOM (0xEF, 0xBB, 0xBF) 추가
+  const encoder = new TextEncoder();
+  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+  const content = encoder.encode(html);
+  const withBom = new Uint8Array(bom.length + content.length);
+  withBom.set(bom);
+  withBom.set(content, bom.length);
+
+  return new Response(withBom, {
     status,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',

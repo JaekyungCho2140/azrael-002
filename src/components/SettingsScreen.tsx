@@ -166,6 +166,7 @@ export function SettingsScreen({
                 currentUserEmail={currentUserEmail}
                 currentUserId={currentUserId}
                 selectedProjectId={selectedProjectId}
+                onSelectedProjectIdChange={setSelectedProjectId}
                 projects={projects}
               />
             )}
