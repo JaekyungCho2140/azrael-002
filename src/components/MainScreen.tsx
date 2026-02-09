@@ -14,8 +14,10 @@ const CalendarView = lazy(() => import('./CalendarView').then(m => ({ default: m
 const SettingsScreen = lazy(() => import('./SettingsScreen').then(m => ({ default: m.SettingsScreen })));
 const JiraPreviewModal = lazy(() => import('./JiraPreviewModal').then(m => ({ default: m.JiraPreviewModal })));
 const EmailGeneratorModal = lazy(() => import('./EmailGeneratorModal').then(m => ({ default: m.EmailGeneratorModal })));
+const SlackSendModal = lazy(() => import('./SlackSendModal').then(m => ({ default: m.SlackSendModal })));
 import { getUserState } from '../lib/storage';
 import { useSaveCalculationResult, useJiraAssignees, useHolidays } from '../hooks/useSupabase';
+import { useSlackTokenStatus } from '../hooks/useSlackTokenStatus';
 import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
@@ -49,8 +51,10 @@ export function MainScreen({
   const [calculationResult, setCalculationResult] = useState<CalculationResult | null>(null);
   const [showSettings, setShowSettings] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showSlackModal, setShowSlackModal] = useState(false);
   const [showVisualization, setShowVisualization] = useState(true);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [currentUserId, setCurrentUserId] = useState<string>('');
 
   // Phase 1.7: 계산 결과 Supabase 연동
   const saveMutation = useSaveCalculationResult();
@@ -70,11 +74,17 @@ export function MainScreen({
     holidays,
   });
 
-  // 사용자 이메일 가져오기
+  // Slack 토큰 상태 조회
+  const { data: hasSlackToken = false } = useSlackTokenStatus(currentUserId);
+
+  // 사용자 이메일 및 ID 가져오기
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
       if (user?.email) {
         setCurrentUserEmail(user.email);
+      }
+      if (user?.id) {
+        setCurrentUserId(user.id);
       }
     });
   }, []);
@@ -230,6 +240,8 @@ export function MainScreen({
       <Suspense fallback={<div className="lazy-loading">설정을 불러오는 중...</div>}>
         <SettingsScreen
           currentProjectId={currentProject.id}
+          currentUserId={currentUserId}
+          currentUserEmail={currentUserEmail}
           onClose={() => setShowSettings(false)}
           calculationResult={calculationResult}
         />
@@ -310,6 +322,13 @@ export function MainScreen({
             title={!calculationResult ? '일정 계산 후 사용 가능' : ''}
           >
             ✉️ 이메일 복사
+          </Button>
+          <Button
+            onClick={() => setShowSlackModal(true)}
+            disabled={!calculationResult || !hasSlackToken}
+            title={!calculationResult ? '먼저 계산을 실행해주세요' : !hasSlackToken ? '설정에서 Slack 연동이 필요합니다' : ''}
+          >
+            💬 슬랙 발신
           </Button>
         </div>
       </div>
@@ -435,6 +454,18 @@ export function MainScreen({
             project={currentProject}
             updateDate={new Date(updateDate.split(' ')[0])}
             calculationResult={calculationResult}
+          />
+        </Suspense>
+      )}
+
+      {showSlackModal && calculationResult && (
+        <Suspense fallback={null}>
+          <SlackSendModal
+            isOpen={showSlackModal}
+            onClose={() => setShowSlackModal(false)}
+            project={currentProject}
+            calculationResult={calculationResult}
+            currentUserId={currentUserId}
           />
         </Suspense>
       )}

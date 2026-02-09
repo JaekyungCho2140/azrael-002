@@ -25,6 +25,8 @@ function mapToProject(row: any): Project {
     jiraHeadsupTemplate: row.jira_headsup_template || undefined,
     jiraHeadsupDescription: row.jira_headsup_description || undefined,
     jiraTaskIssueType: row.jira_task_issue_type || undefined,
+    slackChannelId: row.slack_channel_id || undefined,
+    slackChannelName: row.slack_channel_name || undefined,
   };
 }
 

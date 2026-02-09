@@ -22,6 +22,8 @@ export interface Project {
   jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿 (Phase 0.5)
   jiraHeadsupDescription?: string; // JIRA 헤즈업 Task 설명 (ADF 테이블 마크업 지원)
   jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (Phase 1.5, 기본값: "PM(표준)")
+  slackChannelId?: string;       // Slack 기본 채널 ID (Phase 3, 예: "C0123456789")
+  slackChannelName?: string;     // Slack 기본 채널 이름 (Phase 3, 표시용, 예: "l10n-mir4")
   // isDeletable는 런타임 계산 필드 (저장 안 함)
 }
 
@@ -216,6 +218,72 @@ export const VALID_TEMPLATE_VARIABLES = [
  * 참조: Azrael-PRD-Phase2.md §2.4 (v2.7)
  */
 export const BOOLEAN_ONLY_VARIABLES = ['showIosReviewDate', 'showPaidProductDate'] as const;
+
+// ============================================================
+// Phase 3: 슬랙 발신 타입
+// 참조: Azrael-PRD-Phase3.md §6.1
+// ============================================================
+
+/**
+ * SlackSendModalProps (슬랙 발신 모달)
+ * 참조: Azrael-PRD-Phase3.md §6.1
+ */
+export interface SlackSendModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  project: Project;              // 현재 선택된 프로젝트
+  calculationResult: CalculationResult;  // 계산 결과 (테이블 데이터)
+  currentUserId: string;         // Slack API 호출용 Supabase UID
+}
+
+/**
+ * SlackSendRequest (슬랙 발신 요청)
+ * 참조: Azrael-PRD-Phase3.md §6.1
+ */
+export interface SlackSendRequest {
+  channelId: string;             // Slack 채널 ID (예: C0123456789)
+  message: string;               // mrkdwn 형식 메시지 (렌더링 완료된 최종 텍스트)
+  userId: string;                // 발신자 user_id (Supabase auth.uid())
+  threadTs?: string;             // 스레드 리플라이 시 부모 메시지 timestamp
+}
+
+/**
+ * SlackSendResponse (슬랙 발신 응답)
+ * 참조: Azrael-PRD-Phase3.md §6.1
+ */
+export interface SlackSendResponse {
+  success: boolean;
+  messageTs?: string;            // 발신된 메시지 timestamp (성공 시)
+  error?: string;                // 사용자용 에러 메시지
+  errorCode?: string;            // 프로그래밍용 에러 코드
+  retryAfter?: number;           // Rate limit 시 재시도 대기 시간 (초)
+}
+
+/**
+ * SlackChannel (슬랙 채널)
+ * 참조: Azrael-PRD-Phase3.md §6.1
+ * 런타임 전용 타입 (DB 저장 없음)
+ */
+export interface SlackChannel {
+  id: string;                    // Slack 채널 ID
+  name: string;                  // 채널 이름 (예: "l10n-mir4")
+  isPrivate: boolean;            // 비공개 채널 여부
+}
+
+/**
+ * SlackMessageTemplate (슬랙 메시지 템플릿)
+ * 참조: Azrael-PRD-Phase3.md §6.1
+ */
+export interface SlackMessageTemplate {
+  id: string;                    // UUID
+  projectId: string;             // 소속 프로젝트 ID
+  name: string;                  // 템플릿 이름 (프로젝트 내 UNIQUE, 최대 50자)
+  bodyTemplate: string;          // 본문 템플릿 (mrkdwn, 변수/조건부 블록 지원)
+  isBuiltIn: boolean;            // 기본 제공 템플릿 여부 (true=삭제 불가)
+  createdAt: string;             // ISO 8601
+  createdBy: string | null;      // 생성자 이메일 ('SYSTEM' 또는 사용자 이메일)
+  updatedAt: string;             // ISO 8601
+}
 
 /**
  * LocalStorage 키 상수

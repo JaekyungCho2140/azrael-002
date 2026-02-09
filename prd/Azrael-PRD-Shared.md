@@ -1,7 +1,7 @@
 # Azrael PRD - Shared Components
 
-**최종 업데이트**: 2026-02-06
-**버전**: 3.2 (Phase 2 완료 + 유료화 상품 협의 일정 반영)
+**최종 업데이트**: 2026-02-09
+**버전**: 3.3 (Phase 3 시작 - Slack 연동 타입 추가)
 **참조**: [Azrael-PRD-Master.md](./Azrael-PRD-Master.md)
 
 ---
@@ -90,6 +90,8 @@ interface Project {
   jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (기본값: "PM(표준)")
   paidProductOffset?: number;    // 유료화 상품 협의 일정 Offset (영업일, 선택적)
   showPaidProductDate: boolean;  // 유료화 상품 협의 일정 표시 여부
+  slackChannelId?: string;       // Slack 기본 채널 ID (Phase 3)
+  slackChannelName?: string;     // Slack 기본 채널 이름 (Phase 3, 표시용)
 }
 ```
 
@@ -227,6 +229,8 @@ interface UserState {
 - JiraEpicMappings: JIRA Epic 매핑
 - JiraTaskMappings: JIRA Task 매핑
 - EmailTemplates: 이메일 템플릿 (Phase 2)
+- SlackUserTokens: Slack OAuth 토큰 (Phase 3)
+- SlackMessageTemplates: Slack 메시지 템플릿 (Phase 3)
 
 **LocalStorage (개인 데이터)**:
 - UserState: 사용자 상태 (온보딩, 마지막 프로젝트)
@@ -299,18 +303,55 @@ CREATE POLICY "Anyone can read {table}"
   USING (auth.role() = 'authenticated');
 ```
 
-**쓰기 권한**: 화이트리스트 사용자만 (L10n팀 5명)
+**쓰기 권한**: 화이트리스트 사용자만 (L10n팀 6명)
 ```sql
-CREATE POLICY "Whitelisted users can modify {table}"
-  ON {table} FOR {INSERT|UPDATE|DELETE}
-  USING (auth.email() IN (
-    'jkcho@wemade.com',
-    'mine@wemade.com',
-    'srpark@wemade.com',
-    'garden0130@wemade.com',
-    'hkkim@wemade.com'
-  ));
+-- INSERT 정책 (WITH CHECK)
+CREATE POLICY "Whitelisted users can insert {table}"
+  ON {table} FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    auth.jwt() ->> 'email' IN (
+      'jkcho@wemade.com',
+      'mine@wemade.com',
+      'srpark@wemade.com',
+      'garden0130@wemade.com',
+      'hkkim@wemade.com',
+      'uzilay@gmail.com'
+    )
+  );
+
+-- UPDATE 정책 (USING)
+CREATE POLICY "Whitelisted users can update {table}"
+  ON {table} FOR UPDATE
+  TO authenticated
+  USING (
+    auth.jwt() ->> 'email' IN (
+      'jkcho@wemade.com',
+      'mine@wemade.com',
+      'srpark@wemade.com',
+      'garden0130@wemade.com',
+      'hkkim@wemade.com',
+      'uzilay@gmail.com'
+    )
+  );
+
+-- DELETE 정책 (USING)
+CREATE POLICY "Whitelisted users can delete {table}"
+  ON {table} FOR DELETE
+  TO authenticated
+  USING (
+    auth.jwt() ->> 'email' IN (
+      'jkcho@wemade.com',
+      'mine@wemade.com',
+      'srpark@wemade.com',
+      'garden0130@wemade.com',
+      'hkkim@wemade.com',
+      'uzilay@gmail.com'
+    )
+  );
 ```
+
+> **참고**: `auth.jwt() ->> 'email'` 패턴을 사용합니다 (`auth.email()` 아님). 각 연산(INSERT/UPDATE/DELETE)별로 별도 정책을 생성하여 WITH CHECK와 USING을 명확히 구분합니다 (migration 008 패턴).
 
 ### 3.4. LocalStorage 스키마
 

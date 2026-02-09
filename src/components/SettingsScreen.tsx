@@ -6,9 +6,8 @@
  * 리팩토링: 탭별 컴포넌트 분리 (오케스트레이터 패턴)
  */
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { Button } from './Button';
-import { supabase } from '../lib/supabase';
 import { useProjects, useTemplates } from '../hooks/useSupabase';
 import './SettingsScreen.css';
 
@@ -18,35 +17,30 @@ const SettingsStagesTab = lazy(() => import('./settings/SettingsStagesTab').then
 const SettingsHolidaysTab = lazy(() => import('./settings/SettingsHolidaysTab').then(m => ({ default: m.SettingsHolidaysTab })));
 const SettingsJiraTab = lazy(() => import('./settings/SettingsJiraTab').then(m => ({ default: m.SettingsJiraTab })));
 const SettingsEmailTemplatesTab = lazy(() => import('./settings/SettingsEmailTemplatesTab').then(m => ({ default: m.SettingsEmailTemplatesTab })));
+const SettingsSlackTab = lazy(() => import('./settings/SettingsSlackTab').then(m => ({ default: m.SettingsSlackTab })));
 
 interface SettingsScreenProps {
   currentProjectId: string;
+  currentUserId: string;          // Supabase auth user UUID
+  currentUserEmail: string;       // 사용자 이메일 (OAuth, 표시용)
   onClose: () => void;
   calculationResult?: import('../types').CalculationResult | null;
 }
 
-type SettingsTab = 'projects' | 'stages' | 'holidays' | 'jira' | 'emailTemplates';
+type SettingsTab = 'projects' | 'stages' | 'holidays' | 'jira' | 'emailTemplates' | 'slack';
 
 export function SettingsScreen({
   currentProjectId,
+  currentUserId,
+  currentUserEmail,
   onClose,
   calculationResult,
 }: SettingsScreenProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('projects');
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId);
-  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
 
   // 관리자 권한 확인
   const isAdmin = currentUserEmail === 'jkcho@wemade.com';
-
-  // 현재 사용자 이메일 가져오기
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
-        setCurrentUserEmail(user.email);
-      }
-    });
-  }, []);
 
   // Supabase 데이터 조회
   const { data: projects } = useProjects();
@@ -116,6 +110,16 @@ export function SettingsScreen({
           >
             이메일 템플릿
           </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'slack'}
+            aria-controls="settings-panel-slack"
+            className={`settings-nav-item ${activeTab === 'slack' ? 'active' : ''}`}
+            onClick={() => setActiveTab('slack')}
+          >
+            Slack
+          </button>
         </nav>
 
         {/* Content */}
@@ -154,6 +158,15 @@ export function SettingsScreen({
                 onSelectedProjectIdChange={setSelectedProjectId}
                 projects={projects}
                 calculationResult={calculationResult ?? null}
+              />
+            )}
+
+            {activeTab === 'slack' && projects && (
+              <SettingsSlackTab
+                currentUserEmail={currentUserEmail}
+                currentUserId={currentUserId}
+                selectedProjectId={selectedProjectId}
+                projects={projects}
               />
             )}
           </Suspense>

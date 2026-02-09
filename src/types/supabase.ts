@@ -59,6 +59,8 @@ export interface Database {
           jira_headsup_template: string | null;
           jira_headsup_description: string | null;
           jira_task_issue_type: string | null;
+          slack_channel_id: string | null;
+          slack_channel_name: string | null;
           created_at: string;
           updated_at: string;
           created_by: string;
@@ -78,6 +80,8 @@ export interface Database {
           jira_headsup_template?: string | null;
           jira_headsup_description?: string | null;
           jira_task_issue_type?: string | null;
+          slack_channel_id?: string | null;
+          slack_channel_name?: string | null;
           created_at?: string;
           updated_at?: string;
           created_by: string;
@@ -97,6 +101,8 @@ export interface Database {
           jira_headsup_template?: string | null;
           jira_headsup_description?: string | null;
           jira_task_issue_type?: string | null;
+          slack_channel_id?: string | null;
+          slack_channel_name?: string | null;
           created_at?: string;
           updated_at?: string;
           created_by?: string;
@@ -454,6 +460,73 @@ export interface Database {
         Update: {
           name?: string;
           subject_template?: string;
+          body_template?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "fk_project";
+            columns: ["project_id"];
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
+      // Phase 3: Slack OAuth 토큰 (009_phase3_slack.sql)
+      slack_user_tokens: {
+        Row: {
+          id: string;
+          user_id: string;
+          access_token: string;
+          slack_user_id: string;
+          team_id: string;
+          team_name: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          access_token: string;
+          slack_user_id: string;
+          team_id: string;
+          team_name?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          access_token?: string;
+          slack_user_id?: string;
+          team_id?: string;
+          team_name?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      // Phase 3: Slack 메시지 템플릿 (009_phase3_slack.sql)
+      slack_message_templates: {
+        Row: {
+          id: string;
+          project_id: string;
+          name: string;
+          body_template: string;
+          is_built_in: boolean;
+          created_at: string;
+          created_by: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          name: string;
+          body_template: string;
+          is_built_in?: boolean;       // seed 트리거 전용. 프론트엔드에서 true 설정 금지
+          created_by?: string | null;
+        };
+        Update: {
+          name?: string;
           body_template?: string;
         };
         Relationships: [
