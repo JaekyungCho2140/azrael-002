@@ -53,6 +53,8 @@ export function SlackSendModal({
   const [isThreadReply, setIsThreadReply] = useState(false);
   const [threadTsInput, setThreadTsInput] = useState('');
   const [isSending, setIsSending] = useState(false);
+  const [attachImage, setAttachImage] = useState(false);
+  const [sendingStatus, setSendingStatus] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const queryClient = useQueryClient();
@@ -81,7 +83,9 @@ export function SlackSendModal({
     setSelectedChannelId('');
     setIsThreadReply(false);
     setThreadTsInput('');
+    setAttachImage(false);
     setIsSending(false);
+    setSendingStatus('');
     setToast(null);
   }, [isOpen]);
 
@@ -138,7 +142,60 @@ export function SlackSendModal({
 
     setIsSending(true);
 
+    let imageBlob: Blob | undefined;
+
+    // 이미지 첨부 체크 시 캡처
+    if (attachImage) {
+      try {
+        setSendingStatus('이미지 캡처 중...');
+
+        // useImageCopy 패턴 참조: html2canvas 동적 import
+        const html2canvas = (await import('html2canvas')).default;
+
+        // 선택된 테이블 요소 찾기 (ScheduleTable.tsx: id={`table-${type}`})
+        const tableElementId = `table-${selectedTable}`;
+        const tableElement = document.getElementById(tableElementId);
+        if (!tableElement) {
+          alert('테이블을 찾을 수 없습니다.');
+          setIsSending(false);
+          setSendingStatus('');
+          return;
+        }
+
+        // 스크롤 처리 - overflow를 visible로 임시 전환
+        const originalOverflow = tableElement.style.overflow;
+        tableElement.style.overflow = 'visible';
+
+        // 캔버스 생성
+        const canvas = await html2canvas(tableElement, {
+          backgroundColor: '#ffffff',
+          scale: 2, // 고해상도
+          useCORS: true,
+          logging: false,
+        });
+
+        // 원래 overflow 복원
+        tableElement.style.overflow = originalOverflow;
+
+        // Blob 변환
+        imageBlob = await new Promise<Blob>((resolve, reject) => {
+          canvas.toBlob((blob) => {
+            if (blob) resolve(blob);
+            else reject(new Error('이미지 생성 실패'));
+          }, 'image/png');
+        });
+      } catch (err) {
+        console.error('이미지 캡처 실패:', err);
+        alert('이미지 캡처에 실패했습니다.');
+        setIsSending(false);
+        setSendingStatus('');
+        return;
+      }
+    }
+
+    // API 호출 (기존 로직 + imageBlob 전달)
     try {
+      setSendingStatus(attachImage ? '발신 중 (이미지 포함)...' : '발신 중...');
       const threadTs = isThreadReply ? parseThreadTs(threadTsInput) : undefined;
 
       const response = await sendSlackMessage({
@@ -146,6 +203,7 @@ export function SlackSendModal({
         message: previewMessage,
         userId: currentUserId,
         threadTs: threadTs || undefined,
+        imageBlob,
       });
 
       if (response.success) {
@@ -173,6 +231,7 @@ export function SlackSendModal({
       alert('네트워크 오류가 발생했습니다. 다시 시도해주세요.');
     } finally {
       setIsSending(false);
+      setSendingStatus('');
     }
   };
 
@@ -194,7 +253,7 @@ export function SlackSendModal({
         취소
       </Button>
       <Button onClick={handleSend} disabled={!canSend || isSending}>
-        {isSending ? '발신 중...' : '슬랙에 발신'}
+        {isSending ? (sendingStatus || '발신 중...') : '슬랙에 발신'}
       </Button>
     </div>
   );
@@ -299,6 +358,21 @@ export function SlackSendModal({
               onChange={(e) => setThreadTsInput(e.target.value)}
             />
           )}
+
+          {/* 테이블 이미지 첨부 */}
+          <div style={{ marginTop: '0.5rem' }}>
+            <label className="slack-thread-checkbox">
+              <input
+                type="checkbox"
+                checked={attachImage}
+                onChange={(e) => setAttachImage(e.target.checked)}
+              />
+              <span>테이블 이미지 첨부</span>
+            </label>
+            <div style={{ color: 'var(--azrael-gray-500)', fontSize: '0.85rem', marginLeft: '1.5rem' }}>
+              선택한 테이블을 이미지로 캡처하여 함께 전송합니다
+            </div>
+          </div>
         </div>
 
         {/* 미리보기 */}

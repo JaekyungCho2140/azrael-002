@@ -93,16 +93,35 @@ export async function fetchSlackChannels(
 
 /**
  * Slack 메시지 발신
+ * imageBlob이 있으면 base64 인코딩하여 Edge Function에 전달 (files.uploadV2 사용)
  */
 export async function sendSlackMessage(
-  request: SlackSendRequest
+  request: SlackSendRequest & { imageBlob?: Blob }
 ): Promise<SlackSendResponse> {
+  const { imageBlob, ...requestData } = request;
+
+  // 이미지가 있으면 base64로 인코딩
+  let imageBase64: string | undefined;
+  if (imageBlob) {
+    const arrayBuffer = await imageBlob.arrayBuffer();
+    const uint8Array = new Uint8Array(arrayBuffer);
+    // Uint8Array를 base64 문자열로 변환 (chunk 처리로 큰 이미지 지원)
+    const chunkSize = 8192;
+    let binaryString = '';
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, i + chunkSize);
+      binaryString += String.fromCharCode(...chunk);
+    }
+    imageBase64 = btoa(binaryString);
+  }
+
   const { data, error } = await supabase.functions.invoke('slack-send', {
     body: {
-      channelId: request.channelId,
-      message: request.message,
-      userId: request.userId,
-      threadTs: request.threadTs,
+      channelId: requestData.channelId,
+      message: requestData.message,
+      userId: requestData.userId,
+      threadTs: requestData.threadTs,
+      imageBase64,
     },
   });
 

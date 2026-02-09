@@ -17,6 +17,7 @@ interface SlackSendRequest {
   message: string;
   userId: string;
   threadTs?: string;
+  imageBase64?: string;
 }
 
 interface SlackSendResponse {
@@ -33,7 +34,7 @@ serve(async (req) => {
   }
 
   try {
-    const { channelId, message, userId, threadTs }: SlackSendRequest = await req.json();
+    const { channelId, message, userId, threadTs, imageBase64 }: SlackSendRequest = await req.json();
 
     // Supabase 클라이언트 (Service Role: RLS bypass)
     const supabase = createClient(
@@ -59,26 +60,64 @@ serve(async (req) => {
       );
     }
 
-    // 2. Slack API 호출 (chat.postMessage)
-    // chat.postMessage는 text 필드를 기본적으로 mrkdwn 파싱하므로 mrkdwn 파라미터 불필요
-    const slackBody: Record<string, unknown> = {
-      channel: channelId,
-      text: message,
-    };
-    if (threadTs) {
-      slackBody.thread_ts = threadTs;
+    // 2. Slack API 호출
+    // 이미지 첨부 여부에 따라 분기:
+    //   - 이미지 없음: chat.postMessage (텍스트만)
+    //   - 이미지 있음: files.uploadV2 (이미지 + initial_comment)
+
+    let slackResult: Record<string, unknown>;
+    let slackResponse: Response;
+
+    if (imageBase64) {
+      // ─── 이미지 첨부 발신: files.uploadV2 ───
+      // base64 디코딩
+      const binaryString = atob(imageBase64);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      const imageBlob = new Blob([bytes], { type: 'image/png' });
+
+      // FormData 생성
+      const formData = new FormData();
+      formData.append('channels', channelId);
+      formData.append('file', imageBlob, 'schedule-table.png');
+      formData.append('initial_comment', message);
+      if (threadTs) {
+        formData.append('thread_ts', threadTs);
+      }
+
+      // files.uploadV2 API 호출
+      slackResponse = await fetch('https://slack.com/api/files.uploadV2', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+        },
+        body: formData,
+      });
+
+      slackResult = await slackResponse.json();
+    } else {
+      // ─── 텍스트 전용 발신: chat.postMessage ───
+      const slackBody: Record<string, unknown> = {
+        channel: channelId,
+        text: message,
+      };
+      if (threadTs) {
+        slackBody.thread_ts = threadTs;
+      }
+
+      slackResponse = await fetch('https://slack.com/api/chat.postMessage', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${tokenData.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(slackBody),
+      });
+
+      slackResult = await slackResponse.json();
     }
-
-    const slackResponse = await fetch('https://slack.com/api/chat.postMessage', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${tokenData.access_token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(slackBody),
-    });
-
-    const slackResult = await slackResponse.json();
 
     // 3. 토큰 무효화 에러 시 자동 삭제
     if (slackResult.error === 'token_revoked' || slackResult.error === 'invalid_auth') {
@@ -148,10 +187,26 @@ serve(async (req) => {
     }
 
     // 6. 성공
+    // files.uploadV2의 경우 messageTs 추출 경로가 다름
+    let messageTs: string | undefined;
+    if (imageBase64) {
+      // files.uploadV2 응답: { ok: true, files: [{ id, ... }] }
+      // messageTs는 파일 공유 메시지의 ts (직접 접근 어려움, undefined 허용)
+      const files = slackResult.files as Array<Record<string, unknown>> | undefined;
+      if (files && files.length > 0) {
+        const shares = files[0].shares as Record<string, Record<string, Array<Record<string, string>>>> | undefined;
+        if (shares?.public?.[channelId]?.[0]?.ts) {
+          messageTs = shares.public[channelId][0].ts;
+        }
+      }
+    } else {
+      messageTs = slackResult.ts as string | undefined;
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
-        messageTs: slackResult.ts,
+        messageTs,
       } as SlackSendResponse),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
