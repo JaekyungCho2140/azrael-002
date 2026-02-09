@@ -70,6 +70,8 @@ serve(async (req) => {
 
     if (imageBase64) {
       // ─── 이미지 첨부 발신: files.uploadV2 ───
+      console.log('[이미지 첨부] base64 length:', imageBase64.length);
+
       // base64 디코딩
       const binaryString = atob(imageBase64);
       const bytes = new Uint8Array(binaryString.length);
@@ -77,6 +79,7 @@ serve(async (req) => {
         bytes[i] = binaryString.charCodeAt(i);
       }
       const imageBlob = new Blob([bytes], { type: 'image/png' });
+      console.log('[이미지 첨부] Blob size:', imageBlob.size, 'bytes');
 
       // FormData 생성
       const formData = new FormData();
@@ -86,9 +89,10 @@ serve(async (req) => {
       if (threadTs) {
         formData.append('thread_ts', threadTs);
       }
+      console.log('[이미지 첨부] FormData 생성 완료, thread_ts:', threadTs || 'none');
 
-      // files.uploadV2 API 호출
-      slackResponse = await fetch('https://slack.com/api/files.uploadV2', {
+      // files.upload API 호출 (legacy API지만 여전히 작동)
+      slackResponse = await fetch('https://slack.com/api/files.upload', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${tokenData.access_token}`,
@@ -97,6 +101,7 @@ serve(async (req) => {
       });
 
       slackResult = await slackResponse.json();
+      console.log('[이미지 첨부] Slack API 응답:', JSON.stringify(slackResult));
     } else {
       // ─── 텍스트 전용 발신: chat.postMessage ───
       const slackBody: Record<string, unknown> = {
@@ -187,14 +192,13 @@ serve(async (req) => {
     }
 
     // 6. 성공
-    // files.uploadV2의 경우 messageTs 추출 경로가 다름
+    // files.upload의 경우 messageTs 추출 경로가 다름
     let messageTs: string | undefined;
     if (imageBase64) {
-      // files.uploadV2 응답: { ok: true, files: [{ id, ... }] }
-      // messageTs는 파일 공유 메시지의 ts (직접 접근 어려움, undefined 허용)
-      const files = slackResult.files as Array<Record<string, unknown>> | undefined;
-      if (files && files.length > 0) {
-        const shares = files[0].shares as Record<string, Record<string, Array<Record<string, string>>>> | undefined;
+      // files.upload 응답: { ok: true, file: { id, shares: { public: { C123: [{ ts }] } } } }
+      const file = slackResult.file as Record<string, unknown> | undefined;
+      if (file) {
+        const shares = file.shares as Record<string, Record<string, Array<Record<string, string>>>> | undefined;
         if (shares?.public?.[channelId]?.[0]?.ts) {
           messageTs = shares.public[channelId][0].ts;
         }

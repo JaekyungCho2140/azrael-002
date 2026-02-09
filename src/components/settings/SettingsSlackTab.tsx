@@ -73,7 +73,7 @@ export function SettingsSlackTab({
     const oauthUrl =
       `https://slack.com/oauth/v2/authorize?` +
       `client_id=${SLACK_CLIENT_ID}` +
-      `&user_scope=chat:write,channels:read,groups:read` +
+      `&user_scope=chat:write,channels:read,groups:read,files:write` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
       `&state=${encodeURIComponent(state)}`;
 
