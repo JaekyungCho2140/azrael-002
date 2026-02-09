@@ -7,6 +7,16 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
+// HTML 응답 헬퍼 (UTF-8 인코딩 보장)
+function htmlResponse(html: string, status = 200): Response {
+  return new Response(html, {
+    status,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+    },
+  });
+}
+
 serve(async (req) => {
   try {
     const url = new URL(req.url);
@@ -19,8 +29,7 @@ serve(async (req) => {
       const userMessage = error === 'access_denied'
         ? 'Slack 연동이 취소되었습니다.'
         : `OAuth 인증 실패: ${error}`;
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -33,14 +42,11 @@ serve(async (req) => {
             setTimeout(() => window.close(), 3000);
           </script>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-      );
+        </html>`);
     }
 
     if (!code || !state) {
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -49,16 +55,13 @@ serve(async (req) => {
         <body>
           <p>잘못된 OAuth 콜백 요청입니다.</p>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 400 }
-      );
+        </html>`, 400);
     }
 
     // state 파싱: "csrf:supabaseUid"
     const [csrf, supabaseUid] = state.split(':', 2);
     if (!csrf || !supabaseUid) {
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -67,9 +70,7 @@ serve(async (req) => {
         <body>
           <p>보안 검증에 실패했습니다. 다시 시도해주세요.</p>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 400 }
-      );
+        </html>`, 400);
     }
 
     // Slack OAuth token 교환
@@ -79,8 +80,7 @@ serve(async (req) => {
 
     if (!SLACK_CLIENT_ID || !SLACK_CLIENT_SECRET || !SLACK_REDIRECT_URI) {
       console.error('Slack OAuth 환경변수 누락');
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -89,9 +89,7 @@ serve(async (req) => {
         <body>
           <p>서버 설정이 완료되지 않았습니다. 관리자에게 문의하세요.</p>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 500 }
-      );
+        </html>`, 500);
     }
 
     const tokenResponse = await fetch('https://slack.com/api/oauth.v2.access', {
@@ -112,8 +110,7 @@ serve(async (req) => {
       const userMessage = tokenResult.error === 'invalid_code'
         ? 'OAuth 인증 코드가 만료되었습니다. 다시 시도해주세요.'
         : `OAuth 토큰 교환 실패: ${tokenResult.error}`;
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -123,9 +120,7 @@ serve(async (req) => {
           <p>${userMessage}</p>
           <p>이 창을 닫고 다시 시도해주세요.</p>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 400 }
-      );
+        </html>`, 400);
     }
 
     // authed_user에서 User Token 정보 추출
@@ -136,8 +131,7 @@ serve(async (req) => {
 
     if (!accessToken || !slackUserId || !teamId) {
       console.error('Slack OAuth 응답 불완전:', tokenResult);
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -146,9 +140,7 @@ serve(async (req) => {
         <body>
           <p>Slack 인증 정보를 가져오지 못했습니다.</p>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 500 }
-      );
+        </html>`, 500);
     }
 
     // Supabase 클라이언트 (Service Role: RLS bypass)
@@ -173,8 +165,7 @@ serve(async (req) => {
 
     if (dbError) {
       console.error('Slack 토큰 저장 실패:', dbError);
-      return new Response(
-        `<!DOCTYPE html>
+      return htmlResponse(`<!DOCTYPE html>
         <html>
         <head>
           <meta charset="utf-8">
@@ -183,14 +174,11 @@ serve(async (req) => {
         <body>
           <p>토큰 저장에 실패했습니다. 다시 시도해주세요.</p>
         </body>
-        </html>`,
-        { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 500 }
-      );
+        </html>`, 500);
     }
 
     // 성공: 팝업 닫기 HTML (postMessage 포함)
-    return new Response(
-      `<!DOCTYPE html>
+    return htmlResponse(`<!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
@@ -236,14 +224,11 @@ serve(async (req) => {
           })();
         </script>
       </body>
-      </html>`,
-      { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
-    );
+      </html>`);
 
   } catch (error) {
     console.error('slack-oauth-callback error:', error);
-    return new Response(
-      `<!DOCTYPE html>
+    return htmlResponse(`<!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
@@ -252,8 +237,6 @@ serve(async (req) => {
       <body>
         <p>서버 오류가 발생했습니다.</p>
       </body>
-      </html>`,
-      { headers: { 'Content-Type': 'text/html; charset=utf-8' }, status: 500 }
-    );
+      </html>`, 500);
   }
 });
