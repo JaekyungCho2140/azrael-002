@@ -1,6 +1,6 @@
 # Azrael - L10n 일정 관리 도구
 
-**Phase 2 완료**: 이메일 생성, 번들 최적화, 코드 리팩토링 완료
+**Phase 3 완료**: 슬랙 연동, 계산 결과 자동 복원, 이메일 생성, 번들 최적화
 
 웹 기반 L10n 일정 계산 및 JIRA 연동 도구입니다.
 
@@ -53,6 +53,19 @@
 - **접근성 개선**: ARIA 속성, 키보드 내비게이션
 - **디자인 토큰 통일**: CSS 변수 기반 일관된 스타일링
 
+### Phase 3 - 슬랙 연동 (2026-02-10)
+- **Slack OAuth 연동**: 사용자별 Slack User Token 발급 및 관리
+- **채널 매핑**: 프로젝트별 Slack 채널 매핑 (공개/비공개 채널 지원)
+- **메시지 템플릿**: 기본 제공 + 사용자 정의 Slack 메시지 템플릿 CRUD
+- **메시지 발신**: 변수 치환 기반 Slack 메시지 발신 (Markdown 렌더링)
+- **이미지 첨부**: 스케줄 테이블 PNG 이미지 Slack 첨부 발신 (files.uploadV2)
+- **Edge Functions**: slack-oauth-callback, slack-channels, slack-send
+
+### 계산 결과 자동 복원 (2026-02-10)
+- **프로젝트 전환 시**: 이전 계산 결과 자동 복원 (날짜 + 테이블)
+- **페이지 새로고침 시**: 마지막 계산 결과 자동 로드
+- **하이브리드 저장**: LocalStorage(날짜) + Supabase(데이터)
+
 ---
 
 ## 기술 스택
@@ -65,11 +78,12 @@
 - **Charts**: Frappe Gantt v1.0.4, FullCalendar v6.1
 - **이메일 에디터**: Tiptap 3.18 (리치 텍스트)
 - **Utils**: html2canvas v1.4.1, juice v11.1 (CSS 인라이너)
+- **Slack**: Slack Web API (chat.postMessage, files.uploadV2)
 
 ### 백엔드
 - **BaaS**: Supabase (PostgreSQL + Auth + Edge Functions)
-- **Edge Functions**: Deno (jira-create, jira-update, jira-check)
-- **RLS**: Row Level Security (읽기: 전체, 쓰기: 화이트리스트 5명)
+- **Edge Functions**: Deno (jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send)
+- **RLS**: Row Level Security (읽기: 전체, 쓰기: 화이트리스트 6명)
 
 ### 배포
 - **프론트엔드**: Vercel (자동 배포)
@@ -106,6 +120,10 @@ VITE_DEV_MODE=false
 
 # 공휴일 API
 VITE_HOLIDAY_API_KEY=your-api-key
+
+# Slack OAuth (Phase 3)
+VITE_SLACK_CLIENT_ID=your-slack-client-id
+VITE_SLACK_REDIRECT_URI=https://your-project.supabase.co/functions/v1/slack-oauth-callback
 ```
 
 ### 3. 개발 서버 실행
@@ -128,6 +146,8 @@ Supabase Dashboard → SQL Editor에서 순서대로 실행:
 7. `supabase/migrations/006_phase2_email_templates.sql`
 8. `supabase/migrations/006b_phase2_schedule_entries_extension.sql`
 9. `supabase/migrations/007_paid_product_offset.sql`
+10. `supabase/migrations/008_add_whitelist_user.sql`
+11. `supabase/migrations/009_phase3_slack.sql`
 
 ---
 
@@ -144,9 +164,12 @@ npm run typecheck  # TypeScript 타입 체크
 ### Supabase CLI (Edge Functions)
 
 ```bash
-supabase functions deploy jira-create   # jira-create 배포
-supabase functions deploy jira-update   # jira-update 배포
-supabase functions deploy jira-check    # jira-check 배포
+supabase functions deploy jira-create          # jira-create 배포
+supabase functions deploy jira-update          # jira-update 배포
+supabase functions deploy jira-check           # jira-check 배포
+supabase functions deploy slack-oauth-callback # Slack OAuth 콜백 배포
+supabase functions deploy slack-channels       # Slack 채널 목록 배포
+supabase functions deploy slack-send           # Slack 메시지 발신 배포
 ```
 
 ---
@@ -156,32 +179,38 @@ supabase functions deploy jira-check    # jira-check 배포
 ```
 azrael-002/
 ├── src/
-│   ├── components/       # UI 컴포넌트 (29개)
+│   ├── components/       # UI 컴포넌트 (32개)
 │   │   ├── MainScreen.tsx
 │   │   ├── ScheduleTable.tsx
 │   │   ├── EmailGeneratorModal.tsx
 │   │   ├── JiraPreviewModal.tsx
-│   │   ├── settings/           # 설정 탭 컴포넌트 (5개)
+│   │   ├── SlackSendModal.tsx
+│   │   ├── SlackTemplateEditModal.tsx
+│   │   ├── settings/           # 설정 탭 컴포넌트 (6개)
 │   │   │   ├── SettingsProjectsTab.tsx
 │   │   │   ├── SettingsStagesTab.tsx
 │   │   │   ├── SettingsHolidaysTab.tsx
 │   │   │   ├── SettingsJiraTab.tsx
-│   │   │   └── SettingsEmailTemplatesTab.tsx
+│   │   │   ├── SettingsEmailTemplatesTab.tsx
+│   │   │   └── SettingsSlackTab.tsx
 │   │   └── ...
-│   ├── hooks/            # React Hooks (5개)
+│   ├── hooks/            # React Hooks (7개)
 │   │   ├── useSupabase.ts      # React Query 훅
 │   │   ├── useJiraOperations.ts
 │   │   ├── useEmailTemplates.ts
 │   │   ├── useImageCopy.ts
-│   │   └── useToast.ts
+│   │   ├── useToast.ts
+│   │   ├── useSlackTokenStatus.ts
+│   │   └── useSlackTemplates.ts
 │   ├── lib/
-│   │   ├── api/          # Supabase API 레이어 (6개)
+│   │   ├── api/          # Supabase API 레이어 (7개)
 │   │   │   ├── projects.ts
 │   │   │   ├── templates.ts
 │   │   │   ├── holidays.ts
 │   │   │   ├── jira.ts
 │   │   │   ├── calculations.ts
-│   │   │   └── emailTemplates.ts
+│   │   │   ├── emailTemplates.ts
+│   │   │   └── slack.ts
 │   │   ├── email/        # 이메일 생성 엔진 (6개)
 │   │   │   ├── emailGenerator.ts
 │   │   │   ├── templateParser.ts
@@ -202,11 +231,14 @@ azrael-002/
 │   ├── constants.ts      # 프론트엔드 상수 (16개)
 │   └── scripts/          # 마이그레이션 스크립트
 ├── supabase/
-│   ├── migrations/       # DB 스키마 (9개)
-│   └── functions/        # Edge Functions (3개)
+│   ├── migrations/       # DB 스키마 (11개)
+│   └── functions/        # Edge Functions (6개)
 │       ├── jira-create/
 │       ├── jira-update/
 │       ├── jira-check/
+│       ├── slack-oauth-callback/
+│       ├── slack-channels/
+│       ├── slack-send/
 │       └── _shared/      # 공유 모듈 (adf.ts, constants.ts)
 ├── prd/                  # PRD 문서 (9개)
 ├── docs/                 # 사용자 매뉴얼, 테스트 시나리오
@@ -229,11 +261,12 @@ azrael-002/
     ├─ Projects, Templates, WorkStages, Holidays (팀 공유)
     ├─ CalculationResults, ScheduleEntries (팀 공유)
     ├─ JiraAssignees, EmailTemplates (팀 공유)
-    └─ UserState, JiraConfig (LocalStorage, 개인)
+    ├─ SlackTokens, SlackMessageTemplates (팀 공유)
+    └─ UserState (lastCalculationDates), JiraConfig (LocalStorage, 개인)
     ↓
-[MainScreen] → 계산 → 테이블 출력 → JIRA 생성 / 이메일 복사
+[MainScreen] → 계산 → 테이블 출력 → JIRA 생성 / 이메일 복사 / 슬랙 발신
     ↓
-[Edge Functions] → JIRA API
+[Edge Functions] → JIRA API / Slack API
 ```
 
 ### 핵심 설계 원칙
@@ -298,12 +331,13 @@ npm test
 ### RLS (Row Level Security)
 
 **읽기**: 모든 인증된 사용자
-**쓰기**: 화이트리스트 5명만
+**쓰기**: 화이트리스트 6명만
 - jkcho@wemade.com
 - mine@wemade.com
 - srpark@wemade.com
 - garden0130@wemade.com
 - hkkim@wemade.com
+- uzilay@gmail.com
 
 ### JIRA 담당자 매핑
 
@@ -322,17 +356,21 @@ npm test
 ### Edge Functions 배포
 
 ```bash
-# jira-create 배포
+# JIRA Edge Functions 배포
 supabase functions deploy jira-create --no-verify-jwt
-
-# jira-update 배포
 supabase functions deploy jira-update --no-verify-jwt
-
-# jira-check 배포
 supabase functions deploy jira-check --no-verify-jwt
+
+# Slack Edge Functions 배포
+supabase functions deploy slack-oauth-callback --no-verify-jwt
+supabase functions deploy slack-channels --no-verify-jwt
+supabase functions deploy slack-send --no-verify-jwt
 ```
 
 **주의**: Edge Functions는 자동 배포되지 않으므로, 코드 변경 시 수동 배포 필요
+
+**Slack Edge Functions 환경 변수** (Supabase Dashboard > Settings > Edge Functions):
+- `SLACK_CLIENT_SECRET`: Slack App의 Client Secret
 
 ### 새 마이그레이션 추가
 
@@ -354,6 +392,7 @@ supabase functions deploy jira-check --no-verify-jwt
   - [Phase 0](./prd/Azrael-PRD-Phase0.md)
   - [Phase 1](./prd/Azrael-PRD-Phase1.md)
   - [Phase 2](./prd/Azrael-PRD-Phase2.md)
+  - [Phase 3](./prd/Azrael-PRD-Phase3.md)
   - [Design](./prd/Azrael-PRD-Design.md)
 
 ---
@@ -363,9 +402,9 @@ supabase functions deploy jira-check --no-verify-jwt
 **프로덕션**: https://azrael-002.vercel.app
 
 **최신 배포**:
-- 프론트엔드: 커밋 695223d (2026-02-06)
-- Edge Functions: jira-create, jira-update, jira-check
-- DB: 9개 마이그레이션 완료
+- 프론트엔드: 커밋 5f3e0d9 (2026-02-10)
+- Edge Functions: jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send
+- DB: 11개 마이그레이션 완료
 
 **Git Repository**: https://github.com/JaekyungCho2140/azrael-002
 
@@ -389,4 +428,4 @@ L10n팀 내부 프로젝트
 
 ---
 
-**최종 업데이트**: 2026-02-06 (Phase 2 완료 + 코드 품질 개선)
+**최종 업데이트**: 2026-02-10 (Phase 3 완료 + 계산 결과 자동 복원)

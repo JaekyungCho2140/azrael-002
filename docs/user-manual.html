@@ -325,7 +325,7 @@
   <div class="nav-logo">
     <span>🐱</span>
     <h2>Azrael</h2>
-    <p>사용자 매뉴얼 v3.0</p>
+    <p>사용자 매뉴얼 v4.0</p>
   </div>
 
   <div class="nav-section">시작하기</div>
@@ -352,7 +352,14 @@
   <a href="#email-generate">이메일 생성</a>
   <a href="#email-templates">이메일 템플릿</a>
 
+  <div class="nav-section">Slack 연동</div>
+  <a href="#slack-setup">Slack 연동 설정</a>
+  <a href="#slack-channel">채널 매핑</a>
+  <a href="#slack-send">메시지 발신</a>
+  <a href="#slack-templates">메시지 템플릿</a>
+
   <div class="nav-section">고급 기능</div>
+  <a href="#auto-restore">계산 결과 자동 복원</a>
   <a href="#paid-product">유료화 상품 협의 일정</a>
   <a href="#format-tags">설명란 서식 태그</a>
 
@@ -362,6 +369,7 @@
   <a href="#settings-holidays">공휴일 관리</a>
   <a href="#settings-jira">JIRA 연결</a>
   <a href="#settings-email">이메일 템플릿</a>
+  <a href="#settings-slack">Slack 설정</a>
 
   <div class="nav-section">부록</div>
   <a href="#glossary">용어 사전</a>
@@ -391,7 +399,9 @@
     <tr><td>📋 이미지 복사</td><td>테이블/차트를 PNG 이미지로 클립보드 복사</td></tr>
     <tr><td>🔗 JIRA 연동</td><td>Epic + Task + Subtask 자동 생성/업데이트</td></tr>
     <tr><td>✉️ 이메일 생성</td><td>템플릿 기반 일정 안내 이메일 자동 생성 &amp; 클립보드 복사</td></tr>
-    <tr><td>⚙️ 설정 관리</td><td>프로젝트, 업무 단계, 공휴일, JIRA, 이메일 템플릿 관리</td></tr>
+    <tr><td>💬 Slack 발신</td><td>Slack 채널에 일정 안내 메시지 &amp; 이미지 발신</td></tr>
+    <tr><td>🔄 결과 자동 복원</td><td>프로젝트 전환/새로고침 시 마지막 계산 결과 자동 로드</td></tr>
+    <tr><td>⚙️ 설정 관리</td><td>프로젝트, 업무 단계, 공휴일, JIRA, 이메일 템플릿, Slack 관리</td></tr>
   </tbody>
 </table>
 
@@ -460,7 +470,7 @@
 │   업데이트일: [ 2026-02-10  📅 ]                │
 │                                                 │
 │   [ 계산 ] [ JIRA 생성 ] [ JIRA 업데이트 ]      │  ← 액션 버튼
-│                        [ ✉️ 이메일 복사 ]       │
+│              [ ✉️ 이메일 복사 ] [ 💬 Slack ]    │
 │                                                 │
 │   마지막 계산: 2026-02-02 14:30                 │
 │   [ 결과 보기 ]                                 │
@@ -490,6 +500,7 @@
     <tr><td><strong>JIRA 생성</strong></td><td>JIRA Epic/Task 생성</td><td>계산 완료 + JIRA 설정 완료</td></tr>
     <tr><td><strong>JIRA 업데이트</strong></td><td>기존 JIRA 일감 수정</td><td>계산 완료 + Epic 매핑 존재</td></tr>
     <tr><td><strong>✉️ 이메일 복사</strong></td><td>이메일 생성 모달 열기</td><td>계산 완료</td></tr>
+    <tr><td><strong>💬 Slack 발신</strong></td><td>Slack 메시지 발신 모달 열기</td><td>계산 완료 + Slack 연동 + 채널 매핑</td></tr>
   </tbody>
 </table>
 
@@ -865,7 +876,7 @@
 <p><a href="#jira-setup">9. JIRA 연결 설정</a> 섹션을 참조하세요.</p>
 
 <!-- ===== 18. 설정 - 이메일 템플릿 ===== -->
-<h2 id="settings-email">18. 이메일 템플릿 설정 <span class="badge badge-new">Phase 2</span></h2>
+<h2 id="settings-email">18. 이메일 템플릿 설정</h2>
 
 <div class="screen-flow">
   <span class="step">⚙️ 설정</span>
@@ -894,8 +905,132 @@
 <h3>기본 제공 템플릿</h3>
 <p>각 프로젝트에는 기본 제공 템플릿이 자동 생성됩니다. 이 템플릿은 보기/편집은 가능하지만 삭제할 수 없습니다.</p>
 
-<!-- ===== 19. 유료화 상품 협의 일정 ===== -->
-<h2 id="paid-product">19. 유료화 상품 협의 일정 <span class="badge badge-new">신규</span></h2>
+<!-- ===== 18.5. 설정 - Slack ===== -->
+<h2 id="settings-slack">18.5. Slack 설정 <span class="badge badge-new">Phase 3</span></h2>
+
+<p>Slack 연동, 채널 매핑, 메시지 템플릿 관리는 <strong>설정 &gt; Slack</strong> 탭에서 통합 관리합니다.</p>
+<ul>
+  <li><strong>연동 상태</strong>: Slack 연동/해제</li>
+  <li><strong>채널 매핑</strong>: 프로젝트별 발신 채널 설정</li>
+  <li><strong>메시지 템플릿</strong>: 템플릿 추가/편집/삭제</li>
+</ul>
+<p>자세한 사용법은 <a href="#slack-setup">19. Slack 연동 설정</a> ~ <a href="#slack-templates">22. Slack 메시지 템플릿</a>을 참조하세요.</p>
+
+<!-- ===== Slack 연동 ===== -->
+<h2 id="slack-setup">19. Slack 연동 설정 <span class="badge badge-new">Phase 3</span></h2>
+
+<div class="screen-flow">
+  <span class="step">⚙️ 설정</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">Slack 탭</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">연동하기 클릭</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">Slack 승인</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">연동 완료</span>
+</div>
+
+<ol>
+  <li>헤더의 <strong>⚙️ 설정</strong> 버튼을 클릭합니다.</li>
+  <li>좌측 사이드바에서 <strong>"Slack"</strong> 탭을 선택합니다.</li>
+  <li><strong>"🔗 Slack 연동하기"</strong> 버튼을 클릭합니다.</li>
+  <li>Slack OAuth 팝업에서 워크스페이스를 <strong>승인</strong>합니다.</li>
+  <li>"Slack 연동이 완료되었습니다!" 메시지를 확인합니다.</li>
+</ol>
+
+<div class="callout callout-tip">
+  <strong>💡 팝업 차단</strong>
+  OAuth 팝업이 열리지 않으면 브라우저의 팝업 차단 설정을 확인하세요.
+</div>
+
+<h3>연동 해제</h3>
+<p>Slack 탭에서 <strong>"연동 해제"</strong> 버튼을 클릭합니다. 해제 시 메시지 발신이 불가합니다.</p>
+
+<!-- ===== Slack 채널 매핑 ===== -->
+<h2 id="slack-channel">20. 채널 매핑 <span class="badge badge-new">Phase 3</span></h2>
+
+<p>Slack 연동 완료 후, 각 프로젝트에 메시지를 발신할 채널을 매핑합니다.</p>
+
+<ol>
+  <li><strong>설정 &gt; Slack</strong> 탭의 <strong>채널 매핑</strong> 섹션에서 프로젝트를 선택합니다.</li>
+  <li>채널 드롭다운에서 원하는 <strong>Slack 채널</strong>을 선택합니다.</li>
+  <li>선택 즉시 <strong>자동 저장</strong>됩니다 (별도 저장 버튼 없음).</li>
+</ol>
+
+<div class="callout callout-warn">
+  <strong>⚠️ 비공개 채널</strong>
+  비공개 채널의 경우 Slack App이 해당 채널에 초대되어 있어야 목록에 표시됩니다.
+</div>
+
+<!-- ===== Slack 메시지 발신 ===== -->
+<h2 id="slack-send">21. Slack 메시지 발신 <span class="badge badge-new">Phase 3</span></h2>
+
+<div class="screen-flow">
+  <span class="step">계산 완료</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">💬 Slack 발신</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">템플릿 선택</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">미리보기</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">발신</span>
+</div>
+
+<ol>
+  <li>일정 계산이 완료된 상태에서 <strong>"💬 Slack 발신"</strong> 버튼을 클릭합니다.</li>
+  <li>Slack 발신 모달에서:
+    <ul>
+      <li><strong>채널</strong>: 매핑된 채널이 자동 선택됩니다</li>
+      <li><strong>템플릿</strong>: 기본 제공 또는 사용자 정의 템플릿을 선택합니다</li>
+      <li><strong>이미지 첨부</strong>: 체크 시 스케줄 테이블 PNG 이미지가 함께 전송됩니다</li>
+    </ul>
+  </li>
+  <li>미리보기에서 메시지 내용을 확인합니다 (Slack Markdown 형식).</li>
+  <li><strong>"발신"</strong> 버튼을 클릭합니다.</li>
+  <li>"Slack 메시지가 전송되었습니다!" 메시지를 확인합니다.</li>
+</ol>
+
+<div class="callout callout-tip">
+  <strong>💡 이미지 첨부</strong>
+  이미지 첨부 시 Slack의 files.uploadV2 API를 사용합니다. 스케줄 테이블이 PNG 이미지로 변환되어 메시지와 함께 업로드됩니다.
+</div>
+
+<!-- ===== Slack 메시지 템플릿 ===== -->
+<h2 id="slack-templates">22. Slack 메시지 템플릿 <span class="badge badge-new">Phase 3</span></h2>
+
+<p><strong>설정 &gt; Slack</strong> 탭의 <strong>메시지 템플릿</strong> 섹션에서 관리합니다.</p>
+
+<h3>템플릿 추가</h3>
+<ol>
+  <li><strong>"+ 새 템플릿 추가"</strong> 버튼을 클릭합니다.</li>
+  <li>편집 모달에서 이름, 제목, 본문을 입력합니다.</li>
+  <li>본문에 변수를 사용할 수 있습니다 (이메일 변수와 동일).</li>
+  <li><strong>"저장"</strong>을 클릭합니다.</li>
+</ol>
+
+<h3>기본 제공 템플릿</h3>
+<p>각 프로젝트에는 기본 제공 템플릿이 자동 생성됩니다. 편집은 가능하지만 삭제할 수 없습니다.</p>
+
+<!-- ===== 계산 결과 자동 복원 ===== -->
+<h2 id="auto-restore">23. 계산 결과 자동 복원 <span class="badge badge-new">신규</span></h2>
+
+<p>한번 계산한 결과는 <strong>자동으로 저장</strong>되어, 다음 상황에서 자동 복원됩니다:</p>
+
+<ul>
+  <li><strong>프로젝트 전환</strong>: 다른 프로젝트로 이동했다가 돌아오면 이전 계산 결과가 자동 로드</li>
+  <li><strong>페이지 새로고침</strong>: F5 또는 브라우저 새로고침 후에도 마지막 계산 결과 유지</li>
+  <li><strong>앱 재접속</strong>: 브라우저를 닫고 다시 열어도 마지막 상태 복원</li>
+</ul>
+
+<div class="callout callout-tip">
+  <strong>💡 동작 원리</strong>
+  마지막 계산 날짜는 브라우저(LocalStorage)에, 실제 계산 결과는 서버(Supabase)에 저장됩니다. 따라서 다른 PC에서는 계산 결과가 서버에 있지만 자동 복원되지 않을 수 있습니다 (날짜 정보가 없으므로).
+</div>
+
+<!-- ===== 24. 유료화 상품 협의 일정 ===== -->
+<h2 id="paid-product">24. 유료화 상품 협의 일정</h2>
 
 <p>업데이트일 기준으로 유료화 상품 협의 일정을 자동 역산할 수 있습니다.</p>
 
@@ -919,8 +1054,8 @@
   프로젝트 면책 조항에서 사용할 수 있는 변수: <code>{updateDate}</code>, <code>{headsUp}</code>, <code>{iosReviewDate}</code>, <code>{paidProductDate}</code>
 </div>
 
-<!-- ===== 20. 설명란 서식 태그 ===== -->
-<h2 id="format-tags">20. 설명란 서식 태그 <span class="badge badge-new">신규</span></h2>
+<!-- ===== 25. 설명란 서식 태그 ===== -->
+<h2 id="format-tags">25. 설명란 서식 태그</h2>
 
 <p>T1 테이블의 설명란과 프로젝트 Disclaimer에서 아래 서식 태그를 사용할 수 있습니다.</p>
 
@@ -972,6 +1107,9 @@
     <tr><td><strong>Epic</strong></td><td>Epic</td><td>JIRA 최상위 일감 컨테이너 (1개 업데이트 = 1개 Epic)</td></tr>
     <tr><td><strong>유료화 상품 협의 일정</strong></td><td>Paid Product Date</td><td>업데이트일 기준 유료화 상품 협의 마감일 (Offset 역산)</td></tr>
     <tr><td><strong>서식 태그</strong></td><td>Format Tags</td><td>설명란에서 사용하는 커스텀 서식 (&lt;b&gt;, &lt;r&gt;, &lt;g&gt;, &lt;bl&gt;, &lt;u&gt;)</td></tr>
+    <tr><td><strong>Slack 연동</strong></td><td>Slack Integration</td><td>Slack OAuth로 사용자 토큰 발급, 채널 매핑, 메시지 발신</td></tr>
+    <tr><td><strong>채널 매핑</strong></td><td>Channel Mapping</td><td>프로젝트와 Slack 채널의 1:1 연결</td></tr>
+    <tr><td><strong>자동 복원</strong></td><td>Auto Restore</td><td>프로젝트별 마지막 계산 결과를 자동으로 로드하는 기능</td></tr>
   </tbody>
 </table>
 
@@ -1000,6 +1138,10 @@
     <tr><td>공휴일 수동 추가</td><td>⚙️ 설정 &gt; 공휴일 탭 &gt; + 공휴일 수동 추가</td></tr>
     <tr><td>JIRA 연결</td><td>⚙️ 설정 &gt; JIRA 탭</td></tr>
     <tr><td>이메일 템플릿 관리</td><td>⚙️ 설정 &gt; 이메일 템플릿 탭</td></tr>
+    <tr><td>Slack 연동</td><td>⚙️ 설정 &gt; Slack 탭 &gt; 연동하기</td></tr>
+    <tr><td>Slack 채널 매핑</td><td>⚙️ 설정 &gt; Slack 탭 &gt; 채널 매핑</td></tr>
+    <tr><td>Slack 메시지 발신</td><td>메인 &gt; 계산 후 &gt; 💬 Slack 발신</td></tr>
+    <tr><td>Slack 메시지 템플릿</td><td>⚙️ 설정 &gt; Slack 탭 &gt; 메시지 템플릿</td></tr>
     <tr><td>유료화 상품 협의 일정 설정</td><td>⚙️ 설정 &gt; 프로젝트 탭 &gt; 편집 &gt; 유료화 상품 체크</td></tr>
   </tbody>
 </table>
@@ -1028,8 +1170,17 @@
 <h4>Q. 이전에 생성한 JIRA Epic이 삭제되면 어떻게 되나요?</h4>
 <p>"JIRA 업데이트" 실행 시 시스템이 Epic 존재 여부를 확인합니다. 삭제된 경우 정리 옵션과 함께 새로 생성을 안내합니다.</p>
 
+<h4>Q. Slack 연동 시 팝업이 열리지 않아요.</h4>
+<p>브라우저의 팝업 차단 설정을 확인하세요. Chrome의 경우 주소창 오른쪽에 팝업 차단 아이콘이 표시됩니다. "허용"을 선택한 후 다시 시도하세요.</p>
+
+<h4>Q. Slack 메시지가 전송되지 않아요.</h4>
+<p>다음 항목을 확인하세요: (1) Slack 연동 상태 (설정 > Slack 탭), (2) 채널 매핑 완료 여부, (3) Slack App이 해당 채널에 초대되어 있는지. 비공개 채널의 경우 앱 초대가 필수입니다.</p>
+
+<h4>Q. 프로젝트를 전환하면 이전 계산 결과가 사라져요.</h4>
+<p>Phase 3부터 계산 결과가 자동 복원됩니다. 프로젝트를 전환하면 해당 프로젝트의 마지막 계산 결과가 자동으로 로드됩니다. 만약 복원되지 않으면, 해당 프로젝트에서 한 번이라도 계산을 실행해야 합니다.</p>
+
 <div class="version-info">
-  <p>Azrael 사용자 매뉴얼 v3.0 | 2026-02-06 | Phase 0~2 Complete + 코드 품질 개선</p>
+  <p>Azrael 사용자 매뉴얼 v4.0 | 2026-02-10 | Phase 0~3 Complete + 계산 결과 자동 복원</p>
   <p>문의: L10n팀 관리자 또는 jkcho@wemade.com</p>
 </div>
 

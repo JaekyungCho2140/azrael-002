@@ -1,6 +1,6 @@
 # Azrael 빠른 시작 가이드
 
-**최종 업데이트**: 2026-02-06 (Phase 2 + 코드 품질 개선)
+**최종 업데이트**: 2026-02-10 (Phase 3 + 계산 결과 자동 복원)
 **배포**: https://azrael-002.vercel.app
 **소요 시간**: 5분
 
@@ -9,12 +9,12 @@
 ## 사전 준비 완료 상태
 
 ### Supabase
-- 마이그레이션 9개 실행 완료
-- Edge Functions (jira-create, jira-update, jira-check) 배포 완료
+- 마이그레이션 11개 실행 완료
+- Edge Functions (jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send) 배포 완료
 - jira_assignees 데이터 (5명) 저장 완료
 
 ### 프론트엔드
-- Vercel 배포 완료 (커밋: 695223d)
+- Vercel 배포 완료 (커밋: 5f3e0d9)
 
 **모든 기능 즉시 사용 가능!**
 
@@ -117,6 +117,47 @@ https://azrael-002.vercel.app
 
 ---
 
+## Phase 3 기능 사용
+
+### Slack 연동 설정
+
+1. **설정** → **Slack** 탭
+2. **"Slack 연동하기"** 버튼 클릭
+3. Slack OAuth 팝업에서 워크스페이스 승인
+4. "Slack 연동이 완료되었습니다!" 확인
+
+### 채널 매핑
+
+1. **설정** → **Slack** 탭 → **채널 매핑** 섹션
+2. **프로젝트 선택** 드롭다운에서 프로젝트 선택
+3. 채널 드롭다운에서 메시지를 발신할 **Slack 채널** 선택
+4. 선택 즉시 자동 저장 (optimistic update)
+
+### Slack 메시지 발신
+
+1. 일정 계산이 완료된 상태에서 **"Slack 발신"** 버튼 클릭
+2. Slack 발신 모달에서:
+   - **채널**: 매핑된 채널 자동 선택
+   - **템플릿**: 기본 제공 또는 사용자 정의 템플릿 선택
+   - **이미지 첨부**: 스케줄 테이블 PNG 이미지 첨부 가능
+3. 미리보기 확인 후 **"발신"** 클릭
+4. "Slack 메시지가 전송되었습니다!" 확인
+
+### Slack 메시지 템플릿 관리
+
+1. **설정** → **Slack** 탭 → **메시지 템플릿** 섹션
+2. **"+ 새 템플릿 추가"** 버튼 클릭
+3. 템플릿 이름, 제목, 본문 입력 (변수 사용 가능)
+4. 기본 제공 템플릿은 편집 가능하지만 삭제 불가
+
+### 계산 결과 자동 복원
+
+- **프로젝트 전환 시**: 이전에 계산했던 결과가 자동으로 복원됩니다
+- **페이지 새로고침 시**: 마지막 계산 결과가 자동으로 로드됩니다
+- 별도 설정 없이 자동 동작합니다
+
+---
+
 ## 이미지 복사
 
 ### T1 테이블
@@ -182,9 +223,9 @@ supabase functions serve jira-create
 **Git**: https://github.com/JaekyungCho2140/azrael-002
 
 **최신 버전**:
-- 프론트엔드: 695223d (2026-02-06)
-- Edge Functions: jira-create, jira-update, jira-check
-- DB: 9개 마이그레이션 완료
+- 프론트엔드: 5f3e0d9 (2026-02-10)
+- Edge Functions: jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send
+- DB: 11개 마이그레이션 완료
 
 ---
 
@@ -196,13 +237,15 @@ supabase functions serve jira-create
 - [ ] 프로젝트 JIRA 키 설정
 - [ ] 일정 계산 및 JIRA 생성 테스트
 - [ ] 이메일 생성 및 복사 테스트
+- [ ] Slack 연동 및 메시지 발신 테스트
 
 ### 개발자
 - [ ] Git 클론 및 의존성 설치
 - [ ] 환경 변수 설정
 - [ ] 개발 서버 실행 (포트 3000)
-- [ ] Supabase 마이그레이션 확인 (9개)
+- [ ] Supabase 마이그레이션 확인 (11개)
 - [ ] 단위 테스트 통과 확인 (110/110)
+- [ ] Slack 환경 변수 확인 (VITE_SLACK_CLIENT_ID, VITE_SLACK_REDIRECT_URI)
 
 ---
 

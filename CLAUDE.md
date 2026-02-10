@@ -3,7 +3,7 @@
 ## 스택
 React 18 + TypeScript + Vite
 **Supabase** (PostgreSQL + Auth + Edge Functions) | **React Query** (서버 상태 관리)
-Frappe Gantt 1.0.4, FullCalendar 6.1, html2canvas, Tiptap 3.18
+Frappe Gantt 1.0.4, FullCalendar 6.1, html2canvas, Tiptap 3.18, Slack Web API
 
 ## 명령어
 ```bash
@@ -16,10 +16,10 @@ npm run typecheck  # tsc --noEmit
 ## 아키텍처
 ```
 src/
-├── components/   # UI 컴포넌트 (29개, settings/ 5개 포함)
-├── hooks/        # React Hooks (5개: useSupabase, useJiraOperations, useEmailTemplates, useImageCopy, useToast)
+├── components/   # UI 컴포넌트 (32개, settings/ 6개 포함)
+├── hooks/        # React Hooks (7개: useSupabase, useJiraOperations, useEmailTemplates, useImageCopy, useToast, useSlackTokenStatus, useSlackTemplates)
 ├── lib/
-│   ├── api/      # Supabase API 레이어 (6개: projects, templates, holidays, jira, calculations, emailTemplates)
+│   ├── api/      # Supabase API 레이어 (7개: projects, templates, holidays, jira, calculations, emailTemplates, slack)
 │   ├── email/    # 이메일 생성 엔진 (6개: generator, parser, formatters, sanitizer, clipboard, templates)
 │   ├── jira/     # JIRA 템플릿 헬퍼
 │   ├── businessDays.ts  # 영업일 계산 엔진
@@ -28,11 +28,14 @@ src/
 └── constants.ts  # 프론트엔드 상수 (16개)
 
 supabase/
-├── migrations/   # DB 스키마 (9개)
-└── functions/    # Edge Functions (3개)
+├── migrations/   # DB 스키마 (11개)
+└── functions/    # Edge Functions (6개)
     ├── jira-create/
     ├── jira-update/
     ├── jira-check/
+    ├── slack-oauth-callback/
+    ├── slack-channels/
+    ├── slack-send/
     └── _shared/  # 공유 모듈 (adf.ts, constants.ts)
 ```
 
@@ -48,18 +51,18 @@ supabase/
 - 오류 발생 시 PRD 문서 참조
 
 ## 데이터 저장 전략
-- **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees, EmailTemplates
-- **LocalStorage (개인)**: UserState, JiraConfig
+- **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees, EmailTemplates, SlackTokens, SlackMessageTemplates
+- **LocalStorage (개인)**: UserState (lastCalculationDates 포함), JiraConfig
 
 ## PRD 참조 (Source of Truth)
 - 데이터 구조: `Azrael-PRD-Shared.md` §2
 - 계산 로직: `Azrael-PRD-Shared.md` §3
-- UI 명세: `Azrael-PRD-Phase0.md`, `Azrael-PRD-Phase1.md`, `Azrael-PRD-Phase2.md`
+- UI 명세: `Azrael-PRD-Phase0.md`, `Azrael-PRD-Phase1.md`, `Azrael-PRD-Phase2.md`, `Azrael-PRD-Phase3.md`
 - 디자인: `Azrael-PRD-Design.md`
 
 ## 배포
 - **프론트엔드**: Git push → Vercel 자동 배포
-- **Edge Functions**: `supabase functions deploy [function-name] --no-verify-jwt` (수동)
+- **Edge Functions**: `supabase functions deploy [function-name] --no-verify-jwt` (수동, Slack 함수 포함)
 - **DB 마이그레이션**: Supabase Dashboard SQL Editor (최초 1회)
 
 ## 테스트
@@ -69,7 +72,7 @@ supabase/
 - OAuth, 이미지 복사는 수동 검증 필요
 
 ## 번들 최적화
-- 코드 스플리팅: lazy() + Suspense (GanttChart, CalendarView, SettingsScreen, EmailGeneratorModal, JiraPreviewModal)
+- 코드 스플리팅: lazy() + Suspense (GanttChart, CalendarView, SettingsScreen, EmailGeneratorModal, JiraPreviewModal, SlackSendModal)
 - 동적 import: html2canvas (useImageCopy 클릭 시점)
 - manualChunks: react-vendor, supabase, query
 - 초기 로드 ~120KB gzip (전체 ~560KB gzip)
@@ -82,5 +85,6 @@ supabase/
 - ✅ Phase 1.8: JIRA 일감 존재 확인 (2026-01-21)
 - ✅ Phase 2: 이메일 생성 + UI/UX 감사 개선 (2026-02-02)
 - ✅ 코드 품질 개선: 컴포넌트 분할, 번들 최적화, 접근성, 디자인 토큰 (2026-02-06)
-- ⏳ Phase 3: 슬랙 연동 (예정)
+- ✅ Phase 3: 슬랙 연동 — OAuth, 채널 매핑, 메시지 템플릿, 이미지 첨부 (2026-02-10)
+- ✅ 계산 결과 자동 복원: 프로젝트 전환/새로고침 시 마지막 계산 자동 로드 (2026-02-10)
 - ⏳ Phase 4: 프리셋 관리 (예정)

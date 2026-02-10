@@ -1,7 +1,7 @@
 # Azrael 설정 가이드
 
 **대상**: L10n팀 내부 사용
-**작성일**: 2026-01-12
+**작성일**: 2026-01-12 (최종 업데이트: 2026-02-10)
 
 ---
 
@@ -185,7 +185,70 @@ Azrael은 `locdate`를 Date로 변환하고 `dateName`을 이름으로 저장합
 
 ---
 
-## 3. 개발 서버 재시작
+## 3. Slack OAuth 설정 (Phase 3)
+
+### 3.1. Slack App 생성
+
+1. **Slack API 접속**
+   - https://api.slack.com/apps
+
+2. **Create New App** → **From scratch**
+   - App Name: "Azrael L10n"
+   - 워크스페이스 선택
+
+3. **OAuth & Permissions 설정**
+   - Redirect URLs: `https://your-project.supabase.co/functions/v1/slack-oauth-callback`
+   - User Token Scopes:
+     - `chat:write` (메시지 발신)
+     - `channels:read` (공개 채널 목록)
+     - `groups:read` (비공개 채널 목록)
+     - `files:write` (이미지 첨부)
+
+4. **Basic Information에서 키 복사**
+   - Client ID → `.env`의 `VITE_SLACK_CLIENT_ID`
+   - Client Secret → Supabase Edge Functions 환경 변수
+
+### 3.2. 환경 변수 설정
+
+`.env` 파일에 추가:
+```env
+VITE_SLACK_CLIENT_ID=your_slack_client_id
+VITE_SLACK_REDIRECT_URI=https://your-project.supabase.co/functions/v1/slack-oauth-callback
+```
+
+### 3.3. Supabase Edge Functions 환경 변수
+
+Supabase Dashboard → Settings → Edge Functions → Environment Variables:
+```
+SLACK_CLIENT_SECRET=your_slack_client_secret
+```
+
+### 3.4. DB 마이그레이션
+
+`009_phase3_slack.sql` 실행 (Supabase Dashboard → SQL Editor):
+- `slack_tokens` 테이블: 사용자별 Slack OAuth 토큰 저장
+- `slack_message_templates` 테이블: 프로젝트별 메시지 템플릿
+- `projects` 테이블에 `slack_channel_id`, `slack_channel_name` 컬럼 추가
+
+### 3.5. Edge Functions 배포
+
+```bash
+supabase functions deploy slack-oauth-callback --no-verify-jwt
+supabase functions deploy slack-channels --no-verify-jwt
+supabase functions deploy slack-send --no-verify-jwt
+```
+
+### 3.6. Slack 연동 테스트
+
+1. Azrael 접속 → 설정 → Slack 탭
+2. "Slack 연동하기" 클릭 → OAuth 팝업 → 승인
+3. "Slack 연동이 완료되었습니다!" 확인
+4. 채널 매핑 → 프로젝트 선택 → 채널 선택
+5. 메인 화면 → 계산 → "Slack 발신" → 메시지 확인
+
+---
+
+## 4. 개발 서버 재시작
 
 `.env` 파일 수정 후 **반드시 재시작**:
 
@@ -200,7 +263,7 @@ Vite는 환경 변수 변경 시 HMR로 자동 반영되지 않습니다!
 
 ---
 
-## 4. Google OAuth 테스트 (현재 미구현)
+## 5. Google OAuth 테스트 (현재 미구현)
 
 **현재 상태**:
 - `VITE_DEV_MODE=false`로 설정
@@ -221,7 +284,7 @@ Vite는 환경 변수 변경 시 HMR로 자동 반영되지 않습니다!
 
 ---
 
-## 5. 현재 작동 방식
+## 6. 현재 작동 방식
 
 **DEV_MODE=false**:
 - 자동 로그인 비활성화
@@ -235,5 +298,5 @@ Vite는 환경 변수 변경 시 HMR로 자동 반영되지 않습니다!
 
 ---
 
-**문서 버전**: 1.0
-**마지막 업데이트**: 2026-01-12
+**문서 버전**: 2.0
+**마지막 업데이트**: 2026-02-10
