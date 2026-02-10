@@ -103,10 +103,12 @@ function App() {
 
   // 프로젝트 변경
   const handleProjectChange = (projectId: string) => {
-    if (!userState) return;
+    // 최신 localStorage 상태를 읽어서 다른 곳에서 저장한 데이터(lastCalculationDates 등) 보존
+    const currentState = getUserState();
+    if (!currentState) return;
 
     const updatedState: UserState = {
-      ...userState,
+      ...currentState,
       lastProjectId: projectId
     };
     setUserState(updatedState);
