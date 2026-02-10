@@ -138,8 +138,13 @@ export async function saveCalculationResult(
     if (calcError) throw calcError;
     if (!calcData) throw new Error('계산 결과 저장 실패');
 
-    // 2. 기존 schedule_entries 삭제 (CASCADE로 자동 삭제됨)
-    // (UPSERT 시 자동으로 이전 entries가 삭제되므로 별도 DELETE 불필요)
+    // 2. 기존 schedule_entries 삭제 (UPSERT는 UPDATE이므로 CASCADE 미작동, 명시적 DELETE 필요)
+    const { error: deleteError } = await supabase
+      .from('schedule_entries')
+      .delete()
+      .eq('calculation_id', calcData.id);
+
+    if (deleteError) throw deleteError;
 
     // 3. 새 schedule_entries INSERT (부모 먼저, 자식 나중)
     const saveParentsAndChildren = async (

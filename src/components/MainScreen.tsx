@@ -15,8 +15,8 @@ const SettingsScreen = lazy(() => import('./SettingsScreen').then(m => ({ defaul
 const JiraPreviewModal = lazy(() => import('./JiraPreviewModal').then(m => ({ default: m.JiraPreviewModal })));
 const EmailGeneratorModal = lazy(() => import('./EmailGeneratorModal').then(m => ({ default: m.EmailGeneratorModal })));
 const SlackSendModal = lazy(() => import('./SlackSendModal').then(m => ({ default: m.SlackSendModal })));
-import { getUserState } from '../lib/storage';
-import { useSaveCalculationResult, useJiraAssignees, useHolidays } from '../hooks/useSupabase';
+import { getUserState, getLastCalculationDate, saveLastCalculationDate } from '../lib/storage';
+import { useSaveCalculationResult, useJiraAssignees, useHolidays, useCalculationResult } from '../hooks/useSupabase';
 import { useSlackTokenStatus } from '../hooks/useSlackTokenStatus';
 import { supabase } from '../lib/supabase';
 import {
@@ -26,7 +26,8 @@ import {
   calculateDateTimeFromStage,
   substituteDisclaimerVariables,
   formatUpdateDate,
-  formatDateOnly
+  formatDateOnly,
+  formatDateLocal
 } from '../lib/businessDays';
 import { fetchEpicMapping } from '../lib/api/jira';
 import { useJiraOperations } from '../hooks/useJiraOperations';
@@ -77,6 +78,15 @@ export function MainScreen({
   // Slack 토큰 상태 조회
   const { data: hasSlackToken = false } = useSlackTokenStatus(currentUserId);
 
+  // 마지막 계산 결과 자동 복원
+  const lastCalcDateStr = getLastCalculationDate(currentProject.id);
+  const lastCalcDate = lastCalcDateStr ? new Date(lastCalcDateStr + 'T00:00:00') : null;
+  const { data: restoredResult } = useCalculationResult(
+    currentProject.id,
+    lastCalcDate,
+    !calculationResult && !!lastCalcDate
+  );
+
   // 사용자 이메일 및 ID 가져오기
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -89,11 +99,26 @@ export function MainScreen({
     });
   }, []);
 
-  // 프로젝트 변경 시 초기화
+  // 프로젝트 변경 시 초기화 + 마지막 날짜 복원
+  // NOTE: 이 effect가 복원 effect보다 먼저 선언되어야 함 (React는 선언 순서대로 effect 실행)
+  // 프로젝트 전환 시 두 effect가 동시 트리거되면, 마지막에 실행되는 effect의 setState가 최종값이 됨
   useEffect(() => {
     setCalculationResult(null);
     setUpdateDate('');
+
+    const savedDate = getLastCalculationDate(currentProject.id);
+    if (savedDate) {
+      setUpdateDate(formatUpdateDate(new Date(savedDate + 'T00:00:00')));
+    }
   }, [currentProject.id]);
+
+  // 복원된 계산 결과 적용 (프로젝트 변경 effect 이후 실행되어 null을 올바르게 덮어씀)
+  useEffect(() => {
+    if (restoredResult && !calculationResult) {
+      setCalculationResult(restoredResult);
+      setUpdateDate(formatUpdateDate(restoredResult.updateDate));
+    }
+  }, [restoredResult]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // 시각화 설정 로드 (초기 + 설정 화면 닫힐 때 동기화)
   useEffect(() => {
@@ -220,6 +245,9 @@ export function MainScreen({
     };
 
     setCalculationResult(result);
+
+    // 마지막 계산 날짜 저장 (자동 복원용)
+    saveLastCalculationDate(currentProject.id, formatDateLocal(updateDateObj));
 
     // Phase 1.7: Supabase에 저장
     saveMutation.mutate({ result, userEmail: currentUserEmail });

@@ -76,3 +76,30 @@ export function getUserState(): UserState | null {
 export function saveUserState(state: UserState): void {
   localStorage.setItem(STORAGE_KEYS.USER_STATE, JSON.stringify(state));
 }
+
+/**
+ * 프로젝트별 마지막 계산 날짜 저장 (자동 복원용)
+ * @param projectId 프로젝트 ID
+ * @param updateDate ISO 날짜 문자열 "YYYY-MM-DD"
+ */
+export function saveLastCalculationDate(projectId: string, updateDate: string): void {
+  const state = getUserState();
+  if (!state) return;
+  saveUserState({
+    ...state,
+    lastCalculationDates: {
+      ...(state.lastCalculationDates || {}),
+      [projectId]: updateDate,
+    },
+  });
+}
+
+/**
+ * 프로젝트별 마지막 계산 날짜 조회
+ * @param projectId 프로젝트 ID
+ * @returns ISO 날짜 문자열 "YYYY-MM-DD" 또는 null
+ */
+export function getLastCalculationDate(projectId: string): string | null {
+  const state = getUserState();
+  return state?.lastCalculationDates?.[projectId] || null;
+}

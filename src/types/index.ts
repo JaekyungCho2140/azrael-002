@@ -118,6 +118,7 @@ export interface UserState {
   lastProjectId: string;         // 마지막 사용 프로젝트 ID
   hasCompletedOnboarding: boolean; // 온보딩 완료 여부
   showVisualization?: boolean;   // 간트 차트/캘린더 뷰 표시 여부 (기본값: true)
+  lastCalculationDates?: Record<string, string>; // 프로젝트별 마지막 계산 날짜 (projectId → "YYYY-MM-DD")
 }
 
 /**
