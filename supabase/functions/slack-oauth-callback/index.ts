@@ -7,17 +7,12 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// HTML 응답 헬퍼 (UTF-8 BOM 포함, 인코딩 보장)
+// HTML 응답 헬퍼
+// Note: BOM(Uint8Array) 대신 string body 사용 — Supabase 런타임이 Uint8Array body의
+// Content-Type을 text/html로 전달하지 않아 브라우저가 소스코드를 그대로 출력하는 문제 수정.
+// charset=utf-8은 헤더 + <meta> 이중 선언으로 한글 인코딩 보장.
 function htmlResponse(html: string, status = 200): Response {
-  // UTF-8 BOM (0xEF, 0xBB, 0xBF) 추가
-  const encoder = new TextEncoder();
-  const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-  const content = encoder.encode(html);
-  const withBom = new Uint8Array(bom.length + content.length);
-  withBom.set(bom);
-  withBom.set(content, bom.length);
-
-  return new Response(withBom, {
+  return new Response(html, {
     status,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
@@ -186,48 +181,37 @@ serve(async (req) => {
     }
 
     // 성공: 팝업 닫기 HTML (postMessage 포함)
+    // Note: 클라이언트 CSRF 검증 제거 — 콜백 페이지(supabase.co)와 메인 앱(vercel.app)이
+    // 다른 origin이므로 localStorage 공유 불가. OAuth state 파라미터 라운드트립이 CSRF 보호 담당.
+    const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://azrael-002.vercel.app';
     return htmlResponse(`<!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <title>Slack 연동 완료</title>
+        <style>
+          body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 2rem; }
+          .success { color: #2e7d32; font-size: 1.2rem; margin-bottom: 1rem; }
+          .close-btn { margin-top: 1rem; padding: 0.5rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: #f5f5f5; cursor: pointer; font-size: 0.9rem; }
+          .close-btn:hover { background: #e0e0e0; }
+        </style>
       </head>
       <body>
-        <div id="oauth-config" data-csrf="${csrf}" data-user-id="${supabaseUid}" style="display: none;"></div>
-        <p>Slack 연동이 완료되었습니다. 잠시 후 창이 자동으로 닫힙니다...</p>
+        <p class="success">Slack 연동이 완료되었습니다.</p>
+        <p>잠시 후 창이 자동으로 닫힙니다...</p>
+        <button class="close-btn" onclick="window.close()">닫기</button>
         <script>
           (function() {
             try {
-              // data-* 속성에서 값을 읽어 XSS 방지
-              const configEl = document.getElementById('oauth-config');
-              const urlCsrf = configEl.dataset.csrf;
-              const userId = configEl.dataset.userId;
-
-              // localStorage에서 저장된 CSRF 토큰과 비교
-              const savedCsrf = localStorage.getItem('slack_oauth_state');
-
-              if (!savedCsrf || savedCsrf !== urlCsrf) {
-                // CSRF 검증 실패
-                document.body.innerHTML = '<p>보안 검증에 실패했습니다. 다시 시도해주세요.</p>';
-                setTimeout(() => window.close(), 3000);
-                return;
-              }
-
-              // CSRF 검증 성공 - localStorage 정리 및 부모 창에 성공 메시지 전달
-              localStorage.removeItem('slack_oauth_state');
-
               if (window.opener) {
                 window.opener.postMessage(
-                  { type: 'SLACK_OAUTH_SUCCESS', userId: userId },
-                  '${Deno.env.get('APP_ORIGIN') || 'https://azrael-002.vercel.app'}'
+                  { type: 'SLACK_OAUTH_SUCCESS' },
+                  '${appOrigin}'
                 );
               }
-
-              // 2초 후 자동 닫기
-              setTimeout(() => window.close(), 2000);
+              setTimeout(function() { window.close(); }, 2000);
             } catch (err) {
               console.error('OAuth 콜백 처리 실패:', err);
-              document.body.innerHTML = '<p>연동 처리 중 오류가 발생했습니다.</p>';
             }
           })();
         </script>

@@ -85,12 +85,15 @@ export function SettingsSlackTab({
 
     setIsOAuthPending(true);
 
-    // 팝업 수동 닫기 감지
+    // 팝업 닫기 감지 (수동 닫기 또는 자동 닫기)
     const popupCheckInterval = setInterval(() => {
       if (popup.closed) {
         clearInterval(popupCheckInterval);
         window.removeEventListener('message', handleOAuthMessage);
         setIsOAuthPending(false);
+        localStorage.removeItem('slack_oauth_state');
+        // Fallback: window.opener가 null이거나 postMessage 미수신 시에도 상태 갱신
+        queryClient.invalidateQueries({ queryKey: ['slack-token-status'] });
       }
     }, 500);
 
@@ -101,6 +104,7 @@ export function SettingsSlackTab({
         clearInterval(popupCheckInterval);
         window.removeEventListener('message', handleOAuthMessage);
         setIsOAuthPending(false);
+        localStorage.removeItem('slack_oauth_state');
         alert('Slack 연동이 완료되었습니다.');
         queryClient.invalidateQueries({ queryKey: ['slack-token-status'] });
       }
