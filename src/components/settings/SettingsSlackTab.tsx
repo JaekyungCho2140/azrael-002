@@ -64,7 +64,6 @@ export function SettingsSlackTab({
   const handleSlackConnect = () => {
     const SLACK_CLIENT_ID = import.meta.env.VITE_SLACK_CLIENT_ID;
     const REDIRECT_URI = import.meta.env.VITE_SLACK_REDIRECT_URI;
-    const SUPABASE_ORIGIN = import.meta.env.VITE_SUPABASE_URL;
 
     const csrf = crypto.randomUUID();
     const state = `${csrf}:${currentUserId}`;
@@ -97,9 +96,9 @@ export function SettingsSlackTab({
       }
     }, 500);
 
-    // postMessage 리스너 (named handler)
+    // postMessage 리스너 (same-origin: 콜백 페이지가 메인 앱 도메인에서 로드됨)
     const handleOAuthMessage = (event: MessageEvent) => {
-      if (event.origin !== SUPABASE_ORIGIN) return;
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === 'SLACK_OAUTH_SUCCESS') {
         clearInterval(popupCheckInterval);
         window.removeEventListener('message', handleOAuthMessage);

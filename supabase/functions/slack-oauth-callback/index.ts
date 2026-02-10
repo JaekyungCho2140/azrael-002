@@ -1,22 +1,25 @@
 /**
  * Slack OAuth Callback Edge Function
- * OAuth 인증 완료 후 토큰 저장 및 팝업 닫기 HTML 응답
+ * OAuth 인증 완료 후 토큰 저장, 메인 앱의 정적 콜백 페이지로 리다이렉트
  * 참조: prd/Azrael-PRD-Phase3.md §3.2, §6.3
+ *
+ * Note: Supabase Edge Function 런타임이 HTML 응답의 Content-Type을 정상 전달하지 않아
+ * HTML을 직접 반환하는 대신, 메인 앱 도메인의 정적 HTML(/oauth-callback.html)로 302 리다이렉트.
+ * 이를 통해 HTML 렌더링, 한글 인코딩, same-origin postMessage 문제를 모두 해결.
  */
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-// HTML 응답 헬퍼
-// Note: BOM(Uint8Array) 대신 string body 사용 — Supabase 런타임이 Uint8Array body의
-// Content-Type을 text/html로 전달하지 않아 브라우저가 소스코드를 그대로 출력하는 문제 수정.
-// charset=utf-8은 헤더 + <meta> 이중 선언으로 한글 인코딩 보장.
-function htmlResponse(html: string, status = 200): Response {
-  return new Response(html, {
-    status,
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-    },
+const APP_ORIGIN = Deno.env.get('APP_ORIGIN') || 'https://azrael-002.vercel.app';
+
+/** 메인 앱의 정적 콜백 페이지로 리다이렉트 */
+function redirectToCallback(status: 'success' | 'error', message?: string): Response {
+  const params = new URLSearchParams({ status });
+  if (message) params.set('message', message);
+  return new Response(null, {
+    status: 302,
+    headers: { 'Location': `${APP_ORIGIN}/oauth-callback.html?${params}` },
   });
 }
 
@@ -29,51 +32,20 @@ serve(async (req) => {
 
     // OAuth 에러 처리
     if (error) {
-      const userMessage = error === 'access_denied'
+      const msg = error === 'access_denied'
         ? 'Slack 연동이 취소되었습니다.'
         : `OAuth 인증 실패: ${error}`;
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>Slack 연동 실패</title>
-        </head>
-        <body>
-          <p>${userMessage}</p>
-          <p>이 창을 닫고 다시 시도해주세요.</p>
-          <script>
-            setTimeout(() => window.close(), 3000);
-          </script>
-        </body>
-        </html>`);
+      return redirectToCallback('error', msg);
     }
 
     if (!code || !state) {
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>잘못된 요청</title>
-        </head>
-        <body>
-          <p>잘못된 OAuth 콜백 요청입니다.</p>
-        </body>
-        </html>`, 400);
+      return redirectToCallback('error', '잘못된 OAuth 콜백 요청입니다.');
     }
 
     // state 파싱: "csrf:supabaseUid"
     const [csrf, supabaseUid] = state.split(':', 2);
     if (!csrf || !supabaseUid) {
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>보안 검증 실패</title>
-        </head>
-        <body>
-          <p>보안 검증에 실패했습니다. 다시 시도해주세요.</p>
-        </body>
-        </html>`, 400);
+      return redirectToCallback('error', '보안 검증에 실패했습니다. 다시 시도해주세요.');
     }
 
     // Slack OAuth token 교환
@@ -83,16 +55,7 @@ serve(async (req) => {
 
     if (!SLACK_CLIENT_ID || !SLACK_CLIENT_SECRET || !SLACK_REDIRECT_URI) {
       console.error('Slack OAuth 환경변수 누락');
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>서버 설정 오류</title>
-        </head>
-        <body>
-          <p>서버 설정이 완료되지 않았습니다. 관리자에게 문의하세요.</p>
-        </body>
-        </html>`, 500);
+      return redirectToCallback('error', '서버 설정이 완료되지 않았습니다. 관리자에게 문의하세요.');
     }
 
     const tokenResponse = await fetch('https://slack.com/api/oauth.v2.access', {
@@ -110,20 +73,10 @@ serve(async (req) => {
 
     if (!tokenResult.ok) {
       console.error('Slack OAuth token 교환 실패:', tokenResult.error);
-      const userMessage = tokenResult.error === 'invalid_code'
+      const msg = tokenResult.error === 'invalid_code'
         ? 'OAuth 인증 코드가 만료되었습니다. 다시 시도해주세요.'
         : `OAuth 토큰 교환 실패: ${tokenResult.error}`;
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>인증 실패</title>
-        </head>
-        <body>
-          <p>${userMessage}</p>
-          <p>이 창을 닫고 다시 시도해주세요.</p>
-        </body>
-        </html>`, 400);
+      return redirectToCallback('error', msg);
     }
 
     // authed_user에서 User Token 정보 추출
@@ -134,16 +87,7 @@ serve(async (req) => {
 
     if (!accessToken || !slackUserId || !teamId) {
       console.error('Slack OAuth 응답 불완전:', tokenResult);
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>인증 정보 오류</title>
-        </head>
-        <body>
-          <p>Slack 인증 정보를 가져오지 못했습니다.</p>
-        </body>
-        </html>`, 500);
+      return redirectToCallback('error', 'Slack 인증 정보를 가져오지 못했습니다.');
     }
 
     // Supabase 클라이언트 (Service Role: RLS bypass)
@@ -168,67 +112,14 @@ serve(async (req) => {
 
     if (dbError) {
       console.error('Slack 토큰 저장 실패:', dbError);
-      return htmlResponse(`<!DOCTYPE html>
-        <html>
-        <head>
-          <meta charset="utf-8">
-          <title>저장 실패</title>
-        </head>
-        <body>
-          <p>토큰 저장에 실패했습니다. 다시 시도해주세요.</p>
-        </body>
-        </html>`, 500);
+      return redirectToCallback('error', '토큰 저장에 실패했습니다. 다시 시도해주세요.');
     }
 
-    // 성공: 팝업 닫기 HTML (postMessage 포함)
-    // Note: 클라이언트 CSRF 검증 제거 — 콜백 페이지(supabase.co)와 메인 앱(vercel.app)이
-    // 다른 origin이므로 localStorage 공유 불가. OAuth state 파라미터 라운드트립이 CSRF 보호 담당.
-    const appOrigin = Deno.env.get('APP_ORIGIN') || 'https://azrael-002.vercel.app';
-    return htmlResponse(`<!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>Slack 연동 완료</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; text-align: center; padding: 2rem; }
-          .success { color: #2e7d32; font-size: 1.2rem; margin-bottom: 1rem; }
-          .close-btn { margin-top: 1rem; padding: 0.5rem 1.5rem; border: 1px solid #ccc; border-radius: 6px; background: #f5f5f5; cursor: pointer; font-size: 0.9rem; }
-          .close-btn:hover { background: #e0e0e0; }
-        </style>
-      </head>
-      <body>
-        <p class="success">Slack 연동이 완료되었습니다.</p>
-        <p>잠시 후 창이 자동으로 닫힙니다...</p>
-        <button class="close-btn" onclick="window.close()">닫기</button>
-        <script>
-          (function() {
-            try {
-              if (window.opener) {
-                window.opener.postMessage(
-                  { type: 'SLACK_OAUTH_SUCCESS' },
-                  '${appOrigin}'
-                );
-              }
-              setTimeout(function() { window.close(); }, 2000);
-            } catch (err) {
-              console.error('OAuth 콜백 처리 실패:', err);
-            }
-          })();
-        </script>
-      </body>
-      </html>`);
+    // 성공: 메인 앱 콜백 페이지로 리다이렉트
+    return redirectToCallback('success');
 
   } catch (error) {
     console.error('slack-oauth-callback error:', error);
-    return htmlResponse(`<!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>서버 오류</title>
-      </head>
-      <body>
-        <p>서버 오류가 발생했습니다.</p>
-      </body>
-      </html>`, 500);
+    return redirectToCallback('error', '서버 오류가 발생했습니다.');
   }
 });
