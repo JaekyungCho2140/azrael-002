@@ -230,7 +230,15 @@ SLACK_CLIENT_SECRET=your_slack_client_secret
 - `slack_message_templates` 테이블: 프로젝트별 메시지 템플릿
 - `projects` 테이블에 `slack_channel_id`, `slack_channel_name` 컬럼 추가
 
-### 3.5. Edge Functions 배포
+### 3.5. Phase 4 마이그레이션
+
+`010_phase4_presets.sql` 실행 (Supabase Dashboard → SQL Editor):
+- `preset_slots` 테이블: 프로젝트별, 사용자별 몰아보기 슬롯 저장
+- RLS 정책: 본인 데이터만 읽기/쓰기
+- UNIQUE 제약: (user_id, project_id, slot_index), (user_id, project_id, name)
+- ON DELETE CASCADE: calculation_results, projects 삭제 시 연쇄 삭제
+
+### 3.6. Edge Functions 배포
 
 ```bash
 supabase functions deploy slack-oauth-callback --no-verify-jwt
@@ -238,7 +246,7 @@ supabase functions deploy slack-channels --no-verify-jwt
 supabase functions deploy slack-send --no-verify-jwt
 ```
 
-### 3.6. Slack 연동 테스트
+### 3.7. Slack 연동 테스트
 
 1. Azrael 접속 → 설정 → Slack 탭
 2. "Slack 연동하기" 클릭 → OAuth 팝업 → 승인
@@ -298,5 +306,5 @@ Vite는 환경 변수 변경 시 HMR로 자동 반영되지 않습니다!
 
 ---
 
-**문서 버전**: 2.0
+**문서 버전**: 2.1
 **마지막 업데이트**: 2026-02-10

@@ -3,7 +3,7 @@
 **프로젝트명**: Azrael
 **작성일**: 2026-01-09
 **최종 업데이트**: 2026-02-10
-**버전**: 6.0 (Phase 3 완료 + 계산 결과 자동 복원)
+**버전**: 7.0 (Phase 4 완료 + UI 텍스트 감사)
 **작성자**: L10n팀 (Claude Code 협업)
 
 ---
@@ -25,7 +25,7 @@
   - Phase 1.8 - JIRA 일감 존재 확인 (jira-check)
 - **[Azrael-PRD-Phase2.md](./Azrael-PRD-Phase2.md)**: Phase 2 - 이메일 생성 (✅ 완료)
 - **[Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)**: Phase 3 - 슬랙 메시지 발신 (✅ 완료)
-- **[Azrael-PRD-Phase4.md](./Azrael-PRD-Phase4.md)**: Phase 4 - 프리셋 관리 (예정)
+- **[Azrael-PRD-Phase4.md](./Azrael-PRD-Phase4.md)**: Phase 4 - 몰아보기 비교 뷰 (✅ 완료)
 
 ---
 
@@ -194,21 +194,21 @@
 
 | 기능 | 설명 | 상태 |
 |------|------|------|
-| **Slack User OAuth** | User OAuth Token으로 사용자 계정 메시지 발신 | 📋 설계 완료 |
-| **채널 자동 조회** | Slack API로 채널 목록 조회, 프로젝트-채널 매핑 | 📋 설계 완료 |
-| **메시지 발신** | 새 스레드 생성 또는 기존 스레드 리플라이 | 📋 설계 완료 |
-| **disclaimer 변환** | 커스텀 태그 → Slack mrkdwn 변환 | 📋 설계 완료 |
+| **Slack User OAuth** | User OAuth Token으로 사용자 계정 메시지 발신 | ✅ 완료 |
+| **채널 자동 조회** | Slack API로 채널 목록 조회, 프로젝트-채널 매핑 | ✅ 완료 |
+| **메시지 발신** | Slack 채널에 메시지 + 이미지 발신 | ✅ 완료 |
+| **이미지 첨부** | files.uploadV2 API로 PNG 이미지 첨부 | ✅ 완료 |
 
 자세한 내용은 **[Azrael-PRD-Phase3.md](./Azrael-PRD-Phase3.md)** 참조
 
-### 3.5. Phase 4: 프리셋 관리 (계획)
+### 3.5. Phase 4: 몰아보기 비교 뷰 (✅ 완료)
 
 | 기능 | 설명 | 상태 |
 |------|------|------|
-| **프리셋 슬롯 4개** | 프로젝트별, 사용자별 고정 4개 슬롯 | 📋 설계 완료 |
-| **ViewMode 탭 전환** | "현재" vs 프리셋 탭 전환 | 📋 설계 완료 |
-| **프리셋 저장/삭제** | 현재 계산 결과를 프리셋으로 저장, 삭제 시 빈 슬롯 유지 | 📋 설계 완료 |
-| **동시성 처리** | 충돌 시 error + 새로고침 | 📋 설계 완료 |
+| **몰아보기 슬롯 4개** | 프로젝트별, 사용자별 고정 4개 슬롯 | ✅ 완료 |
+| **ViewMode 토글** | 톺아보기(단일) ↔ 몰아보기(4분할) 전환 | ✅ 완료 |
+| **몰아보기 CRUD** | 저장, 이름 변경, 테이블 전환(T1/T2/T3), 삭제 | ✅ 완료 |
+| **UI 텍스트 감사** | 이모지 제거, 용어 통일 (프리셋→몰아보기, 단일 화면→톺아보기) | ✅ 완료 |
 
 자세한 내용은 **[Azrael-PRD-Phase4.md](./Azrael-PRD-Phase4.md)** 참조
 
@@ -233,7 +233,7 @@ Phase 2: 이메일 생성 ✅ 완료 (2026-02-02)
     ↓
 Phase 3: 슬랙 메시지 발신 (✅ 완료)
     ↓
-Phase 4: 프리셋 관리 (예정)
+Phase 4: 몰아보기 비교 뷰 ✅ 완료 (2026-02-10)
 ```
 
 ### 4.2. Phase 0 완료 내역
@@ -338,19 +338,33 @@ Phase 4: 프리셋 관리 (예정)
    - ADF 코드 중복 제거 (~560줄 삭제)
    - 매직 넘버 상수화, CSS 토큰 통일, 접근성 개선
 
-### 4.6. Phase 3~4 개발 방향
+### 4.6. Phase 3 완료 내역 (2026-02-10)
 
-**Phase 3: 슬랙 메시지 발신** (✅ 구현 완료 2026-02-10)
-- Slack User OAuth Token 방식 (사용자 계정 메시지)
-- 채널 자동 조회, 프로젝트-채널 매핑
-- 새 스레드 또는 기존 스레드 리플라이
-- 토큰 자동 삭제 (무효화 시), Rate Limit 자동 재시도
+**완료일**: 2026-02-10
+**배포**: https://azrael-002.vercel.app
 
-**Phase 4: 프리셋 관리** (📋 설계 완료)
-- 프로젝트별, 사용자별 고정 4개 슬롯
-- ViewMode 탭 전환 ("현재" vs 프리셋)
-- React Query 캐싱으로 탭 전환 시 상태 유지
-- ON DELETE CASCADE로 프리셋 삭제 시 연쇄 삭제
+**주요 구현**:
+1. ✅ Slack User OAuth Token (chat:write, channels:read, groups:read, files:write)
+2. ✅ 채널 매핑: 프로젝트별 1:1 매핑, optimistic update
+3. ✅ 메시지 템플릿: 기본 제공 + 사용자 정의 CRUD
+4. ✅ 메시지 발신: 변수 치환 + Slack Markdown
+5. ✅ 이미지 첨부: files.uploadV2 API (FormData 형식)
+6. ✅ Edge Functions: slack-oauth-callback, slack-channels, slack-send
+7. ✅ 계산 결과 자동 복원: LocalStorage(날짜) + Supabase(데이터) 하이브리드
+
+### 4.7. Phase 4 완료 내역 (2026-02-10)
+
+**완료일**: 2026-02-10
+**Git Commit**: 744c896
+**배포**: https://azrael-002.vercel.app
+
+**주요 구현**:
+1. ✅ 몰아보기 비교 뷰: 4분할 화면(QuadViewScreen), 최대 4개 계산 결과 동시 비교
+2. ✅ 몰아보기 CRUD: 저장(PresetSaveModal), 이름 변경, 테이블 전환, 삭제
+3. ✅ ViewMode 토글: 톺아보기(단일) ↔ 몰아보기(4분할) 버튼 전환
+4. ✅ DB: preset_slots 테이블 (RLS, UNIQUE 2개, CASCADE 2개)
+5. ✅ UI 텍스트 감사: 이모지 제거(17개 파일), 용어 통일(프리셋→몰아보기, 단일 화면→톺아보기)
+6. ✅ 코드 정리: 데드 코드 제거, buildEntries 중복 추출, CSS 중복 제거
 
 ---
 
@@ -443,9 +457,9 @@ Phase 4: 프리셋 관리 (예정)
 - OAuth 연동 후 메시지 발신까지 10초 이내
 - 슬랙 수동 입력 대비 70% 시간 단축
 
-**Phase 4 (프리셋 관리)**:
-- 프리셋 저장/불러오기 3초 이내
-- 과거 일정 조회 시 재계산 불필요
+**Phase 4 (몰아보기 비교 뷰)**:
+- 몰아보기 저장/불러오기 3초 이내
+- 4분할 화면에서 계산 결과 동시 비교 가능
 
 ---
 
@@ -467,7 +481,7 @@ Phase 4: 프리셋 관리 (예정)
 **배포 URL**: https://azrael-002.vercel.app
 **Git Repository**: https://github.com/JaekyungCho2140/azrael-002
 **최초 배포**: 2026-01-13
-**최신 배포**: 2026-02-06 (Phase 2 + 코드 품질 개선)
+**최신 배포**: 2026-02-10 (Phase 4 + UI 텍스트 감사)
 
 **환경 변수** (Vercel 설정):
 ```env
@@ -494,6 +508,8 @@ VITE_HOLIDAY_API_KEY=*** (설정됨)
 | 2026-01-26 | 4.0 | Phase 2~4 분할 (이메일, 슬랙, 프리셋), 상세 설계 완료 | L10n팀 + Claude |
 | 2026-02-02 | 4.5 | Phase 2 구현 완료 반영 | L10n팀 + Claude |
 | 2026-02-06 | 5.0 | 코드 품질 개선, 유료화 상품 협의 일정, PRD 최신화 | L10n팀 + Claude |
+| 2026-02-10 | 6.0 | Phase 3 슬랙 연동 완료 반영, 계산 결과 자동 복원 | L10n팀 + Claude |
+| 2026-02-10 | 7.0 | Phase 4 몰아보기 비교 뷰 완료, UI 텍스트 감사, 코드 정리 | L10n팀 + Claude |
 
 ### 12.2. 승인 이력
 
@@ -506,6 +522,8 @@ VITE_HOLIDAY_API_KEY=*** (설정됨)
 | Phase 1.7 배포 승인 | | 2026-01-20 | ✅ |
 | Phase 1.8 배포 승인 | | 2026-01-21 | ✅ |
 | Phase 2 배포 승인 | | 2026-02-02 | ✅ |
+| Phase 3 배포 승인 | | 2026-02-10 | ✅ |
+| Phase 4 배포 승인 | | 2026-02-10 | ✅ |
 
 ---
 

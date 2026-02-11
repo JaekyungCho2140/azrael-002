@@ -24,7 +24,7 @@ src/
 │   ├── jira/     # JIRA 템플릿 헬퍼
 │   ├── businessDays.ts  # 영업일 계산 엔진
 │   └── storage.ts       # LocalStorage 유틸
-├── types/        # PRD Shared.md §2 인터페이스 (5개)
+├── types/        # PRD Shared.md §2 인터페이스 (3개)
 └── constants.ts  # 프론트엔드 상수 (18개)
 
 supabase/
@@ -51,13 +51,13 @@ supabase/
 - 오류 발생 시 PRD 문서 참조
 
 ## 데이터 저장 전략
-- **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees, EmailTemplates, SlackTokens, SlackMessageTemplates
+- **Supabase (팀 공유)**: Projects, Templates, WorkStages, Holidays, CalculationResults, JiraAssignees, EmailTemplates, SlackTokens, SlackMessageTemplates, PresetSlots
 - **LocalStorage (개인)**: UserState (lastCalculationDates 포함), JiraConfig
 
 ## PRD 참조 (Source of Truth)
 - 데이터 구조: `Azrael-PRD-Shared.md` §2
 - 계산 로직: `Azrael-PRD-Shared.md` §3
-- UI 명세: `Azrael-PRD-Phase0.md`, `Azrael-PRD-Phase1.md`, `Azrael-PRD-Phase2.md`, `Azrael-PRD-Phase3.md`
+- UI 명세: `Azrael-PRD-Phase0.md`, `Azrael-PRD-Phase1.md`, `Azrael-PRD-Phase2.md`, `Azrael-PRD-Phase3.md`, `Azrael-PRD-Phase4.md`
 - 디자인: `Azrael-PRD-Design.md`
 
 ## 배포

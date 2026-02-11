@@ -325,7 +325,7 @@
   <div class="nav-logo">
     <span>🐱</span>
     <h2>Azrael</h2>
-    <p>사용자 매뉴얼 v4.0</p>
+    <p>사용자 매뉴얼 v5.0</p>
   </div>
 
   <div class="nav-section">시작하기</div>
@@ -360,6 +360,7 @@
 
   <div class="nav-section">고급 기능</div>
   <a href="#auto-restore">계산 결과 자동 복원</a>
+  <a href="#quad-view">몰아보기 비교 뷰</a>
   <a href="#paid-product">유료화 상품 협의 일정</a>
   <a href="#format-tags">설명란 서식 태그</a>
 
@@ -381,7 +382,7 @@
 <div class="main">
 
 <h1>🐱 Azrael 사용자 매뉴얼</h1>
-<p>L10n(현지화) 일정 관리 도구 — 업데이트 일자 기반 스케줄 자동 계산, JIRA 연동, 이메일 생성</p>
+<p>L10n(현지화) 일정 관리 도구 — 업데이트 일자 기반 스케줄 자동 계산, JIRA 연동, 이메일 생성, 몰아보기 비교 뷰</p>
 
 <!-- ===== 1. 개요 ===== -->
 <h2 id="overview">1. 개요</h2>
@@ -402,6 +403,7 @@
     <tr><td>💬 Slack 발신</td><td>Slack 채널에 일정 안내 메시지 &amp; 이미지 발신</td></tr>
     <tr><td>🔄 결과 자동 복원</td><td>프로젝트 전환/새로고침 시 마지막 계산 결과 자동 로드</td></tr>
     <tr><td>⚙️ 설정 관리</td><td>프로젝트, 업무 단계, 공휴일, JIRA, 이메일 템플릿, Slack 관리</td></tr>
+    <tr><td>🔀 몰아보기 비교 뷰</td><td>4분할 화면으로 최대 4개 계산 결과 동시 비교</td></tr>
   </tbody>
 </table>
 
@@ -464,13 +466,15 @@
 <h2 id="main-screen">5. 메인 화면</h2>
 
 <div class="layout-diagram">┌─────────────────────────────────────────────────┐
-│  🐱 Azrael     [프로젝트 ▼]        [⚙️]  [🚪]  │  ← 헤더
+│  🐱 Azrael     [프로젝트 ▼]        [⚙️]  [로그아웃]  │  ← 헤더
 ├─────────────────────────────────────────────────┤
 │                                                 │
 │   업데이트일: [ 2026-02-10  📅 ]                │
 │                                                 │
 │   [ 계산 ] [ JIRA 생성 ] [ JIRA 업데이트 ]      │  ← 액션 버튼
-│              [ ✉️ 이메일 복사 ] [ 💬 Slack ]    │
+│              [ 이메일 복사 ] [ Slack 발신 ]      │
+│                                                 │
+│   [ 톺아보기 | 몰아보기 ]                        │  ← 뷰 전환
 │                                                 │
 │   마지막 계산: 2026-02-02 14:30                 │
 │   [ 결과 보기 ]                                 │
@@ -486,7 +490,7 @@
     <tr><td>🐱 Azrael</td><td>로고 (클릭 시 메인 화면)</td></tr>
     <tr><td>프로젝트 드롭다운</td><td>현재 프로젝트 변경</td></tr>
     <tr><td>⚙️ 설정 버튼</td><td>설정 화면으로 이동</td></tr>
-    <tr><td>🚪 로그아웃</td><td>로그아웃 후 로그인 화면으로</td></tr>
+    <tr><td>로그아웃</td><td>로그아웃 후 로그인 화면으로</td></tr>
   </tbody>
 </table>
 
@@ -499,8 +503,9 @@
     <tr><td><strong>계산</strong></td><td>일정 계산 실행</td><td>업데이트일 입력 시</td></tr>
     <tr><td><strong>JIRA 생성</strong></td><td>JIRA Epic/Task 생성</td><td>계산 완료 + JIRA 설정 완료</td></tr>
     <tr><td><strong>JIRA 업데이트</strong></td><td>기존 JIRA 일감 수정</td><td>계산 완료 + Epic 매핑 존재</td></tr>
-    <tr><td><strong>✉️ 이메일 복사</strong></td><td>이메일 생성 모달 열기</td><td>계산 완료</td></tr>
-    <tr><td><strong>💬 Slack 발신</strong></td><td>Slack 메시지 발신 모달 열기</td><td>계산 완료 + Slack 연동 + 채널 매핑</td></tr>
+    <tr><td><strong>이메일 복사</strong></td><td>이메일 생성 모달 열기</td><td>계산 완료</td></tr>
+    <tr><td><strong>Slack 발신</strong></td><td>Slack 메시지 발신 모달 열기</td><td>계산 완료 + Slack 연동 + 채널 매핑</td></tr>
+    <tr><td><strong>톺아보기/몰아보기</strong></td><td>단일 뷰 ↔ 4분할 비교 뷰 전환</td><td>항상 활성화</td></tr>
   </tbody>
 </table>
 
@@ -605,10 +610,10 @@
 <!-- ===== 8. 이미지 복사 ===== -->
 <h2 id="copy-image">8. 이미지 복사</h2>
 
-<p>각 테이블과 차트 옆에 <strong>📋 복사</strong> 버튼이 있습니다.</p>
+<p>각 테이블과 차트 옆에 <strong>복사</strong> 버튼이 있습니다.</p>
 
 <ol>
-  <li>복사하고 싶은 테이블/차트의 <strong>📋 복사</strong> 버튼을 클릭합니다.</li>
+  <li>복사하고 싶은 테이블/차트의 <strong>복사</strong> 버튼을 클릭합니다.</li>
   <li>해당 영역이 <strong>PNG 이미지</strong>로 클립보드에 복사됩니다.</li>
   <li>슬랙, 메일, 문서 등에 <kbd>Ctrl+V</kbd> (Mac: <kbd>⌘V</kbd>)로 붙여넣기합니다.</li>
 </ol>
@@ -710,7 +715,7 @@
 <div class="screen-flow">
   <span class="step">계산 완료</span>
   <span class="arrow">→</span>
-  <span class="step">✉️ 이메일 복사</span>
+  <span class="step">이메일 복사</span>
   <span class="arrow">→</span>
   <span class="step">테이블 선택</span>
   <span class="arrow">→</span>
@@ -720,7 +725,7 @@
 </div>
 
 <ol>
-  <li>일정 계산이 완료된 상태에서 <strong>"✉️ 이메일 복사"</strong> 버튼을 클릭합니다.</li>
+  <li>일정 계산이 완료된 상태에서 <strong>"이메일 복사"</strong> 버튼을 클릭합니다.</li>
   <li>이메일 생성 모달이 열립니다.</li>
   <li><strong>테이블 선택</strong>: 이메일에 포함할 테이블을 선택합니다 (Table 1 / Table 2 / Table 3).</li>
   <li><strong>템플릿 선택</strong>: 사용할 이메일 템플릿을 선택합니다.</li>
@@ -934,7 +939,7 @@
 <ol>
   <li>헤더의 <strong>⚙️ 설정</strong> 버튼을 클릭합니다.</li>
   <li>좌측 사이드바에서 <strong>"Slack"</strong> 탭을 선택합니다.</li>
-  <li><strong>"🔗 Slack 연동하기"</strong> 버튼을 클릭합니다.</li>
+  <li><strong>"Slack 연동하기"</strong> 버튼을 클릭합니다.</li>
   <li>Slack OAuth 팝업에서 워크스페이스를 <strong>승인</strong>합니다.</li>
   <li>"Slack 연동이 완료되었습니다!" 메시지를 확인합니다.</li>
 </ol>
@@ -969,7 +974,7 @@
 <div class="screen-flow">
   <span class="step">계산 완료</span>
   <span class="arrow">&rarr;</span>
-  <span class="step">💬 Slack 발신</span>
+  <span class="step">Slack 발신</span>
   <span class="arrow">&rarr;</span>
   <span class="step">템플릿 선택</span>
   <span class="arrow">&rarr;</span>
@@ -979,7 +984,7 @@
 </div>
 
 <ol>
-  <li>일정 계산이 완료된 상태에서 <strong>"💬 Slack 발신"</strong> 버튼을 클릭합니다.</li>
+  <li>일정 계산이 완료된 상태에서 <strong>"Slack 발신"</strong> 버튼을 클릭합니다.</li>
   <li>Slack 발신 모달에서:
     <ul>
       <li><strong>채널</strong>: 매핑된 채널이 자동 선택됩니다</li>
@@ -1013,8 +1018,55 @@
 <h3>기본 제공 템플릿</h3>
 <p>각 프로젝트에는 기본 제공 템플릿이 자동 생성됩니다. 편집은 가능하지만 삭제할 수 없습니다.</p>
 
+<!-- ===== 몰아보기 비교 뷰 ===== -->
+<h2 id="quad-view">23. 몰아보기 비교 뷰 <span class="badge badge-new">Phase 4</span></h2>
+
+<p>여러 업데이트일의 계산 결과를 <strong>4분할 화면으로 동시 비교</strong>할 수 있습니다.</p>
+
+<div class="screen-flow">
+  <span class="step">계산 완료</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">몰아보기 클릭</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">4분할 화면</span>
+  <span class="arrow">&rarr;</span>
+  <span class="step">슬롯에 저장</span>
+</div>
+
+<h3>몰아보기 화면 전환</h3>
+<ol>
+  <li>메인 화면에서 <strong>"몰아보기"</strong> 토글 버튼을 클릭합니다.</li>
+  <li>4분할 화면(QuadView)이 표시됩니다.</li>
+  <li><strong>"톺아보기"</strong> 버튼을 클릭하면 기존 단일 화면으로 돌아갑니다.</li>
+</ol>
+
+<h3>몰아보기 슬롯 저장</h3>
+<ol>
+  <li>빈 슬롯의 <strong>"+"</strong> 버튼을 클릭합니다.</li>
+  <li>저장 모달에서 <strong>슬롯 이름</strong>을 입력합니다 (최대 20자).</li>
+  <li>표시할 <strong>테이블</strong>을 선택합니다 (Table 1 / Table 2 / Table 3).</li>
+  <li><strong>"저장"</strong>을 클릭하면 현재 계산 결과가 슬롯에 저장됩니다.</li>
+</ol>
+
+<h3>슬롯 관리</h3>
+<table>
+  <thead>
+    <tr><th>작업</th><th>방법</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>이름 변경</strong></td><td>슬롯 이름을 클릭하여 인라인 편집</td></tr>
+    <tr><td><strong>테이블 전환</strong></td><td>드롭다운으로 T1/T2/T3 선택</td></tr>
+    <tr><td><strong>삭제</strong></td><td>슬롯의 "삭제" 버튼 클릭</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-tip">
+  <strong>슬롯 제한</strong>
+  프로젝트당 최대 4개 슬롯을 사용할 수 있습니다. 프로젝트를 전환하면 해당 프로젝트의 슬롯이 자동으로 로드됩니다.
+</div>
+
 <!-- ===== 계산 결과 자동 복원 ===== -->
-<h2 id="auto-restore">23. 계산 결과 자동 복원 <span class="badge badge-new">신규</span></h2>
+<h2 id="auto-restore">24. 계산 결과 자동 복원 <span class="badge badge-new">신규</span></h2>
 
 <p>한번 계산한 결과는 <strong>자동으로 저장</strong>되어, 다음 상황에서 자동 복원됩니다:</p>
 
@@ -1030,7 +1082,7 @@
 </div>
 
 <!-- ===== 24. 유료화 상품 협의 일정 ===== -->
-<h2 id="paid-product">24. 유료화 상품 협의 일정</h2>
+<h2 id="paid-product">25. 유료화 상품 협의 일정</h2>
 
 <p>업데이트일 기준으로 유료화 상품 협의 일정을 자동 역산할 수 있습니다.</p>
 
@@ -1055,7 +1107,7 @@
 </div>
 
 <!-- ===== 25. 설명란 서식 태그 ===== -->
-<h2 id="format-tags">25. 설명란 서식 태그</h2>
+<h2 id="format-tags">26. 설명란 서식 태그</h2>
 
 <p>T1 테이블의 설명란과 프로젝트 Disclaimer에서 아래 서식 태그를 사용할 수 있습니다.</p>
 
@@ -1110,6 +1162,9 @@
     <tr><td><strong>Slack 연동</strong></td><td>Slack Integration</td><td>Slack OAuth로 사용자 토큰 발급, 채널 매핑, 메시지 발신</td></tr>
     <tr><td><strong>채널 매핑</strong></td><td>Channel Mapping</td><td>프로젝트와 Slack 채널의 1:1 연결</td></tr>
     <tr><td><strong>자동 복원</strong></td><td>Auto Restore</td><td>프로젝트별 마지막 계산 결과를 자동으로 로드하는 기능</td></tr>
+    <tr><td><strong>몰아보기</strong></td><td>Quad View</td><td>4분할 화면으로 여러 계산 결과를 동시 비교하는 모드</td></tr>
+    <tr><td><strong>톺아보기</strong></td><td>Single View</td><td>기본 단일 화면 모드 (메인 화면)</td></tr>
+    <tr><td><strong>몰아보기 슬롯</strong></td><td>Preset Slot</td><td>몰아보기 화면의 개별 저장 영역 (프로젝트당 최대 4개)</td></tr>
   </tbody>
 </table>
 
@@ -1142,6 +1197,8 @@
     <tr><td>Slack 채널 매핑</td><td>⚙️ 설정 &gt; Slack 탭 &gt; 채널 매핑</td></tr>
     <tr><td>Slack 메시지 발신</td><td>메인 &gt; 계산 후 &gt; 💬 Slack 발신</td></tr>
     <tr><td>Slack 메시지 템플릿</td><td>⚙️ 설정 &gt; Slack 탭 &gt; 메시지 템플릿</td></tr>
+    <tr><td>몰아보기 전환</td><td>메인 &gt; 몰아보기 버튼</td></tr>
+    <tr><td>몰아보기 저장</td><td>몰아보기 화면 &gt; 빈 슬롯 + 버튼</td></tr>
     <tr><td>유료화 상품 협의 일정 설정</td><td>⚙️ 설정 &gt; 프로젝트 탭 &gt; 편집 &gt; 유료화 상품 체크</td></tr>
   </tbody>
 </table>
@@ -1179,8 +1236,11 @@
 <h4>Q. 프로젝트를 전환하면 이전 계산 결과가 사라져요.</h4>
 <p>Phase 3부터 계산 결과가 자동 복원됩니다. 프로젝트를 전환하면 해당 프로젝트의 마지막 계산 결과가 자동으로 로드됩니다. 만약 복원되지 않으면, 해당 프로젝트에서 한 번이라도 계산을 실행해야 합니다.</p>
 
+<h4>Q. 몰아보기에서 저장한 슬롯이 보이지 않아요.</h4>
+<p>몰아보기 슬롯은 프로젝트별, 사용자별로 관리됩니다. 다른 프로젝트로 전환하면 해당 프로젝트의 슬롯이 로드됩니다. 또한 다른 사용자의 슬롯은 보이지 않습니다.</p>
+
 <div class="version-info">
-  <p>Azrael 사용자 매뉴얼 v4.0 | 2026-02-10 | Phase 0~3 Complete + 계산 결과 자동 복원</p>
+  <p>Azrael 사용자 매뉴얼 v5.0 | 2026-02-10 | Phase 0~4 Complete + UI 텍스트 감사</p>
   <p>문의: L10n팀 관리자 또는 jkcho@wemade.com</p>
 </div>
 

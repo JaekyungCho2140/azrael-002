@@ -1,6 +1,6 @@
 # Azrael 빠른 시작 가이드
 
-**최종 업데이트**: 2026-02-10 (Phase 3 + 계산 결과 자동 복원)
+**최종 업데이트**: 2026-02-10 (Phase 4 + UI 텍스트 감사)
 **배포**: https://azrael-002.vercel.app
 **소요 시간**: 5분
 
@@ -9,12 +9,12 @@
 ## 사전 준비 완료 상태
 
 ### Supabase
-- 마이그레이션 11개 실행 완료
+- 마이그레이션 12개 실행 완료
 - Edge Functions (jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send) 배포 완료
 - jira_assignees 데이터 (5명) 저장 완료
 
 ### 프론트엔드
-- Vercel 배포 완료 (커밋: 5f3e0d9)
+- Vercel 배포 완료 (커밋: 744c896)
 
 **모든 기능 즉시 사용 가능!**
 
@@ -156,6 +156,23 @@ https://azrael-002.vercel.app
 - **페이지 새로고침 시**: 마지막 계산 결과가 자동으로 로드됩니다
 - 별도 설정 없이 자동 동작합니다
 
+## Phase 4 기능 사용
+
+### 몰아보기 (비교 뷰)
+
+1. 메인 화면에서 **"몰아보기"** 토글 버튼을 클릭합니다
+2. 4분할 화면(QuadView)이 표시됩니다
+3. 빈 슬롯의 **"+"** 버튼을 클릭하여 현재 계산 결과를 저장합니다
+4. 슬롯 이름과 표시할 테이블(T1/T2/T3)을 선택합니다
+5. **"톺아보기"** 버튼을 클릭하면 기존 단일 화면으로 돌아갑니다
+
+### 몰아보기 슬롯 관리
+
+- **슬롯 개수**: 프로젝트별 최대 4개
+- **이름 변경**: 슬롯 이름을 클릭하여 인라인 편집
+- **테이블 변경**: 드롭다운으로 T1/T2/T3 전환
+- **삭제**: 슬롯의 "삭제" 버튼 클릭
+
 ---
 
 ## 이미지 복사
@@ -223,9 +240,9 @@ supabase functions serve jira-create
 **Git**: https://github.com/JaekyungCho2140/azrael-002
 
 **최신 버전**:
-- 프론트엔드: 5f3e0d9 (2026-02-10)
+- 프론트엔드: 744c896 (2026-02-10)
 - Edge Functions: jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send
-- DB: 11개 마이그레이션 완료
+- DB: 12개 마이그레이션 완료
 
 ---
 
@@ -243,7 +260,7 @@ supabase functions serve jira-create
 - [ ] Git 클론 및 의존성 설치
 - [ ] 환경 변수 설정
 - [ ] 개발 서버 실행 (포트 3000)
-- [ ] Supabase 마이그레이션 확인 (11개)
+- [ ] Supabase 마이그레이션 확인 (12개)
 - [ ] 단위 테스트 통과 확인 (110/110)
 - [ ] Slack 환경 변수 확인 (VITE_SLACK_CLIENT_ID, VITE_SLACK_REDIRECT_URI)
 

@@ -1,6 +1,6 @@
 # Azrael - L10n 일정 관리 도구
 
-**Phase 3 완료**: 슬랙 연동, 계산 결과 자동 복원, 이메일 생성, 번들 최적화
+**Phase 4 완료**: 몰아보기 비교 뷰, 슬랙 연동, 이메일 생성, 번들 최적화
 
 웹 기반 L10n 일정 계산 및 JIRA 연동 도구입니다.
 
@@ -65,6 +65,16 @@
 - **프로젝트 전환 시**: 이전 계산 결과 자동 복원 (날짜 + 테이블)
 - **페이지 새로고침 시**: 마지막 계산 결과 자동 로드
 - **하이브리드 저장**: LocalStorage(날짜) + Supabase(데이터)
+
+### Phase 4 - 몰아보기 비교 뷰 (2026-02-10)
+- **몰아보기 비교 뷰**: 4분할 화면으로 최대 4개 계산 결과 동시 비교
+- **몰아보기 CRUD**: 저장, 이름 변경, 테이블 전환(T1/T2/T3), 삭제
+- **ViewMode 토글**: 톺아보기(단일)/몰아보기(4분할) 전환
+- **DB**: preset_slots 테이블 (RLS, CASCADE)
+
+### UI 텍스트 감사 (2026-02-10)
+- **이모지 제거**: 버튼 레이블에서 이모지 전면 제거
+- **용어 통일**: 프리셋→몰아보기, 단일 화면→톺아보기
 
 ---
 
@@ -179,7 +189,7 @@ supabase functions deploy slack-send           # Slack 메시지 발신 배포
 ```
 azrael-002/
 ├── src/
-│   ├── components/       # UI 컴포넌트 (32개)
+│   ├── components/       # UI 컴포넌트 (36개)
 │   │   ├── MainScreen.tsx
 │   │   ├── ScheduleTable.tsx
 │   │   ├── EmailGeneratorModal.tsx
@@ -194,23 +204,26 @@ azrael-002/
 │   │   │   ├── SettingsEmailTemplatesTab.tsx
 │   │   │   └── SettingsSlackTab.tsx
 │   │   └── ...
-│   ├── hooks/            # React Hooks (7개)
+│   ├── hooks/            # React Hooks (9개)
 │   │   ├── useSupabase.ts      # React Query 훅
 │   │   ├── useJiraOperations.ts
 │   │   ├── useEmailTemplates.ts
 │   │   ├── useImageCopy.ts
 │   │   ├── useToast.ts
 │   │   ├── useSlackTokenStatus.ts
-│   │   └── useSlackTemplates.ts
+│   │   ├── useSlackTemplates.ts
+│   │   ├── useViewMode.ts
+│   │   └── usePresetSlots.ts
 │   ├── lib/
-│   │   ├── api/          # Supabase API 레이어 (7개)
+│   │   ├── api/          # Supabase API 레이어 (8개)
 │   │   │   ├── projects.ts
 │   │   │   ├── templates.ts
 │   │   │   ├── holidays.ts
 │   │   │   ├── jira.ts
 │   │   │   ├── calculations.ts
 │   │   │   ├── emailTemplates.ts
-│   │   │   └── slack.ts
+│   │   │   ├── slack.ts
+│   │   │   └── presets.ts
 │   │   ├── email/        # 이메일 생성 엔진 (6개)
 │   │   │   ├── emailGenerator.ts
 │   │   │   ├── templateParser.ts
@@ -222,16 +235,14 @@ azrael-002/
 │   │   ├── businessDays.ts  # 영업일 계산 엔진
 │   │   ├── storage.ts       # LocalStorage 유틸
 │   │   └── supabase.ts      # Supabase 클라이언트
-│   ├── types/            # TypeScript 타입 (5개)
+│   ├── types/            # TypeScript 타입 (3개)
 │   │   ├── index.ts
 │   │   ├── supabase.ts
-│   │   ├── supabase-generated.ts
-│   │   ├── event-calendar.d.ts
 │   │   └── frappe-gantt.d.ts
-│   ├── constants.ts      # 프론트엔드 상수 (16개)
+│   ├── constants.ts      # 프론트엔드 상수 (18개)
 │   └── scripts/          # 마이그레이션 스크립트
 ├── supabase/
-│   ├── migrations/       # DB 스키마 (11개)
+│   ├── migrations/       # DB 스키마 (12개)
 │   └── functions/        # Edge Functions (6개)
 │       ├── jira-create/
 │       ├── jira-update/
@@ -393,6 +404,7 @@ supabase functions deploy slack-send --no-verify-jwt
   - [Phase 1](./prd/Azrael-PRD-Phase1.md)
   - [Phase 2](./prd/Azrael-PRD-Phase2.md)
   - [Phase 3](./prd/Azrael-PRD-Phase3.md)
+  - [Phase 4](./prd/Azrael-PRD-Phase4.md)
   - [Design](./prd/Azrael-PRD-Design.md)
 
 ---
@@ -402,9 +414,9 @@ supabase functions deploy slack-send --no-verify-jwt
 **프로덕션**: https://azrael-002.vercel.app
 
 **최신 배포**:
-- 프론트엔드: 커밋 5f3e0d9 (2026-02-10)
+- 프론트엔드: 커밋 744c896 (2026-02-10)
 - Edge Functions: jira-create, jira-update, jira-check, slack-oauth-callback, slack-channels, slack-send
-- DB: 11개 마이그레이션 완료
+- DB: 12개 마이그레이션 완료
 
 **Git Repository**: https://github.com/JaekyungCho2140/azrael-002
 
@@ -428,4 +440,4 @@ L10n팀 내부 프로젝트
 
 ---
 
-**최종 업데이트**: 2026-02-10 (Phase 3 완료 + 계산 결과 자동 복원)
+**최종 업데이트**: 2026-02-10 (Phase 4 완료 + UI 텍스트 감사)
