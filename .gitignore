@@ -36,11 +36,14 @@ nul
 # Playwright MCP
 .playwright-mcp/
 
-# 문서 및 내부 자료 (커밋 금지)
-docs/*
-!docs/user-manual.html
-!docs/test-scenarios.html
+# Claude Code 설정
+.claude/
+CLAUDE.md
+
+# 내부 문서 및 자료 (로컬 전용)
+docs/
 prd/
+claudedocs/
 plan.md
 talkwiththeuser/
 
