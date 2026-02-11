@@ -538,6 +538,48 @@ export interface Database {
           }
         ];
       };
+      // Phase 4: 몰아보기 슬롯 (010_phase4_presets.sql)
+      preset_slots: {
+        Row: {
+          id: string;
+          project_id: string;
+          slot_index: number;
+          name: string;
+          calculation_id: string;
+          visible_table: string;       // 'table1' | 'table2' | 'table3'
+          created_at: string;
+          updated_at: string;
+          created_by: string;
+        };
+        Insert: {
+          id?: string;
+          project_id: string;
+          slot_index: number;
+          name: string;
+          calculation_id: string;
+          visible_table?: string;      // 기본값: 'table1'
+          created_by: string;
+        };
+        Update: {
+          name?: string;
+          visible_table?: string;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "preset_slots_project_id_fkey";
+            columns: ["project_id"];
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "preset_slots_calculation_id_fkey";
+            columns: ["calculation_id"];
+            referencedRelation: "calculation_results";
+            referencedColumns: ["id"];
+          }
+        ];
+      };
     };
     Views: {
       [_ in never]: never;

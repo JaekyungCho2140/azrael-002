@@ -26,5 +26,9 @@ export const GANTT_BAR_HEIGHT = 30;
 export const GANTT_BAR_CORNER_RADIUS = 3;
 export const GANTT_PADDING = 18;
 
+// ── 몰아보기 (Phase 4) ──
+export const MAX_PRESET_SLOTS = 4;
+export const PRESET_NAME_MAX_LENGTH = 20;
+
 // ── React Query ──
 export const QUERY_RETRY_COUNT = 1;

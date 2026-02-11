@@ -16,19 +16,19 @@ npm run typecheck  # tsc --noEmit
 ## 아키텍처
 ```
 src/
-├── components/   # UI 컴포넌트 (32개, settings/ 6개 포함)
-├── hooks/        # React Hooks (7개: useSupabase, useJiraOperations, useEmailTemplates, useImageCopy, useToast, useSlackTokenStatus, useSlackTemplates)
+├── components/   # UI 컴포넌트 (36개, settings/ 6개, QuadViewScreen, PresetSlotCard, PresetSaveModal 포함)
+├── hooks/        # React Hooks (9개: useSupabase, useJiraOperations, useEmailTemplates, useImageCopy, useToast, useSlackTokenStatus, useSlackTemplates, useViewMode, usePresetSlots)
 ├── lib/
-│   ├── api/      # Supabase API 레이어 (7개: projects, templates, holidays, jira, calculations, emailTemplates, slack)
+│   ├── api/      # Supabase API 레이어 (8개: projects, templates, holidays, jira, calculations, emailTemplates, slack, presets)
 │   ├── email/    # 이메일 생성 엔진 (6개: generator, parser, formatters, sanitizer, clipboard, templates)
 │   ├── jira/     # JIRA 템플릿 헬퍼
 │   ├── businessDays.ts  # 영업일 계산 엔진
 │   └── storage.ts       # LocalStorage 유틸
 ├── types/        # PRD Shared.md §2 인터페이스 (5개)
-└── constants.ts  # 프론트엔드 상수 (16개)
+└── constants.ts  # 프론트엔드 상수 (18개)
 
 supabase/
-├── migrations/   # DB 스키마 (11개)
+├── migrations/   # DB 스키마 (12개)
 └── functions/    # Edge Functions (6개)
     ├── jira-create/
     ├── jira-update/
@@ -87,4 +87,5 @@ supabase/
 - ✅ 코드 품질 개선: 컴포넌트 분할, 번들 최적화, 접근성, 디자인 토큰 (2026-02-06)
 - ✅ Phase 3: 슬랙 연동 — OAuth, 채널 매핑, 메시지 템플릿, 이미지 첨부 (2026-02-10)
 - ✅ 계산 결과 자동 복원: 프로젝트 전환/새로고침 시 마지막 계산 자동 로드 (2026-02-10)
-- ⏳ Phase 4: 프리셋 관리 (예정)
+- ✅ Phase 4: 몰아보기 비교 뷰 — 4분할 화면, 몰아보기 CRUD, ViewMode 토글 (2026-02-10)
+- ✅ UI 텍스트 감사: 이모지 제거, 용어 통일 (프리셋→몰아보기, 단일 화면→톺아보기) (2026-02-10)

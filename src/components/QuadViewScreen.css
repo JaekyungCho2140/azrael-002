@@ -1,0 +1,45 @@
+/**
+ * QuadViewScreen Styles
+ * 참조: prd/Azrael-PRD-Phase4.md §3.3
+ */
+
+.quad-view-screen {
+  padding: 1rem;
+  height: calc(100vh - 70px); /* 헤더 높이 제외 */
+  overflow: hidden;
+}
+
+.quad-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 0.75rem;
+  height: 100%;
+}
+
+.quad-view-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: calc(100vh - 70px);
+  color: var(--azrael-gray-500);
+  font-size: var(--text-base);
+}
+
+/* 1280px~1399px: 컴팩트 모드 (일부 컬럼 축소) */
+@media (max-width: 1399px) {
+  .quad-grid {
+    gap: 0.5rem;
+  }
+
+  .quad-view-screen {
+    padding: 0.5rem;
+  }
+}
+
+/* 1400px+: 풀 모드 */
+@media (min-width: 1400px) {
+  .quad-grid {
+    gap: 1rem;
+  }
+}

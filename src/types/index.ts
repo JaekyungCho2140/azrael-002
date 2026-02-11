@@ -88,6 +88,7 @@ export interface ScheduleEntry {
  * 참조: Azrael-PRD-Shared.md §2.4
  */
 export interface CalculationResult {
+  id: string;                    // UUID (Supabase DB PK) — Phase 4 몰아보기 FK 참조
   projectId: string;             // 프로젝트 ID (타입 정보 포함)
   updateDate: Date;              // 업데이트일
   headsUpDate: Date;             // 계산된 헤즈업 날짜
@@ -119,6 +120,41 @@ export interface UserState {
   hasCompletedOnboarding: boolean; // 온보딩 완료 여부
   showVisualization?: boolean;   // 간트 차트/캘린더 뷰 표시 여부 (기본값: true)
   lastCalculationDates?: Record<string, string>; // 프로젝트별 마지막 계산 날짜 (projectId → "YYYY-MM-DD")
+  viewModeByProject?: Record<string, ViewMode>;  // Phase 4: 프로젝트별 화면 모드
+}
+
+// ============================================================
+// Phase 4: 몰아보기 비교 뷰 타입
+// 참조: Azrael-PRD-Phase4.md §4.1
+// ============================================================
+
+/**
+ * ViewMode (화면 모드)
+ * 참조: Azrael-PRD-Phase4.md §3.1
+ */
+export type ViewMode = { type: 'single' } | { type: 'quad' };
+
+/**
+ * PresetSlot (몰아보기 슬롯)
+ * 참조: Azrael-PRD-Phase4.md §4.1
+ */
+export interface PresetSlot {
+  id: string;                    // UUID
+  projectId: string;             // 프로젝트 ID
+  slotIndex: number;             // 슬롯 인덱스 (0~3)
+  name: string;                  // 슬롯 이름
+  calculationId: string;         // calculation_results.id FK
+  visibleTable: TableType;       // 표시할 테이블 (table1/table2/table3)
+  createdAt: string;             // ISO 8601
+  createdBy: string;             // 저장한 사용자 ID
+}
+
+/**
+ * PresetSlotWithData (몰아보기 슬롯 + 계산 결과)
+ * 참조: Azrael-PRD-Phase4.md §4.1
+ */
+export interface PresetSlotWithData extends PresetSlot {
+  calculationResult: CalculationResult | null;
 }
 
 /**

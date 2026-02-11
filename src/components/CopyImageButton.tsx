@@ -30,7 +30,7 @@ export function CopyImageButton({ targetId, onSuccess, onError }: CopyImageButto
       disabled={isLoading}
       variant="secondary"
     >
-      {isLoading ? '생성 중...' : '📋 이미지 복사'}
+      {isLoading ? '생성 중...' : '이미지 복사'}
     </Button>
   );
 }

@@ -220,7 +220,7 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           className="form-input"
           value={jiraProjectKey}
           onChange={(e) => setJiraProjectKey(e.target.value)}
-          placeholder="예: M4L10N, NCL10N"
+          placeholder="예: L10NM4, L10NNC, L10NLY"
         />
         <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
           JIRA 연동 시 사용할 프로젝트 키

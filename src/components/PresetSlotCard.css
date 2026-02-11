@@ -1,0 +1,226 @@
+/**
+ * PresetSlotCard Styles
+ * 참조: prd/Azrael-PRD-Phase4.md §3.3
+ */
+
+.preset-slot-card {
+  background: white;
+  border: 2px solid var(--azrael-gray-200);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.preset-slot-empty {
+  border-style: dashed;
+}
+
+.preset-slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, var(--azrael-orange-50) 0%, var(--azrael-gray-50) 100%);
+  border-bottom: 2px solid var(--azrael-orange-200);
+  min-height: 44px;
+}
+
+.preset-slot-title-area {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.preset-slot-index {
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-600);
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+}
+
+.preset-slot-name {
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-gray-900);
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.preset-slot-name:hover {
+  background: var(--azrael-orange-100);
+}
+
+.preset-name-input {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  padding: 2px 6px;
+  border: 1.5px solid var(--azrael-orange-500);
+  border-radius: 4px;
+  outline: none;
+  width: 120px;
+}
+
+.preset-slot-title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--azrael-gray-700);
+}
+
+.preset-delete-button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  color: var(--azrael-gray-500);
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.preset-delete-button:hover {
+  background: var(--azrael-gray-100);
+  color: var(--azrael-gray-900);
+}
+
+.preset-slot-empty-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  gap: 0.75rem;
+}
+
+.preset-add-button {
+  padding: 0.75rem 1.5rem;
+  background: var(--azrael-orange-500);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: var(--text-base);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.preset-add-button:hover:not(:disabled) {
+  background: var(--azrael-orange-600);
+}
+
+.preset-add-button:disabled {
+  background: var(--azrael-gray-300);
+  cursor: not-allowed;
+}
+
+.preset-empty-hint {
+  font-size: var(--text-sm);
+  color: var(--azrael-gray-500);
+  text-align: center;
+  margin: 0;
+}
+
+.preset-slot-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.preset-dates {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: var(--azrael-gray-50);
+  border-bottom: 1px solid var(--azrael-gray-200);
+}
+
+.preset-date-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.preset-date-label {
+  font-size: 0.6875rem;
+  color: var(--azrael-gray-500);
+  font-weight: var(--weight-medium);
+}
+
+.preset-date-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  color: var(--azrael-orange-700);
+  font-weight: var(--weight-semibold);
+}
+
+.preset-table-selector {
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid var(--azrael-gray-200);
+}
+
+.preset-table-dropdown {
+  width: 100%;
+  padding: 0.375rem 0.5rem;
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  border: 1.5px solid var(--azrael-gray-300);
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+}
+
+.preset-table-dropdown:focus {
+  border-color: var(--azrael-orange-500);
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 152, 0, 0.1);
+}
+
+.preset-table-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0;
+}
+
+/* 슬롯 내 테이블은 컴팩트하게 */
+.preset-table-container .table-container {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+}
+
+.preset-table-container .table-header {
+  display: none;
+}
+
+.preset-table-container table {
+  font-size: 0.75rem;
+}
+
+.preset-table-container th,
+.preset-table-container td {
+  padding: 0.375rem 0.5rem;
+}
+
+.preset-slot-loading {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--azrael-gray-500);
+  font-size: var(--text-sm);
+}

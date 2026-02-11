@@ -147,7 +147,7 @@ function stripHtmlTags(text: string): string {
  * @param html - 변환할 HTML 문자열
  * @returns 인라인 스타일이 적용된 HTML
  */
-export function convertToInlineStyles(html: string): string {
+function convertToInlineStyles(html: string): string {
   return juice(html, {
     removeStyleTags: true,
     preserveMediaQueries: false,

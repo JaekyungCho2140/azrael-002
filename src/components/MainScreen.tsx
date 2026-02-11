@@ -15,10 +15,12 @@ const SettingsScreen = lazy(() => import('./SettingsScreen').then(m => ({ defaul
 const JiraPreviewModal = lazy(() => import('./JiraPreviewModal').then(m => ({ default: m.JiraPreviewModal })));
 const EmailGeneratorModal = lazy(() => import('./EmailGeneratorModal').then(m => ({ default: m.EmailGeneratorModal })));
 const SlackSendModal = lazy(() => import('./SlackSendModal').then(m => ({ default: m.SlackSendModal })));
+const QuadViewScreen = lazy(() => import('./QuadViewScreen'));
 import { getUserState, getLastCalculationDate, saveLastCalculationDate } from '../lib/storage';
 import { useSaveCalculationResult, useJiraAssignees, useHolidays } from '../hooks/useSupabase';
 import { fetchCalculationResult } from '../lib/api/calculations';
 import { useSlackTokenStatus } from '../hooks/useSlackTokenStatus';
+import { useViewMode } from '../hooks/useViewMode';
 import { supabase } from '../lib/supabase';
 import {
   calculateHeadsUpDate,
@@ -57,6 +59,9 @@ export function MainScreen({
   const [showVisualization, setShowVisualization] = useState(true);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [currentUserId, setCurrentUserId] = useState<string>('');
+
+  // Phase 4: ViewMode 상태 관리
+  const { viewMode, setViewMode } = useViewMode(currentProject.id);
 
   // Phase 1.7: 계산 결과 Supabase 연동
   const saveMutation = useSaveCalculationResult();
@@ -227,6 +232,7 @@ export function MainScreen({
     const table3Entries = createEntries(template.stages, 'table3');
 
     const result: CalculationResult = {
+      id: '',  // Supabase UPSERT 후 할당됨
       projectId: currentProject.id,
       updateDate: updateDateObj,
       headsUpDate,
@@ -243,8 +249,17 @@ export function MainScreen({
     // 마지막 계산 날짜 저장 (자동 복원용)
     saveLastCalculationDate(currentProject.id, formatDateLocal(updateDateObj));
 
-    // Phase 1.7: Supabase에 저장
-    saveMutation.mutate({ result, userEmail: currentUserEmail });
+    // Phase 1.7: Supabase에 저장 (Phase 4: 반환된 id로 상태 업데이트)
+    saveMutation.mutate(
+      { result, userEmail: currentUserEmail },
+      {
+        onSuccess: (savedId) => {
+          if (savedId) {
+            setCalculationResult(prev => prev ? { ...prev, id: savedId } : prev);
+          }
+        },
+      }
+    );
 
     // Epic 매핑 존재 여부 확인 (JIRA 업데이트 버튼 활성화용)
     fetchEpicMapping(currentProject.id, updateDateObj).then(epicMapping => {
@@ -298,15 +313,34 @@ export function MainScreen({
               <option key={p.id} value={p.id}>{p.name}</option>
             ))}
           </select>
+          {viewMode.type === 'single' ? (
+            <Button variant="ghost" onClick={() => setViewMode({ type: 'quad' })}>
+              몰아보기
+            </Button>
+          ) : (
+            <Button variant="ghost" onClick={() => setViewMode({ type: 'single' })}>
+              톺아보기
+            </Button>
+          )}
           <Button variant="ghost" onClick={() => setShowSettings(true)}>
             ⚙️ 설정
           </Button>
           <Button variant="ghost" onClick={onLogout}>
-            🚪 로그아웃
+            로그아웃
           </Button>
         </div>
       </header>
 
+      {/* 조건부 렌더링: 톺아보기 vs 몰아보기 화면 */}
+      {viewMode.type === 'quad' ? (
+        <Suspense fallback={<div className="lazy-loading">몰아보기 화면을 불러오는 중...</div>}>
+          <QuadViewScreen
+            currentProject={currentProject}
+            currentCalculationResult={calculationResult}
+          />
+        </Suspense>
+      ) : (
+      <>
       {/* Input Section */}
       <div className="input-section">
         <div className="input-row">
@@ -328,7 +362,7 @@ export function MainScreen({
             disabled={!calculationResult || !jira.hasJiraConfig}
             title={!calculationResult ? '일정 계산 후 사용 가능' : !jira.hasJiraConfig ? 'JIRA 설정 필요' : ''}
           >
-            📋 JIRA 생성
+            JIRA 생성
           </Button>
           <Button
             onClick={jira.handleUpdateJira}
@@ -336,7 +370,7 @@ export function MainScreen({
             variant="secondary"
             title={!jira.hasEpicMapping ? '먼저 JIRA 생성 필요' : ''}
           >
-            🔄 JIRA 업데이트
+            JIRA 업데이트
           </Button>
           <Button
             onClick={() => setShowEmailModal(true)}
@@ -490,6 +524,8 @@ export function MainScreen({
             currentUserId={currentUserId}
           />
         </Suspense>
+      )}
+      </>
       )}
     </div>
   );

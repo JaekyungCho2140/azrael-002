@@ -8,6 +8,53 @@ import { CalculationResult, ScheduleEntry } from '../../types';
 import { formatDateLocal } from '../businessDays';
 
 /**
+ * DB schedule_entries 행 → ScheduleEntry[] 재구성 (부모-자식 관계)
+ *
+ * fetchCalculationResult, fetchCalculationResultById 공용 헬퍼.
+ */
+function buildEntries(
+  entriesData: any[] | null,
+  tableType: 'table1' | 'table2' | 'table3'
+): ScheduleEntry[] {
+  const tableEntries = entriesData?.filter((e: any) => e.table_type === tableType) || [];
+  const parentEntries = tableEntries.filter((e: any) => !e.parent_id);
+
+  return parentEntries.map((parent: any) => {
+    const entry: ScheduleEntry = {
+      id: parent.id,
+      index: parent.entry_index,
+      stageId: parent.stage_id,
+      stageName: parent.stage_name,
+      startDateTime: new Date(parent.start_datetime),
+      endDateTime: new Date(parent.end_datetime),
+      description: '',
+      assignee: '',
+      jiraDescription: '',
+      jiraAssignee: '',
+      isManualEdit: false,
+    };
+
+    const children = tableEntries.filter((e: any) => e.parent_id === parent.id);
+    if (children.length > 0) {
+      entry.children = children.map((child: any) => ({
+        id: child.id,
+        index: child.entry_index,
+        stageId: child.stage_id,
+        stageName: child.stage_name,
+        startDateTime: new Date(child.start_datetime),
+        endDateTime: new Date(child.end_datetime),
+        description: '',
+        jiraDescription: '',
+        parentId: parent.id,
+        isManualEdit: false,
+      }));
+    }
+
+    return entry;
+  });
+}
+
+/**
  * 계산 결과 조회
  * @param projectId 프로젝트 ID
  * @param updateDate 업데이트일
@@ -40,61 +87,19 @@ export async function fetchCalculationResult(
 
     if (entriesError) throw entriesError;
 
-    // 3. ScheduleEntry 재구성 (부모-자식 관계)
-    const buildEntries = (tableType: 'table1' | 'table2' | 'table3'): ScheduleEntry[] => {
-      const tableEntries = entriesData?.filter((e: any) => e.table_type === tableType) || [];
-      const parentEntries = tableEntries.filter((e: any) => !e.parent_id);
-
-      return parentEntries.map((parent: any) => {
-        const entry: ScheduleEntry = {
-          id: parent.id,
-          index: parent.entry_index,
-          stageId: parent.stage_id,
-          stageName: parent.stage_name,
-          startDateTime: new Date(parent.start_datetime),
-          endDateTime: new Date(parent.end_datetime),
-          description: '',
-          assignee: '',
-          jiraDescription: '',
-          jiraAssignee: '',
-          isManualEdit: false,
-        };
-
-        // 하위 일감 찾기
-        const children = tableEntries.filter((e: any) => e.parent_id === parent.id);
-        if (children.length > 0) {
-          entry.children = children.map((child: any) => ({
-            id: child.id,
-            index: child.entry_index,
-            stageId: child.stage_id,
-            stageName: child.stage_name,
-            startDateTime: new Date(child.start_datetime),
-            endDateTime: new Date(child.end_datetime),
-            description: '',
-            jiraDescription: '',
-            parentId: parent.id,
-            isManualEdit: false,
-          }));
-        }
-
-        return entry;
-      });
-    };
-
-    // 4. CalculationResult 조립
-    const result: CalculationResult = {
+    // 3. CalculationResult 조립
+    return {
+      id: calcData.id,
       projectId: calcData.project_id,
       updateDate: new Date(calcData.update_date),
       headsUpDate: new Date(calcData.heads_up_date),
       iosReviewDate: calcData.ios_review_date ? new Date(calcData.ios_review_date) : undefined,
       paidProductDate: calcData.paid_product_date ? new Date(calcData.paid_product_date) : undefined,
-      table1Entries: buildEntries('table1'),
-      table2Entries: buildEntries('table2'),
-      table3Entries: buildEntries('table3'),
+      table1Entries: buildEntries(entriesData, 'table1'),
+      table2Entries: buildEntries(entriesData, 'table2'),
+      table3Entries: buildEntries(entriesData, 'table3'),
       calculatedAt: new Date(calcData.calculated_at),
     };
-
-    return result;
   } catch (error) {
     console.error('계산 결과 조회 실패:', error);
     throw error;
@@ -109,7 +114,7 @@ export async function fetchCalculationResult(
 export async function saveCalculationResult(
   result: CalculationResult,
   userEmail: string
-): Promise<void> {
+): Promise<string> {
   try {
     const updateDateStr = formatDateLocal(result.updateDate);
     const headsUpDateStr = formatDateLocal(result.headsUpDate);
@@ -196,8 +201,57 @@ export async function saveCalculationResult(
     await saveParentsAndChildren(result.table2Entries, 'table2');
     await saveParentsAndChildren(result.table3Entries, 'table3');
 
+    return calcData.id;
+
   } catch (error) {
     console.error('계산 결과 저장 실패:', error);
+    throw error;
+  }
+}
+
+/**
+ * 계산 결과 ID로 직접 조회 (Phase 4 몰아보기용)
+ * @param id calculation_results UUID
+ * @returns 계산 결과 또는 null
+ */
+export async function fetchCalculationResultById(
+  id: string
+): Promise<CalculationResult | null> {
+  try {
+    // 1. calculation_results 조회 (id로)
+    const { data: calcData, error: calcError } = await supabase
+      .from('calculation_results')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (calcError) throw calcError;
+    if (!calcData) return null;
+
+    // 2. schedule_entries 조회
+    const { data: entriesData, error: entriesError } = await supabase
+      .from('schedule_entries')
+      .select('*')
+      .eq('calculation_id', calcData.id)
+      .order('entry_index');
+
+    if (entriesError) throw entriesError;
+
+    // 3. CalculationResult 조립
+    return {
+      id: calcData.id,
+      projectId: calcData.project_id,
+      updateDate: new Date(calcData.update_date),
+      headsUpDate: new Date(calcData.heads_up_date),
+      iosReviewDate: calcData.ios_review_date ? new Date(calcData.ios_review_date) : undefined,
+      paidProductDate: calcData.paid_product_date ? new Date(calcData.paid_product_date) : undefined,
+      table1Entries: buildEntries(entriesData, 'table1'),
+      table2Entries: buildEntries(entriesData, 'table2'),
+      table3Entries: buildEntries(entriesData, 'table3'),
+      calculatedAt: new Date(calcData.calculated_at),
+    };
+  } catch (error) {
+    console.error('계산 결과 ID 조회 실패:', error);
     throw error;
   }
 }

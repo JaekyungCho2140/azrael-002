@@ -94,7 +94,6 @@ export function CalendarView({
 
   const handleCopySuccess = () => {
     // Toast는 MainScreen에서 관리
-    console.log('캘린더 이미지 복사 성공');
   };
 
   const handleCopyError = (error: Error) => {
@@ -104,7 +103,7 @@ export function CalendarView({
   return (
     <div className="calendar-container" id="calendar-view">
       <div className="calendar-header">
-        <h3>📅 캘린더 뷰</h3>
+        <h3>달력 보기</h3>
         <CopyImageButton
           targetId="calendar-view"
           onSuccess={handleCopySuccess}

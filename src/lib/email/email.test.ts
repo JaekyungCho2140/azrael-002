@@ -58,6 +58,7 @@ function makeEntry(overrides: Partial<ScheduleEntry> = {}): ScheduleEntry {
 
 function makeCalcResult(overrides: Partial<CalculationResult> = {}): CalculationResult {
   return {
+    id: 'test-calc-id',
     projectId: 'proj-1',
     updateDate: new Date('2026-02-10'),
     headsUpDate: new Date('2026-02-03'),

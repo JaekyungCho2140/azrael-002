@@ -207,7 +207,7 @@ export function SettingsProjectsTab({
             variant="secondary"
             onClick={() => document.getElementById('projects-csv-upload')?.click()}
           >
-            📁 프로젝트 불러오기 (CSV)
+            프로젝트 불러오기 (CSV)
           </Button>
         </div>
       )}

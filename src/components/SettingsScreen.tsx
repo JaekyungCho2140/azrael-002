@@ -53,7 +53,7 @@ export function SettingsScreen({
       <div className="settings-header">
         <h2>설정</h2>
         <Button variant="ghost" onClick={onClose}>
-          ← 돌아가기
+          뒤로
         </Button>
       </div>
 

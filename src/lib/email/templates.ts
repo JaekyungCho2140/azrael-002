@@ -125,20 +125,3 @@ export const BUILT_IN_TEMPLATE_NAMES = {
   DETAILED: '상세',
 } as const;
 
-/**
- * 기본 제공 템플릿 정의 (seed/마이그레이션 참조용)
- *
- * 참조: PRD §2.6, §6 seed_email_templates_for_project
- */
-export const BUILT_IN_TEMPLATES = [
-  {
-    name: BUILT_IN_TEMPLATE_NAMES.BASIC,
-    subjectTemplate: BASIC_SUBJECT_TEMPLATE,
-    bodyTemplate: BASIC_BODY_TEMPLATE,
-  },
-  {
-    name: BUILT_IN_TEMPLATE_NAMES.DETAILED,
-    subjectTemplate: DETAILED_SUBJECT_TEMPLATE,
-    bodyTemplate: DETAILED_BODY_TEMPLATE,
-  },
-] as const;

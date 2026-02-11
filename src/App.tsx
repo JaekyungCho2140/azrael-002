@@ -191,7 +191,7 @@ function App() {
         padding: '2rem',
         textAlign: 'center'
       }}>
-        <h2>📦 프로젝트 데이터가 없습니다</h2>
+        <h2>프로젝트 데이터가 없습니다</h2>
         <p style={{ color: 'var(--azrael-gray-600)' }}>
           Supabase에 프로젝트가 없습니다.<br />
           CSV 임포트를 실행해주세요.

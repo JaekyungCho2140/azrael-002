@@ -170,7 +170,7 @@ export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
           onClick={handleFetchHolidays}
           disabled={isLoadingHolidays}
         >
-          {isLoadingHolidays ? '불러오는 중...' : '🔄 공휴일 불러오기 (API)'}
+          {isLoadingHolidays ? '불러오는 중...' : '공휴일 불러오기 (API)'}
         </Button>
 
         <span style={{ color: 'var(--azrael-gray-600)', display: 'inline-flex', alignItems: 'center' }}>
@@ -190,14 +190,14 @@ export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
               variant="secondary"
               onClick={() => document.getElementById('holidays-csv-upload')?.click()}
             >
-              📁 공휴일 불러오기 (CSV)
+              공휴일 불러오기 (CSV)
             </Button>
 
             <Button
               variant="ghost"
               onClick={handleClearAllHolidays}
             >
-              🗑️ 모두 삭제
+              모두 삭제
             </Button>
           </>
         )}
