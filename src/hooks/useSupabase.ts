@@ -10,6 +10,7 @@ import {
   createProject,
   updateProject,
   deleteProject,
+  duplicateProject,
 } from '../lib/api/projects';
 import {
   fetchTemplates,
@@ -86,6 +87,21 @@ export function useDeleteProject() {
 
   return useMutation({
     mutationFn: deleteProject,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+      queryClient.invalidateQueries({ queryKey: ['templates'] });
+    },
+  });
+}
+
+/**
+ * 프로젝트 복제
+ */
+export function useDuplicateProject() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: duplicateProject,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
       queryClient.invalidateQueries({ queryKey: ['templates'] });

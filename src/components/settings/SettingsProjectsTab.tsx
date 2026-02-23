@@ -6,6 +6,7 @@ import {
   useCreateProject,
   useUpdateProject,
   useDeleteProject,
+  useDuplicateProject,
 } from '../../hooks/useSupabase';
 import { getUserState, saveUserState } from '../../lib/storage';
 
@@ -29,6 +30,7 @@ export function SettingsProjectsTab({
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
   const deleteProjectMutation = useDeleteProject();
+  const duplicateProjectMutation = useDuplicateProject();
 
   // 시각화 설정 로드
   useEffect(() => {
@@ -80,6 +82,22 @@ export function SettingsProjectsTab({
         },
       });
     }
+  };
+
+  const handleDuplicateProject = (projectId: string) => {
+    if (!confirm('프로젝트를 복제하시겠습니까?\n(프로젝트 설정, 업무 단계, 이메일/Slack 템플릿이 복사됩니다)')) {
+      return;
+    }
+
+    duplicateProjectMutation.mutate(projectId, {
+      onSuccess: (newProject) => {
+        onSelectedProjectIdChange(newProject.id);
+        alert(`프로젝트가 복제되었습니다: ${newProject.name}`);
+      },
+      onError: (err: any) => {
+        alert(`프로젝트 복제 실패: ${err.message}`);
+      },
+    });
   };
 
   const handleDeleteProject = (projectId: string) => {
@@ -163,6 +181,7 @@ export function SettingsProjectsTab({
             <th>헤즈업 Offset</th>
             <th>iOS 심사일</th>
             <th>편집</th>
+            <th>복제</th>
             <th>삭제</th>
           </tr>
         </thead>
@@ -178,6 +197,16 @@ export function SettingsProjectsTab({
                   onClick={() => handleEditProject(p)}
                 >
                   ✎
+                </button>
+              </td>
+              <td>
+                <button
+                  className="btn-icon"
+                  onClick={() => handleDuplicateProject(p.id)}
+                  disabled={duplicateProjectMutation.isPending}
+                  title="프로젝트 복제"
+                >
+                  {duplicateProjectMutation.isPending ? '⏳' : '📋'}
                 </button>
               </td>
               <td>

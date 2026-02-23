@@ -5,6 +5,9 @@
 
 import { supabase, getCurrentUserEmail } from '../supabase';
 import type { Project } from '../../types';
+import { fetchTemplateByProjectId, saveTemplate } from './templates';
+import { fetchEmailTemplates, createEmailTemplate } from './emailTemplates';
+import { fetchSlackTemplates, createSlackTemplate } from './slack';
 
 /**
  * Supabase Row → TypeScript Project 타입 매핑
@@ -132,4 +135,118 @@ export async function deleteProject(id: string): Promise<void> {
     console.error('Failed to delete project:', error);
     throw new Error(`프로젝트 삭제 실패: ${error.message}`);
   }
+}
+
+/**
+ * 프로젝트 복제
+ * 프로젝트 설정 + WorkStages + 이메일 템플릿 + Slack 템플릿을 복사한다.
+ * 프리셋/계산결과는 제외.
+ */
+export async function duplicateProject(sourceProjectId: string): Promise<Project> {
+  const userEmail = await getCurrentUserEmail();
+  if (!userEmail) {
+    throw new Error('로그인이 필요합니다.');
+  }
+
+  // 1. 소스 프로젝트 조회
+  const { data: sourceRow, error: fetchError } = await supabase
+    .from('projects')
+    .select('*')
+    .eq('id', sourceProjectId)
+    .single();
+
+  if (fetchError || !sourceRow) {
+    throw new Error(`원본 프로젝트 조회 실패: ${fetchError?.message}`);
+  }
+
+  // 2. 새 프로젝트 생성
+  const timestamp = Date.now();
+  const newId = `${sourceProjectId}_COPY_${timestamp}`;
+  const newTemplateId = `template_${newId}`;
+  const newName = `${sourceRow.name} (복사본)`;
+
+  const { data: newProjectRow, error: createError } = await supabase
+    .from('projects')
+    .insert({
+      id: newId,
+      name: newName,
+      heads_up_offset: sourceRow.heads_up_offset,
+      ios_review_offset: sourceRow.ios_review_offset,
+      show_ios_review_date: sourceRow.show_ios_review_date,
+      paid_product_offset: sourceRow.paid_product_offset,
+      show_paid_product_date: sourceRow.show_paid_product_date,
+      template_id: newTemplateId,
+      disclaimer: sourceRow.disclaimer,
+      jira_project_key: sourceRow.jira_project_key,
+      jira_epic_template: sourceRow.jira_epic_template,
+      jira_headsup_template: sourceRow.jira_headsup_template,
+      jira_headsup_description: sourceRow.jira_headsup_description,
+      jira_task_issue_type: sourceRow.jira_task_issue_type,
+      slack_channel_id: sourceRow.slack_channel_id,
+      slack_channel_name: sourceRow.slack_channel_name,
+      created_by: userEmail,
+    })
+    .select()
+    .single();
+
+  if (createError || !newProjectRow) {
+    throw new Error(`프로젝트 복제 실패: ${createError?.message}`);
+  }
+
+  // 3. WorkStages 복사 (템플릿 + stages)
+  const sourceTemplate = await fetchTemplateByProjectId(sourceProjectId);
+  if (sourceTemplate && sourceTemplate.stages.length > 0) {
+    // stage ID 매핑 (parentStageId 참조 유지를 위해)
+    const stageIdMap = new Map<string, string>();
+    const newStages = sourceTemplate.stages.map((stage) => {
+      const newStageId = `${newTemplateId}_stage_${stage.order}`;
+      stageIdMap.set(stage.id, newStageId);
+      return { ...stage, id: newStageId };
+    });
+
+    // parentStageId 재매핑
+    const remappedStages = newStages.map((stage) => ({
+      ...stage,
+      parentStageId: stage.parentStageId
+        ? stageIdMap.get(stage.parentStageId) || stage.parentStageId
+        : undefined,
+    }));
+
+    await saveTemplate({
+      id: newTemplateId,
+      projectId: newId,
+      stages: remappedStages,
+    });
+  } else {
+    // stages가 없더라도 빈 템플릿 레코드 생성
+    await saveTemplate({
+      id: newTemplateId,
+      projectId: newId,
+      stages: [],
+    });
+  }
+
+  // 4. 이메일 템플릿 복사 (사용자 정의만 — DB 트리거가 built-in 자동 생성)
+  const emailTemplates = await fetchEmailTemplates(sourceProjectId);
+  for (const et of emailTemplates) {
+    if (et.isBuiltIn) continue;
+    await createEmailTemplate(newId, {
+      name: et.name,
+      subjectTemplate: et.subjectTemplate,
+      bodyTemplate: et.bodyTemplate,
+    });
+  }
+
+  // 5. Slack 메시지 템플릿 복사 (사용자 정의만 — DB 트리거가 built-in 자동 생성)
+  const slackTemplates = await fetchSlackTemplates(sourceProjectId);
+  for (const st of slackTemplates) {
+    if (st.isBuiltIn) continue;
+    await createSlackTemplate({
+      projectId: newId,
+      name: st.name,
+      bodyTemplate: st.bodyTemplate,
+    });
+  }
+
+  return mapToProject(newProjectRow);
 }
