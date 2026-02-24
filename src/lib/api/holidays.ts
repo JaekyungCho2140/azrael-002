@@ -90,15 +90,22 @@ export async function deleteHoliday(date: Date): Promise<void> {
 
 /**
  * API 공휴일 동기화
- * 기존 API 공휴일(isManual=false)을 삭제하고 새로운 API 데이터 삽입
+ * 해당 연도의 API 공휴일(isManual=false)만 삭제하고 새로운 API 데이터 삽입
  * 수동 공휴일(isManual=true)은 유지하며, 날짜가 겹치는 API 공휴일은 건너뜀
  */
-export async function syncApiHolidays(apiHolidays: Holiday[]): Promise<void> {
-  // 1. 기존 API 공휴일 삭제
+export async function syncApiHolidays(targetYear: number, apiHolidays: Holiday[]): Promise<void> {
+  // 0. 빈 응답 방어 (삭제 전 차단)
+  if (apiHolidays.length === 0) {
+    throw new Error(`${targetYear}년 공휴일 데이터가 없습니다.`);
+  }
+
+  // 1. 해당 연도의 API 공휴일만 삭제
   const { error: deleteError } = await supabase
     .from('holidays')
     .delete()
-    .eq('is_manual', false);
+    .eq('is_manual', false)
+    .gte('date', `${targetYear}-01-01`)
+    .lte('date', `${targetYear}-12-31`);
 
   if (deleteError) {
     console.error('Failed to delete old API holidays:', deleteError);

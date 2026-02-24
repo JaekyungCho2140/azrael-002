@@ -4,7 +4,7 @@
  */
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { Project } from '../types';
+import type { Project, Holiday } from '../types';
 import {
   fetchProjects,
   createProject,
@@ -245,7 +245,8 @@ export function useSyncApiHolidays() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: syncApiHolidays,
+    mutationFn: ({ targetYear, holidays }: { targetYear: number; holidays: Holiday[] }) =>
+      syncApiHolidays(targetYear, holidays),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['holidays'] });
     },

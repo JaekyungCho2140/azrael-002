@@ -75,7 +75,7 @@ export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
         };
       });
 
-      syncApiHolidaysMutation.mutate(newHolidays, {
+      syncApiHolidaysMutation.mutate({ targetYear, holidays: newHolidays }, {
         onSuccess: () => {
           setIsLoadingHolidays(false);
           alert('공휴일을 성공적으로 불러왔습니다.');
