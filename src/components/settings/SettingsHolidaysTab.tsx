@@ -17,6 +17,7 @@ interface SettingsHolidaysTabProps {
 export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
   const [holidayModalOpen, setHolidayModalOpen] = useState(false);
   const [isLoadingHolidays, setIsLoadingHolidays] = useState(false);
+  const [fetchYear, setFetchYear] = useState(new Date().getFullYear());
 
   const { data: holidays } = useHolidays();
   const createHolidayMutation = useCreateHoliday();
@@ -24,11 +25,11 @@ export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
   const syncApiHolidaysMutation = useSyncApiHolidays();
 
   const handleFetchHolidays = async () => {
-    const currentYear = new Date().getFullYear();
-    const hasApiHolidays = holidays?.some(h => !h.isManual && h.date.getFullYear() === currentYear);
+    const targetYear = fetchYear;
+    const hasApiHolidays = holidays?.some(h => !h.isManual && h.date.getFullYear() === targetYear);
 
     if (hasApiHolidays) {
-      if (!confirm(`이미 ${currentYear}년 공휴일을 불러왔습니다. 다시 불러오시겠습니까?`)) {
+      if (!confirm(`이미 ${targetYear}년 공휴일을 불러왔습니다. 다시 불러오시겠습니까?`)) {
         return;
       }
     }
@@ -40,7 +41,7 @@ export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
         throw new Error('공휴일 API 키가 설정되지 않았습니다.');
       }
 
-      const url = `http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${currentYear}&ServiceKey=${apiKey}`;
+      const url = `https://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService/getRestDeInfo?solYear=${targetYear}&numOfRows=50&ServiceKey=${apiKey}`;
       const response = await fetch(url);
 
       if (!response.ok) {
@@ -166,16 +167,22 @@ export function SettingsHolidaysTab({ isAdmin }: SettingsHolidaysTabProps) {
       </div>
 
       <div style={{ marginBottom: '1rem', display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <input
+          type="number"
+          value={fetchYear}
+          onChange={(e) => setFetchYear(parseInt(e.target.value, 10))}
+          min={2020}
+          max={2030}
+          style={{ width: '5rem', textAlign: 'center' }}
+        />
+        <span style={{ color: 'var(--azrael-gray-600)' }}>년</span>
+
         <Button
           onClick={handleFetchHolidays}
           disabled={isLoadingHolidays}
         >
           {isLoadingHolidays ? '불러오는 중...' : '공휴일 불러오기 (API)'}
         </Button>
-
-        <span style={{ color: 'var(--azrael-gray-600)', display: 'inline-flex', alignItems: 'center' }}>
-          올해: {new Date().getFullYear()}년
-        </span>
 
         {isAdmin && (
           <>
