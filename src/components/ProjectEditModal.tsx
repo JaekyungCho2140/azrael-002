@@ -31,6 +31,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
   const [jiraEpicTemplate, setJiraEpicTemplate] = useState('');
   const [jiraHeadsupTemplate, setJiraHeadsupTemplate] = useState('');
   const [jiraHeadsupDescription, setJiraHeadsupDescription] = useState('');
+  const [jiraEpicDescription, setJiraEpicDescription] = useState('');
+  const [jiraEpicTableEnabled, setJiraEpicTableEnabled] = useState(false);
+  const [jiraEpicTableType, setJiraEpicTableType] = useState<'table1' | 'table2' | 'table3'>('table1');
   const [jiraTaskIssueType, setJiraTaskIssueType] = useState('');
 
   // 폼 라벨 연결용 ID
@@ -60,6 +63,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraEpicTemplate(project.jiraEpicTemplate || '');
       setJiraHeadsupTemplate(project.jiraHeadsupTemplate || '');
       setJiraHeadsupDescription(project.jiraHeadsupDescription || '');
+      setJiraEpicDescription(project.jiraEpicDescription || '');
+      setJiraEpicTableEnabled(project.jiraEpicTableEnabled ?? false);
+      setJiraEpicTableType(project.jiraEpicTableType || 'table1');
       setJiraTaskIssueType(project.jiraTaskIssueType || '');
     } else {
       setName('');
@@ -73,6 +79,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       setJiraEpicTemplate('');
       setJiraHeadsupTemplate('');
       setJiraHeadsupDescription('');
+      setJiraEpicDescription('');
+      setJiraEpicTableEnabled(false);
+      setJiraEpicTableType('table1');
       setJiraTaskIssueType('');
     }
   }, [project, isOpen]);
@@ -97,6 +106,9 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
       jiraEpicTemplate: jiraEpicTemplate.trim() || undefined,
       jiraHeadsupTemplate: jiraHeadsupTemplate.trim() || undefined,
       jiraHeadsupDescription: jiraHeadsupDescription.trim() || undefined,
+      jiraEpicDescription: jiraEpicDescription.trim() || undefined,
+      jiraEpicTableEnabled,
+      jiraEpicTableType,
       jiraTaskIssueType: jiraTaskIssueType.trim() || undefined
     };
 
@@ -251,6 +263,62 @@ export function ProjectEditModal({ isOpen, onClose, project, onSave }: ProjectEd
           비워두면 기본 형식 사용
         </small>
       </div>
+
+        {/* Epic Description 템플릿 (v1.2) */}
+        <div className="form-group">
+          <label className="form-label" htmlFor="jiraEpicDescription">
+            Epic Description 템플릿 (선택)
+            <span
+              className="info-icon"
+              title="사용 가능한 변수: {updateDate}, {updateDateDay}, {updateDateFull}, {headsUp}, {headsUpDay}, {headsUpFull}, {iosReviewDate}, {iosReviewDateFull}, {paidProductDate}, {paidProductDateFull}, {projectName}&#10;ADF 테이블 마크업: ||헤더1|헤더2|| |데이터1|데이터2|"
+              style={{ marginLeft: '0.5rem', cursor: 'help', color: 'var(--azrael-gray-400)' }}
+            >
+              ?
+            </span>
+          </label>
+          <textarea
+            id="jiraEpicDescription"
+            className="form-input"
+            value={jiraEpicDescription}
+            onChange={(e) => setJiraEpicDescription(e.target.value)}
+            placeholder="Epic 일감의 설명에 삽입될 내용 (ADF 테이블 마크업 지원)"
+            rows={4}
+            style={{ resize: 'vertical' }}
+          />
+          <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)' }}>
+            비워두면 Epic 설명 없이 생성됩니다
+          </small>
+
+          {/* 표 자동 삽입 토글 */}
+          <div style={{ marginTop: '0.75rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={jiraEpicTableEnabled}
+                onChange={(e) => setJiraEpicTableEnabled(e.target.checked)}
+              />
+              <span style={{ fontSize: 'var(--text-sm)' }}>스케줄 표 자동 삽입</span>
+            </label>
+          </div>
+
+          {/* 테이블 선택 라디오 (토글 ON일 때만) */}
+          {jiraEpicTableEnabled && (
+            <div style={{ marginTop: '0.5rem', paddingLeft: '1.5rem', display: 'flex', gap: '1rem' }}>
+              {(['table1', 'table2', 'table3'] as const).map((t) => (
+                <label key={t} style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', cursor: 'pointer', fontSize: 'var(--text-sm)' }}>
+                  <input
+                    type="radio"
+                    name="epicTableType"
+                    value={t}
+                    checked={jiraEpicTableType === t}
+                    onChange={() => setJiraEpicTableType(t)}
+                  />
+                  {t === 'table1' ? 'T1 (Standard)' : t === 'table2' ? 'T2 (Ext.)' : 'T3 (Int.)'}
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
 
       {/* 헤즈업 Task Summary 템플릿 (Phase 0.5) */}
       <div className="form-group">
