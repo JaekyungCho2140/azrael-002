@@ -66,7 +66,7 @@ export function formatScheduleTableForADF(
     const desc = (entry.description || '').replace(/\n/g, ' ').replace(/\|/g, '\\|');
 
     if (tableType === 'table1') {
-      const assignee = (entry.assignee || '').replace(/\|/g, '\\|');
+      const assignee = (entry.assignee || '').replace(/\n/g, ' ').replace(/\|/g, '\\|');
       lines.push(`|${idx}|${stageName}|${start}|${end}|${desc}|${assignee}|`);
     } else {
       lines.push(`|${idx}|${stageName}|${start}|${end}|${desc}|`);
