@@ -12,6 +12,7 @@ interface CreateJiraRequest {
   projectKey: string;
   epic: {
     summary: string;
+    description?: string;  // v1.2: Epic Description (ADF 마크업)
     startDate: string;
     endDate: string;
   };
@@ -81,16 +82,23 @@ serve(async (req) => {
     // 1단계: Epic 생성
     // ========================================
     console.log('[1/3] Epic 생성 시작');
-    const epicPayload = {
+    const epicPayload: any = {
       fields: {
         project: { key: projectKey },
         summary: epic.summary,
         issuetype: { name: 'Epic' },
         [CUSTOM_FIELD_START]: epic.startDate,
         [CUSTOM_FIELD_END]: epic.endDate,
-        // description은 선택사항이므로 제거 (빈 문자열은 ADF 형식 오류 발생)
       },
     };
+
+    // v1.2: Epic Description (ADF 변환)
+    if (epic.description) {
+      const descriptionADF = textToADF(epic.description);
+      if (descriptionADF) {
+        epicPayload.fields.description = descriptionADF;
+      }
+    }
 
     const epicResponse = await fetch(`${JIRA_URL}/rest/api/3/issue`, {
       method: 'POST',

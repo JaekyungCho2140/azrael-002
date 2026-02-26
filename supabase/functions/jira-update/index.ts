@@ -13,6 +13,7 @@ interface UpdateJiraRequest {
   epicUpdate: {
     startDate: string;
     endDate: string;
+    description?: string;  // v1.2: Epic Description (ADF 마크업)
   };
   updates: {
     issueId?: string;
@@ -74,12 +75,20 @@ serve(async (req) => {
     const createdIssues: UpdateJiraResponse['createdIssues'] = [];
 
     // 1. Epic 날짜 업데이트
-    const epicUpdatePayload = {
+    const epicUpdatePayload: any = {
       fields: {
         [CUSTOM_FIELD_START]: epicUpdate.startDate,
         [CUSTOM_FIELD_END]: epicUpdate.endDate,
       },
     };
+
+    // v1.2: Epic Description 업데이트 (ADF 변환)
+    if (epicUpdate.description) {
+      const descriptionADF = textToADF(epicUpdate.description);
+      if (descriptionADF) {
+        epicUpdatePayload.fields.description = descriptionADF;
+      }
+    }
 
     const epicResponse = await fetch(`${JIRA_URL}/rest/api/3/issue/${epicId}`, {
       method: 'PUT',
