@@ -8,12 +8,23 @@
  * 템플릿 변수
  */
 export interface TemplateVars {
-  date: string;          // YYMMDD (예: 260210)
-  headsUp: string;       // MMDD (예: 0128)
-  projectName: string;   // 프로젝트명 (예: M4/GL)
-  taskName: string;      // Task 배치명 (예: REGULAR)
-  subtaskName?: string;  // Subtask 배치명 (예: 번역)
-  stageName: string;     // 현재 업무 단계명
+  date: string;              // YYMMDD (예: 260210) — 레거시
+  updateDate: string;        // MMDD (예: 0210)
+  updateDateDay: string;     // MM/DD(요일) (예: 02/10(월))
+  updateDateFull: string;    // YY/MM/DD (예: 26/02/10)
+  headsUp: string;           // MMDD (예: 0128)
+  headsUpDay: string;        // MM/DD(요일) (예: 01/28(화))
+  headsUpFull: string;       // YY/MM/DD (예: 26/01/28)
+  iosReviewDate: string;     // MMDD (예: 0203) — 없으면 빈 문자열
+  iosReviewDateDay: string;  // MM/DD(요일) — 없으면 빈 문자열
+  iosReviewDateFull: string; // YY/MM/DD — 없으면 빈 문자열
+  paidProductDate: string;     // MMDD — 없으면 빈 문자열
+  paidProductDateDay: string;  // MM/DD(요일) — 없으면 빈 문자열
+  paidProductDateFull: string; // YY/MM/DD — 없으면 빈 문자열
+  projectName: string;       // 프로젝트명
+  taskName: string;          // Task 배치명
+  subtaskName?: string;      // Subtask 배치명
+  stageName: string;         // 현재 업무 단계명
 }
 
 /**
@@ -80,4 +91,28 @@ export function formatDateMMDD(date: Date): string {
   const mm = String(date.getMonth() + 1).padStart(2, '0');
   const dd = String(date.getDate()).padStart(2, '0');
   return `${mm}${dd}`;
+}
+
+const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+/**
+ * 날짜를 MM/DD(요일) 형식으로 변환
+ * @returns "MM/DD(요일)" 형식 (예: 01/28(화))
+ */
+export function formatDateDay(date: Date): string {
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  const day = WEEKDAYS[date.getDay()];
+  return `${mm}/${dd}(${day})`;
+}
+
+/**
+ * 날짜를 YY/MM/DD 형식으로 변환
+ * @returns "YY/MM/DD" 형식 (예: 26/01/28)
+ */
+export function formatDateFull(date: Date): string {
+  const yy = String(date.getFullYear()).substring(2);
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yy}/${mm}/${dd}`;
 }

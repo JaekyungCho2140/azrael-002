@@ -16,6 +16,8 @@ import { renderTemplate, validateTemplate } from './templateParser';
 import {
   formatEmailDate,
   formatUpdateDateShort,
+  formatDateMMDD,
+  formatDateFull,
   getEntriesByTableType,
   formatTableHtml,
   htmlToPlainText,
@@ -310,6 +312,24 @@ describe('formatUpdateDateShort', () => {
 
   it('한 자리 월/일 제로패딩', () => {
     expect(formatUpdateDateShort(new Date('2026-01-05'))).toBe('01-05');
+  });
+});
+
+describe('formatDateMMDD', () => {
+  it('MMDD 형식 반환', () => {
+    expect(formatDateMMDD(new Date('2026-02-10'))).toBe('0210');
+  });
+  it('한 자리 월/일 패딩', () => {
+    expect(formatDateMMDD(new Date('2026-01-05'))).toBe('0105');
+  });
+});
+
+describe('formatDateFull', () => {
+  it('YY/MM/DD 형식 반환', () => {
+    expect(formatDateFull(new Date('2026-02-10'))).toBe('26/02/10');
+  });
+  it('연도 넘김', () => {
+    expect(formatDateFull(new Date('2025-12-28'))).toBe('25/12/28');
   });
 });
 
