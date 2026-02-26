@@ -16,6 +16,8 @@ import { renderTemplate, validateTemplate } from './templateParser';
 import {
   formatEmailDate,
   formatUpdateDateShort,
+  formatDateMMDD,
+  formatDateFull,
   getEntriesByTableType,
   formatTableHtml,
   htmlToPlainText,
@@ -97,8 +99,8 @@ function makeTemplate(overrides: Partial<EmailTemplate> = {}): EmailTemplate {
     id: 'tmpl-1',
     projectId: 'proj-1',
     name: '테스트',
-    subjectTemplate: '[L10n] {updateDateShort} 업데이트',
-    bodyTemplate: '<p>{updateDate} 일정 안내</p>',
+    subjectTemplate: '[L10n] {updateDate} 업데이트',
+    bodyTemplate: '<p>{updateDateDay} 일정 안내</p>',
     isBuiltIn: false,
     createdAt: '2026-01-01T00:00:00Z',
     createdBy: null,
@@ -113,10 +115,17 @@ function makeTemplate(overrides: Partial<EmailTemplate> = {}): EmailTemplate {
 
 describe('renderTemplate', () => {
   const context: TemplateContext = {
-    updateDate: '02/10(월)',
-    updateDateShort: '02-10',
-    headsUp: '02/03(월)',
-    iosReviewDate: '02/07(토)',
+    updateDate: '0210',
+    updateDateDay: '02/10(월)',
+    updateDateFull: '26/02/10',
+    updateDateShort: '0210',
+    headsUp: '0203',
+    headsUpDay: '02/03(월)',
+    headsUpFull: '26/02/03',
+    iosReviewDate: '0207',
+    iosReviewDateDay: '02/07(토)',
+    iosReviewDateFull: '26/02/07',
+    date: '260210',
     table: '<table>...</table>',
     disclaimer: '주의사항 텍스트',
     projectName: 'TestProject',
@@ -124,20 +133,28 @@ describe('renderTemplate', () => {
   };
 
   describe('변수 치환 (8개 변수)', () => {
-    it('{updateDate} 치환', () => {
-      expect(renderTemplate('{updateDate}', context)).toBe('02/10(월)');
+    it('{updateDate} 치환 (MMDD)', () => {
+      expect(renderTemplate('{updateDate}', context)).toBe('0210');
     });
 
-    it('{updateDateShort} 치환', () => {
-      expect(renderTemplate('{updateDateShort}', context)).toBe('02-10');
+    it('{updateDateDay} 치환 (MM/DD(요일))', () => {
+      expect(renderTemplate('{updateDateDay}', context)).toBe('02/10(월)');
     });
 
-    it('{headsUp} 치환', () => {
-      expect(renderTemplate('{headsUp}', context)).toBe('02/03(월)');
+    it('{updateDateFull} 치환 (YY/MM/DD)', () => {
+      expect(renderTemplate('{updateDateFull}', context)).toBe('26/02/10');
     });
 
-    it('{iosReviewDate} 치환', () => {
-      expect(renderTemplate('{iosReviewDate}', context)).toBe('02/07(토)');
+    it('{headsUp} 치환 (MMDD)', () => {
+      expect(renderTemplate('{headsUp}', context)).toBe('0203');
+    });
+
+    it('{headsUpDay} 치환 (MM/DD(요일))', () => {
+      expect(renderTemplate('{headsUpDay}', context)).toBe('02/03(월)');
+    });
+
+    it('{iosReviewDate} 치환 (MMDD)', () => {
+      expect(renderTemplate('{iosReviewDate}', context)).toBe('0207');
     });
 
     it('{table} 치환', () => {
@@ -157,7 +174,7 @@ describe('renderTemplate', () => {
     });
 
     it('여러 변수가 포함된 복합 템플릿 치환', () => {
-      const template = '{projectName}: {updateDate} 업데이트, 헤즈업 {headsUp}';
+      const template = '{projectName}: {updateDateDay} 업데이트, 헤즈업 {headsUpDay}';
       expect(renderTemplate(template, context)).toBe(
         'TestProject: 02/10(월) 업데이트, 헤즈업 02/03(월)',
       );
@@ -185,22 +202,22 @@ describe('renderTemplate', () => {
 
   describe('TipTap HTML entity 디코딩', () => {
     it('&#123; / &#125; 디코딩 후 변수 치환', () => {
-      expect(renderTemplate('&#123;updateDate&#125;', context)).toBe('02/10(월)');
+      expect(renderTemplate('&#123;updateDate&#125;', context)).toBe('0210');
     });
 
     it('&lcub; / &rcub; 디코딩 후 변수 치환', () => {
-      expect(renderTemplate('&lcub;updateDate&rcub;', context)).toBe('02/10(월)');
+      expect(renderTemplate('&lcub;updateDate&rcub;', context)).toBe('0210');
     });
 
     it('엔티티 디코딩 + 조건부 블록', () => {
-      const tmpl = '&#123;&#123;#if showIosReviewDate&#125;&#125;iOS: &#123;iosReviewDate&#125;&#123;&#123;/if&#125;&#125;';
+      const tmpl = '&#123;&#123;#if showIosReviewDate&#125;&#125;iOS: &#123;iosReviewDateDay&#125;&#123;&#123;/if&#125;&#125;';
       expect(renderTemplate(tmpl, context)).toBe('iOS: 02/07(토)');
     });
   });
 
   describe('조건부 블록 {{#if}}', () => {
     it('truthy 조건 → 블록 렌더링', () => {
-      const tmpl = '{{#if showIosReviewDate}}iOS: {iosReviewDate}{{/if}}';
+      const tmpl = '{{#if showIosReviewDate}}iOS: {iosReviewDateDay}{{/if}}';
       expect(renderTemplate(tmpl, context)).toBe('iOS: 02/07(토)');
     });
 
@@ -236,7 +253,7 @@ describe('renderTemplate', () => {
     });
 
     it('조건부 블록 내부에 HTML 포함', () => {
-      const tmpl = '{{#if showIosReviewDate}}<li>iOS: {iosReviewDate}</li>{{/if}}';
+      const tmpl = '{{#if showIosReviewDate}}<li>iOS: {iosReviewDateDay}</li>{{/if}}';
       expect(renderTemplate(tmpl, context)).toBe('<li>iOS: 02/07(토)</li>');
     });
   });
@@ -310,6 +327,24 @@ describe('formatUpdateDateShort', () => {
 
   it('한 자리 월/일 제로패딩', () => {
     expect(formatUpdateDateShort(new Date('2026-01-05'))).toBe('01-05');
+  });
+});
+
+describe('formatDateMMDD', () => {
+  it('MMDD 형식 반환', () => {
+    expect(formatDateMMDD(new Date('2026-02-10'))).toBe('0210');
+  });
+  it('한 자리 월/일 패딩', () => {
+    expect(formatDateMMDD(new Date('2026-01-05'))).toBe('0105');
+  });
+});
+
+describe('formatDateFull', () => {
+  it('YY/MM/DD 형식 반환', () => {
+    expect(formatDateFull(new Date('2026-02-10'))).toBe('26/02/10');
+  });
+  it('연도 넘김', () => {
+    expect(formatDateFull(new Date('2025-12-28'))).toBe('25/12/28');
   });
 });
 
@@ -531,12 +566,12 @@ describe('generateEmail', () => {
     bodyTemplate: BASIC_BODY_TEMPLATE,
   });
 
-  it('제목에 updateDateShort 변수 치환', () => {
+  it('제목에 updateDate 변수 치환 (MMDD)', () => {
     const result = generateEmail(
       { projectId: 'proj-1', updateDate: new Date('2026-02-10'), tableType: 'table2', templateId: 'tmpl-1' },
       { template, project: mockProject, calcResult },
     );
-    expect(result.subject).toContain('02-10');
+    expect(result.subject).toContain('0210');
     expect(result.subject).toContain('[L10n]');
     expect(result.subject).not.toContain('{');
   });
@@ -568,13 +603,13 @@ describe('generateEmail', () => {
   });
 
   it('제목에 HTML 태그가 포함되어도 strip 처리', () => {
-    const tmpl = makeTemplate({ subjectTemplate: '<b>{updateDateShort}</b> 업데이트' });
+    const tmpl = makeTemplate({ subjectTemplate: '<b>{updateDate}</b> 업데이트' });
     const result = generateEmail(
       { projectId: 'proj-1', updateDate: new Date('2026-02-10'), tableType: 'table2', templateId: 'tmpl-1' },
       { template: tmpl, project: mockProject, calcResult },
     );
     expect(result.subject).not.toContain('<b>');
-    expect(result.subject).toContain('02-10');
+    expect(result.subject).toContain('0210');
   });
 
   it('showIosReviewDate=true → iOS 심사일 블록 포함', () => {
@@ -781,8 +816,8 @@ describe('Gmail 호환성', () => {
 // ============================================================
 
 describe('기본 제공 템플릿', () => {
-  it('기본 템플릿 제목에 {updateDateShort} 포함', () => {
-    expect(BASIC_SUBJECT_TEMPLATE).toContain('{updateDateShort}');
+  it('기본 템플릿 제목에 {updateDate} 포함', () => {
+    expect(BASIC_SUBJECT_TEMPLATE).toContain('{updateDate}');
   });
 
   it('기본 템플릿 본문에 필수 변수 포함', () => {

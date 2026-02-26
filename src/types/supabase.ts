@@ -58,6 +58,9 @@ export interface Database {
           jira_epic_template: string | null;
           jira_headsup_template: string | null;
           jira_headsup_description: string | null;
+          jira_epic_description: string | null;
+          jira_epic_table_enabled: boolean;
+          jira_epic_table_type: string | null;
           jira_task_issue_type: string | null;
           slack_channel_id: string | null;
           slack_channel_name: string | null;
@@ -79,6 +82,9 @@ export interface Database {
           jira_epic_template?: string | null;
           jira_headsup_template?: string | null;
           jira_headsup_description?: string | null;
+          jira_epic_description?: string | null;
+          jira_epic_table_enabled?: boolean;
+          jira_epic_table_type?: string | null;
           jira_task_issue_type?: string | null;
           slack_channel_id?: string | null;
           slack_channel_name?: string | null;
@@ -100,6 +106,9 @@ export interface Database {
           jira_epic_template?: string | null;
           jira_headsup_template?: string | null;
           jira_headsup_description?: string | null;
+          jira_epic_description?: string | null;
+          jira_epic_table_enabled?: boolean;
+          jira_epic_table_type?: string | null;
           jira_task_issue_type?: string | null;
           slack_channel_id?: string | null;
           slack_channel_name?: string | null;

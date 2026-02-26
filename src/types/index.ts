@@ -21,6 +21,9 @@ export interface Project {
   jiraEpicTemplate?: string;     // JIRA Epic Summary 템플릿 (Phase 0.5)
   jiraHeadsupTemplate?: string;  // JIRA 헤즈업 Task Summary 템플릿 (Phase 0.5)
   jiraHeadsupDescription?: string; // JIRA 헤즈업 Task 설명 (ADF 테이블 마크업 지원)
+  jiraEpicDescription?: string;
+  jiraEpicTableEnabled?: boolean;
+  jiraEpicTableType?: 'table1' | 'table2' | 'table3';
   jiraTaskIssueType?: string;    // JIRA Task 이슈 타입 (Phase 1.5, 기본값: "PM(표준)")
   slackChannelId?: string;       // Slack 기본 채널 ID (Phase 3, 예: "C0123456789")
   slackChannelName?: string;     // Slack 기본 채널 이름 (Phase 3, 표시용, 예: "l10n-mir4")
@@ -245,8 +248,15 @@ export interface EmailGenerationResult {
  * ⚠️ §2.4 이메일 템플릿 변수 테이블과 동기화 필수
  */
 export const VALID_TEMPLATE_VARIABLES = [
-  'updateDate', 'updateDateShort', 'headsUp', 'iosReviewDate',
-  'paidProductDate', 'table', 'disclaimer', 'projectName',
+  // 날짜 변수 (4 날짜 × 3 형식 = 12개)
+  'updateDate', 'updateDateDay', 'updateDateFull',
+  'headsUp', 'headsUpDay', 'headsUpFull',
+  'iosReviewDate', 'iosReviewDateDay', 'iosReviewDateFull',
+  'paidProductDate', 'paidProductDateDay', 'paidProductDateFull',
+  // 레거시 (하위 호환)
+  'date',
+  // 비날짜 변수
+  'table', 'disclaimer', 'projectName',
   'showIosReviewDate', 'showPaidProductDate',
 ] as const;
 

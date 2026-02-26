@@ -51,6 +51,27 @@ export function formatUpdateDateShort(date: Date): string {
   return `${mm}-${dd}`;
 }
 
+/**
+ * Date → MMDD 형식 (통합 변수용)
+ * @returns "MMDD" 형식 (예: 0210)
+ */
+export function formatDateMMDD(date: Date): string {
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${mm}${dd}`;
+}
+
+/**
+ * Date → YY/MM/DD 형식 (통합 변수용)
+ * @returns "YY/MM/DD" 형식 (예: 26/02/10)
+ */
+export function formatDateFull(date: Date): string {
+  const yy = String(date.getFullYear()).substring(2);
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+  return `${yy}/${mm}/${dd}`;
+}
+
 // ============================================================
 // 테이블 엔트리 추출
 // ============================================================

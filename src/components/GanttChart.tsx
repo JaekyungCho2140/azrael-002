@@ -115,7 +115,9 @@ export function GanttChart({ entries, collapsedParentIds = new Set(), chartId, c
     <div className="gantt-container" id={containerId} ref={containerRef}>
       <div className="gantt-header">
         <h4>간트 차트</h4>
-        <CopyImageButton targetId={containerId} />
+        <div className="copy-exclude">
+          <CopyImageButton targetId={containerId} />
+        </div>
       </div>
       <div id={chartId}></div>
     </div>

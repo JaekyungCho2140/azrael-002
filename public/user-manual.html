@@ -325,7 +325,7 @@
   <div class="nav-logo">
     <span>🐱</span>
     <h2>Azrael</h2>
-    <p>사용자 매뉴얼 v5.0</p>
+    <p>사용자 매뉴얼 v5.1</p>
   </div>
 
   <div class="nav-section">시작하기</div>
@@ -623,6 +623,11 @@
   "복사 성공!" 토스트 메시지가 나타나면 정상적으로 복사된 것입니다. 만약 실패하면 브라우저의 클립보드 권한을 확인하세요.
 </div>
 
+<div class="callout callout-success">
+  <strong>✅ 버튼 제외 <span class="badge badge-new">v1.2</span></strong>
+  이미지 복사 시 "이미지 복사" 버튼 자체는 캡처 이미지에 포함되지 않습니다. 버튼 영역이 자동으로 제외되므로 깨끗한 이미지를 얻을 수 있습니다.
+</div>
+
 <!-- ===== 9. JIRA 설정 ===== -->
 <h2 id="jira-setup">9. JIRA 연결 설정</h2>
 
@@ -678,7 +683,7 @@
   <li>시스템이 자동으로 중복 여부를 확인합니다.</li>
   <li><strong>미리보기 모달</strong>에서 생성될 일감 목록을 확인합니다:
     <ul>
-      <li>📦 <strong>Epic</strong>: 전체 업데이트 컨테이너</li>
+      <li>📦 <strong>Epic</strong>: 전체 업데이트 컨테이너 (Description 포함 가능) <span class="badge badge-new">v1.2</span></li>
       <li>📋 <strong>Task</strong>: 각 업무 단계 (테이블 2/3 기준)</li>
       <li>📄 <strong>Subtask</strong>: 하위 일감</li>
     </ul>
@@ -690,6 +695,11 @@
 <div class="callout callout-important">
   <strong>🚫 중복 생성 방지</strong>
   동일 프로젝트 + 업데이트일 조합으로 이미 Epic이 존재하면 중복 생성이 차단됩니다. 일정 변경 시에는 "JIRA 업데이트"를 사용하세요.
+</div>
+
+<div class="callout callout-tip">
+  <strong>💡 Epic Description <span class="badge badge-new">v1.2</span></strong>
+  프로젝트 설정에서 Epic Description 템플릿을 입력하면 JIRA Epic 생성 시 설명란에 자동 삽입됩니다. 또한 "스케줄 표 자동 삽입"을 활성화하면 T1/T2/T3 스케줄 테이블이 ADF 테이블로 변환되어 Epic 설명에 함께 추가됩니다. JIRA 업데이트 시에도 Epic Description이 최신 계산 결과로 갱신됩니다.
 </div>
 
 <!-- ===== 11. JIRA 업데이트 ===== -->
@@ -747,26 +757,34 @@
 
 <table>
   <thead>
-    <tr><th>변수</th><th>설명</th><th>예시</th></tr>
+    <tr><th>변수</th><th>형식</th><th>설명</th><th>예시</th></tr>
   </thead>
   <tbody>
-    <tr><td><code>{{updateDate}}</code></td><td>업데이트 날짜 (전체)</td><td>2026-02-10</td></tr>
-    <tr><td><code>{{updateDateShort}}</code></td><td>업데이트 날짜 (MMDD)</td><td>0210</td></tr>
-    <tr><td><code>{{headsUp}}</code></td><td>헤즈업 날짜</td><td>01/28(화)</td></tr>
-    <tr><td><code>{{iosReviewDate}}</code></td><td>iOS 심사일</td><td>02/03(화)</td></tr>
-    <tr><td><code>{{projectName}}</code></td><td>프로젝트 이름</td><td>M4/GL</td></tr>
-    <tr><td><code>{{table}}</code></td><td>선택된 스케줄 테이블 HTML</td><td>(테이블 렌더링)</td></tr>
-    <tr><td><code>{{disclaimer}}</code></td><td>프로젝트 면책 조항</td><td>(HTML 텍스트)</td></tr>
-    <tr><td><code>{{paidProductDate}}</code></td><td>유료화 상품 협의 일정</td><td>02/05(수)</td></tr>
+    <tr><td><code>{updateDate}</code></td><td>MMDD</td><td>업데이트 날짜</td><td>0210</td></tr>
+    <tr><td><code>{updateDateDay}</code></td><td>MM/DD(요일)</td><td>업데이트 날짜 (요일 포함)</td><td>02/10(화)</td></tr>
+    <tr><td><code>{updateDateFull}</code></td><td>YY/MM/DD</td><td>업데이트 날짜 (연도 포함)</td><td>26/02/10</td></tr>
+    <tr><td><code>{headsUp}</code></td><td>MMDD</td><td>헤즈업 날짜</td><td>0128</td></tr>
+    <tr><td><code>{headsUpDay}</code></td><td>MM/DD(요일)</td><td>헤즈업 날짜 (요일 포함)</td><td>01/28(화)</td></tr>
+    <tr><td><code>{headsUpFull}</code></td><td>YY/MM/DD</td><td>헤즈업 날짜 (연도 포함)</td><td>26/01/28</td></tr>
+    <tr><td><code>{iosReviewDate}</code></td><td>MMDD</td><td>iOS 심사일</td><td>0203</td></tr>
+    <tr><td><code>{iosReviewDateDay}</code></td><td>MM/DD(요일)</td><td>iOS 심사일 (요일 포함)</td><td>02/03(화)</td></tr>
+    <tr><td><code>{iosReviewDateFull}</code></td><td>YY/MM/DD</td><td>iOS 심사일 (연도 포함)</td><td>26/02/03</td></tr>
+    <tr><td><code>{paidProductDate}</code></td><td>MMDD</td><td>유료화 상품 협의 일정</td><td>0205</td></tr>
+    <tr><td><code>{paidProductDateDay}</code></td><td>MM/DD(요일)</td><td>유료화 상품 협의 (요일 포함)</td><td>02/05(수)</td></tr>
+    <tr><td><code>{paidProductDateFull}</code></td><td>YY/MM/DD</td><td>유료화 상품 협의 (연도 포함)</td><td>26/02/05</td></tr>
+    <tr><td><code>{date}</code></td><td>YYMMDD</td><td>업데이트 날짜 (레거시)</td><td>260210</td></tr>
+    <tr><td><code>{projectName}</code></td><td>텍스트</td><td>프로젝트 이름</td><td>M4/GL</td></tr>
+    <tr><td><code>{table}</code></td><td>HTML</td><td>선택된 스케줄 테이블</td><td>(테이블 렌더링)</td></tr>
+    <tr><td><code>{disclaimer}</code></td><td>HTML</td><td>프로젝트 면책 조항</td><td>(HTML 텍스트)</td></tr>
   </tbody>
 </table>
 
 <h3>조건부 블록</h3>
 <p>iOS 심사일 등 선택적 정보는 조건부 렌더링으로 처리합니다:</p>
-<p><code>{{#if showIosReviewDate}}iOS 심사일: {{iosReviewDate}}{{/if}}</code></p>
+<p><code>{{#if showIosReviewDate}}iOS 심사일: {iosReviewDate}{{/if}}</code></p>
 <p>→ iOS 심사일이 활성화된 프로젝트에서만 표시됩니다.</p>
 
-<p><code>{{#if showPaidProductDate}}유료화 상품 협의: {{paidProductDate}}{{/if}}</code></p>
+<p><code>{{#if showPaidProductDate}}유료화 상품 협의: {paidProductDate}{{/if}}</code></p>
 <p>→ 유료화 상품 협의 일정이 활성화된 프로젝트에서만 표시됩니다.</p>
 
 <!-- ===== 14. 설정 - 프로젝트 ===== -->
@@ -795,12 +813,43 @@
   <li><strong>JIRA 설정</strong> (선택):
     <ul>
       <li>프로젝트 키 (예: L10NM4)</li>
-      <li>Epic/Headsup Summary 템플릿</li>
+      <li>Epic Summary 템플릿</li>
+      <li>Epic Description 템플릿 <span class="badge badge-new">v1.2</span></li>
+      <li>스케줄 표 자동 삽입 (ON/OFF + T1/T2/T3 선택) <span class="badge badge-new">v1.2</span></li>
+      <li>Headsup Summary 템플릿</li>
       <li>Task Issue Type</li>
     </ul>
   </li>
   <li><strong>"저장"</strong>을 클릭합니다.</li>
 </ol>
+
+<h3>JIRA 템플릿 변수 <span class="badge badge-new">v1.2</span></h3>
+<p>Epic Summary, Headsup Summary, Epic Description 템플릿에서 아래 변수를 사용할 수 있습니다:</p>
+
+<table>
+  <thead>
+    <tr><th>변수</th><th>형식</th><th>설명</th><th>예시</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>{date}</code></td><td>YYMMDD</td><td>업데이트 날짜 (레거시)</td><td>260210</td></tr>
+    <tr><td><code>{updateDate}</code></td><td>MMDD</td><td>업데이트 날짜</td><td>0210</td></tr>
+    <tr><td><code>{updateDateDay}</code></td><td>MM/DD(요일)</td><td>업데이트 날짜 (요일 포함)</td><td>02/10(화)</td></tr>
+    <tr><td><code>{updateDateFull}</code></td><td>YY/MM/DD</td><td>업데이트 날짜 (연도 포함)</td><td>26/02/10</td></tr>
+    <tr><td><code>{headsUp}</code></td><td>MMDD</td><td>헤즈업 날짜</td><td>0128</td></tr>
+    <tr><td><code>{headsUpDay}</code></td><td>MM/DD(요일)</td><td>헤즈업 날짜 (요일 포함)</td><td>01/28(화)</td></tr>
+    <tr><td><code>{headsUpFull}</code></td><td>YY/MM/DD</td><td>헤즈업 날짜 (연도 포함)</td><td>26/01/28</td></tr>
+    <tr><td><code>{iosReviewDate}</code></td><td>MMDD</td><td>iOS 심사일</td><td>0203</td></tr>
+    <tr><td><code>{iosReviewDateDay}</code></td><td>MM/DD(요일)</td><td>iOS 심사일 (요일 포함)</td><td>02/03(화)</td></tr>
+    <tr><td><code>{iosReviewDateFull}</code></td><td>YY/MM/DD</td><td>iOS 심사일 (연도 포함)</td><td>26/02/03</td></tr>
+    <tr><td><code>{paidProductDate}</code></td><td>MMDD</td><td>유료화 상품 협의 일정</td><td>0205</td></tr>
+    <tr><td><code>{paidProductDateDay}</code></td><td>MM/DD(요일)</td><td>유료화 상품 협의 (요일 포함)</td><td>02/05(수)</td></tr>
+    <tr><td><code>{paidProductDateFull}</code></td><td>YY/MM/DD</td><td>유료화 상품 협의 (연도 포함)</td><td>26/02/05</td></tr>
+    <tr><td><code>{projectName}</code></td><td>텍스트</td><td>프로젝트 이름</td><td>M4/GL</td></tr>
+    <tr><td><code>{taskName}</code></td><td>텍스트</td><td>업무 단계명 (Task Summary용)</td><td>REGULAR</td></tr>
+    <tr><td><code>{subtaskName}</code></td><td>텍스트</td><td>하위 일감명 (Subtask Summary용)</td><td>번역</td></tr>
+    <tr><td><code>{stageName}</code></td><td>텍스트</td><td>현재 단계명</td><td>REGULAR</td></tr>
+  </tbody>
+</table>
 
 <h3>프로젝트 편집/삭제</h3>
 <ul>
@@ -1240,7 +1289,7 @@
 <p>몰아보기 슬롯은 프로젝트별, 사용자별로 관리됩니다. 다른 프로젝트로 전환하면 해당 프로젝트의 슬롯이 로드됩니다. 또한 다른 사용자의 슬롯은 보이지 않습니다.</p>
 
 <div class="version-info">
-  <p>Azrael 사용자 매뉴얼 v5.0 | 2026-02-10 | Phase 0~4 Complete + UI 텍스트 감사</p>
+  <p>Azrael 사용자 매뉴얼 v5.1 | 2026-02-26 | v1.2: 통합 변수 체계, Epic Description, 이미지 복사 개선</p>
   <p>문의: L10n팀 관리자 또는 jkcho@wemade.com</p>
 </div>
 
