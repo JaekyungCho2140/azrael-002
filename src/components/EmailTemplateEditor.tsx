@@ -26,16 +26,36 @@ import './EmailTemplateEditor.css';
 // ============================================================
 
 const VARIABLE_OPTIONS = [
-  { label: '{updateDate} - 업데이트 날짜', value: '{updateDate}' },
-  { label: '{updateDateShort} - 업데이트 날짜 (짧은 형식)', value: '{updateDateShort}' },
-  { label: '{headsUp} - 헤즈업 날짜', value: '{headsUp}' },
-  { label: '{iosReviewDate} - iOS 심사 날짜', value: '{iosReviewDate}' },
+  // 업데이트 날짜 (3형식)
+  { label: '{updateDate} - 업데이트 날짜 (MMDD)', value: '{updateDate}' },
+  { label: '{updateDateDay} - 업데이트 날짜 (MM/DD(요일))', value: '{updateDateDay}' },
+  { label: '{updateDateFull} - 업데이트 날짜 (YY/MM/DD)', value: '{updateDateFull}' },
+  // 헤즈업 날짜 (3형식)
+  { label: '{headsUp} - 헤즈업 날짜 (MMDD)', value: '{headsUp}' },
+  { label: '{headsUpDay} - 헤즈업 날짜 (MM/DD(요일))', value: '{headsUpDay}' },
+  { label: '{headsUpFull} - 헤즈업 날짜 (YY/MM/DD)', value: '{headsUpFull}' },
+  // iOS 심사일 (3형식)
+  { label: '{iosReviewDate} - iOS 심사일 (MMDD)', value: '{iosReviewDate}' },
+  { label: '{iosReviewDateDay} - iOS 심사일 (MM/DD(요일))', value: '{iosReviewDateDay}' },
+  { label: '{iosReviewDateFull} - iOS 심사일 (YY/MM/DD)', value: '{iosReviewDateFull}' },
+  // 유료화 상품 협의 일정 (3형식)
+  { label: '{paidProductDate} - 유료화 상품 (MMDD)', value: '{paidProductDate}' },
+  { label: '{paidProductDateDay} - 유료화 상품 (MM/DD(요일))', value: '{paidProductDateDay}' },
+  { label: '{paidProductDateFull} - 유료화 상품 (YY/MM/DD)', value: '{paidProductDateFull}' },
+  // 레거시
+  { label: '{date} - 업데이트 날짜 (YYMMDD, 레거시)', value: '{date}' },
+  // 비날짜 변수
   { label: '{table} - 일정 테이블', value: '{table}' },
   { label: '{disclaimer} - Disclaimer', value: '{disclaimer}' },
   { label: '{projectName} - 프로젝트 이름', value: '{projectName}' },
+  // 조건부 블록
   {
     label: '{{#if showIosReviewDate}} - iOS 심사일 조건부',
     value: '{{#if showIosReviewDate}}<li>□ iOS 심사일: {iosReviewDate}</li>{{/if}}',
+  },
+  {
+    label: '{{#if showPaidProductDate}} - 유료화 상품 조건부',
+    value: '{{#if showPaidProductDate}}<li>□ 유료화 상품 협의: {paidProductDate}</li>{{/if}}',
   },
   {
     label: '{{#if disclaimer}} - Disclaimer 조건부',
