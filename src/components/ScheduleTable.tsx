@@ -121,7 +121,9 @@ export function ScheduleTable({
     <div className="table-container" id={tableId}>
       <div className="table-header">
         <h3 className="table-title">{title}</h3>
-        <CopyImageButton targetId={tableId} />
+        <div className="copy-exclude">
+          <CopyImageButton targetId={tableId} />
+        </div>
       </div>
 
       <table className={tableClass}>

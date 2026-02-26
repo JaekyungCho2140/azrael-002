@@ -104,11 +104,13 @@ export function CalendarView({
     <div className="calendar-container" id="calendar-view">
       <div className="calendar-header">
         <h3>달력 보기</h3>
-        <CopyImageButton
-          targetId="calendar-view"
-          onSuccess={handleCopySuccess}
-          onError={handleCopyError}
-        />
+        <div className="copy-exclude">
+          <CopyImageButton
+            targetId="calendar-view"
+            onSuccess={handleCopySuccess}
+            onError={handleCopyError}
+          />
+        </div>
       </div>
 
       <div className="fullcalendar-wrapper">
