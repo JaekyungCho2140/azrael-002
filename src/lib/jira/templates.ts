@@ -35,8 +35,25 @@ export interface TemplateVars {
  */
 export function applyTemplate(template: string, vars: TemplateVars): string {
   return template
+    // 레거시
     .replace(/{date}/g, vars.date)
+    // updateDate (3형식) — Full/Day를 먼저 치환 (접두어 충돌 방지)
+    .replace(/{updateDateFull}/g, vars.updateDateFull)
+    .replace(/{updateDateDay}/g, vars.updateDateDay)
+    .replace(/{updateDate}/g, vars.updateDate)
+    // headsUp (3형식)
+    .replace(/{headsUpFull}/g, vars.headsUpFull)
+    .replace(/{headsUpDay}/g, vars.headsUpDay)
     .replace(/{headsUp}/g, vars.headsUp)
+    // iosReviewDate (3형식)
+    .replace(/{iosReviewDateFull}/g, vars.iosReviewDateFull)
+    .replace(/{iosReviewDateDay}/g, vars.iosReviewDateDay)
+    .replace(/{iosReviewDate}/g, vars.iosReviewDate)
+    // paidProductDate (3형식)
+    .replace(/{paidProductDateFull}/g, vars.paidProductDateFull)
+    .replace(/{paidProductDateDay}/g, vars.paidProductDateDay)
+    .replace(/{paidProductDate}/g, vars.paidProductDate)
+    // 비날짜 변수
     .replace(/{projectName}/g, vars.projectName)
     .replace(/{taskName}/g, vars.taskName)
     .replace(/{subtaskName}/g, vars.subtaskName || '')

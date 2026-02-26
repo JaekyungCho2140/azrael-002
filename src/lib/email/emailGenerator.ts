@@ -28,10 +28,11 @@ import type {
 import { renderTemplate } from './templateParser';
 import {
   formatEmailDate,
-  formatUpdateDateShort,
   getEntriesByTableType,
   formatTableHtml,
   htmlToPlainText,
+  formatDateMMDD,
+  formatDateFull,
 } from './formatters';
 import { substituteDisclaimerVariables } from '../businessDays';
 import { renderDisclaimerHtml } from './sanitizer';
@@ -74,16 +75,22 @@ export function generateEmail(
 ): EmailGenerationResult {
   const { template, project, calcResult } = deps;
 
-  // 1. 날짜 포맷팅 (이메일용: 시간 제외)
-  const updateDate = formatEmailDate(request.updateDate);
-  const updateDateShort = formatUpdateDateShort(request.updateDate);
-  const headsUp = formatEmailDate(calcResult.headsUpDate);
-  const iosReviewDate = calcResult.iosReviewDate
-    ? formatEmailDate(calcResult.iosReviewDate)
-    : null;
-  const paidProductDate = calcResult.paidProductDate
-    ? formatEmailDate(calcResult.paidProductDate)
-    : null;
+  // 1. 날짜 포맷팅 — 통합 변수 체계 (v1.2)
+  const updateDate = formatDateMMDD(request.updateDate);           // MMDD
+  const updateDateDay = formatEmailDate(request.updateDate);       // MM/DD(요일)
+  const updateDateFull = formatDateFull(request.updateDate);       // YY/MM/DD
+
+  const headsUp = formatDateMMDD(calcResult.headsUpDate);          // MMDD
+  const headsUpDay = formatEmailDate(calcResult.headsUpDate);      // MM/DD(요일)
+  const headsUpFull = formatDateFull(calcResult.headsUpDate);      // YY/MM/DD
+
+  const iosReviewDate = calcResult.iosReviewDate ? formatDateMMDD(calcResult.iosReviewDate) : null;
+  const iosReviewDateDay = calcResult.iosReviewDate ? formatEmailDate(calcResult.iosReviewDate) : null;
+  const iosReviewDateFull = calcResult.iosReviewDate ? formatDateFull(calcResult.iosReviewDate) : null;
+
+  const paidProductDate = calcResult.paidProductDate ? formatDateMMDD(calcResult.paidProductDate) : null;
+  const paidProductDateDay = calcResult.paidProductDate ? formatEmailDate(calcResult.paidProductDate) : null;
+  const paidProductDateFull = calcResult.paidProductDate ? formatDateFull(calcResult.paidProductDate) : null;
 
   // 2. 테이블 HTML 생성 (children 평탄화 포함)
   const entries = getEntriesByTableType(calcResult, request.tableType);
@@ -97,15 +104,32 @@ export function generateEmail(
 
   // 4. 템플릿 변수 컨텍스트 구성
   const context: TemplateContext = {
+    // 통합 날짜 변수 (v1.2)
     updateDate,
-    updateDateShort,
+    updateDateDay,
+    updateDateFull,
     headsUp,
+    headsUpDay,
+    headsUpFull,
     iosReviewDate,
+    iosReviewDateDay,
+    iosReviewDateFull,
+    paidProductDate,
+    paidProductDateDay,
+    paidProductDateFull,
+    // 레거시 호환
+    date: (() => {
+      const yy = String(request.updateDate.getFullYear()).substring(2);
+      const mm = String(request.updateDate.getMonth() + 1).padStart(2, '0');
+      const dd = String(request.updateDate.getDate()).padStart(2, '0');
+      return `${yy}${mm}${dd}`;
+    })(),
+    updateDateShort: updateDate,
+    // 비날짜 변수
     table: tableHtml,
-    disclaimer: disclaimerHtml || null, // v2.5: 빈 문자열 → null ({{#if disclaimer}} 평가용)
+    disclaimer: disclaimerHtml || null,
     projectName: project.name,
     showIosReviewDate: project.showIosReviewDate && iosReviewDate != null,
-    paidProductDate,
     showPaidProductDate: project.showPaidProductDate && paidProductDate != null,
   };
 

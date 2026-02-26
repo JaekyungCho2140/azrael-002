@@ -12,6 +12,8 @@ import {
   getSummary,
   formatDateYYMMDD,
   formatDateMMDD,
+  formatDateDay,
+  formatDateFull,
   type TemplateVars
 } from '../lib/jira/templates';
 import {
@@ -151,6 +153,18 @@ export function useJiraOperations({
       const dateStr = formatDateYYMMDD(calculationResult.updateDate);
       const headsUpStr = formatDateMMDD(calculationResult.headsUpDate);
 
+      // 통합 변수 체계 (v1.2) — 날짜 3형식
+      const updateDateDay = formatDateDay(calculationResult.updateDate);
+      const updateDateFull = formatDateFull(calculationResult.updateDate);
+      const headsUpDay = formatDateDay(calculationResult.headsUpDate);
+      const headsUpFull = formatDateFull(calculationResult.headsUpDate);
+      const iosReviewStr = calculationResult.iosReviewDate ? formatDateMMDD(calculationResult.iosReviewDate) : '';
+      const iosReviewDay = calculationResult.iosReviewDate ? formatDateDay(calculationResult.iosReviewDate) : '';
+      const iosReviewFull = calculationResult.iosReviewDate ? formatDateFull(calculationResult.iosReviewDate) : '';
+      const paidProductStr = calculationResult.paidProductDate ? formatDateMMDD(calculationResult.paidProductDate) : '';
+      const paidProductDay = calculationResult.paidProductDate ? formatDateDay(calculationResult.paidProductDate) : '';
+      const paidProductFull = calculationResult.paidProductDate ? formatDateFull(calculationResult.paidProductDate) : '';
+
       const epicSummary = currentProject.jiraEpicTemplate
         ? currentProject.jiraEpicTemplate.replace(/{date}/g, dateStr).replace(/{projectName}/g, currentProject.name).replace(/{headsUp}/g, headsUpStr)
         : `${dateStr} 업데이트`;
@@ -192,7 +206,18 @@ export function useJiraOperations({
 
           const vars: TemplateVars = {
             date: dateStr,
+            updateDate: formatDateMMDD(calculationResult.updateDate),
+            updateDateDay,
+            updateDateFull,
             headsUp: headsUpStr,
+            headsUpDay,
+            headsUpFull,
+            iosReviewDate: iosReviewStr,
+            iosReviewDateDay: iosReviewDay,
+            iosReviewDateFull: iosReviewFull,
+            paidProductDate: paidProductStr,
+            paidProductDateDay: paidProductDay,
+            paidProductDateFull: paidProductFull,
             projectName: currentProject.name,
             taskName: stage.name,
             subtaskName: '',
@@ -476,6 +501,18 @@ export function useJiraOperations({
       const dateStr = formatDateYYMMDD(calculationResult.updateDate);
       const headsUpStr = formatDateMMDD(calculationResult.headsUpDate);
 
+      // 통합 변수 체계 (v1.2) — 날짜 3형식
+      const updateDateDay2 = formatDateDay(calculationResult.updateDate);
+      const updateDateFull2 = formatDateFull(calculationResult.updateDate);
+      const headsUpDay2 = formatDateDay(calculationResult.headsUpDate);
+      const headsUpFull2 = formatDateFull(calculationResult.headsUpDate);
+      const iosReviewStr2 = calculationResult.iosReviewDate ? formatDateMMDD(calculationResult.iosReviewDate) : '';
+      const iosReviewDay2 = calculationResult.iosReviewDate ? formatDateDay(calculationResult.iosReviewDate) : '';
+      const iosReviewFull2 = calculationResult.iosReviewDate ? formatDateFull(calculationResult.iosReviewDate) : '';
+      const paidProductStr2 = calculationResult.paidProductDate ? formatDateMMDD(calculationResult.paidProductDate) : '';
+      const paidProductDay2 = calculationResult.paidProductDate ? formatDateDay(calculationResult.paidProductDate) : '';
+      const paidProductFull2 = calculationResult.paidProductDate ? formatDateFull(calculationResult.paidProductDate) : '';
+
       const updates: any[] = [];
       let updatedCount = 0;
       let createdCount = 0;
@@ -521,7 +558,18 @@ export function useJiraOperations({
 
           const vars: TemplateVars = {
             date: dateStr,
+            updateDate: formatDateMMDD(calculationResult.updateDate),
+            updateDateDay: updateDateDay2,
+            updateDateFull: updateDateFull2,
             headsUp: headsUpStr,
+            headsUpDay: headsUpDay2,
+            headsUpFull: headsUpFull2,
+            iosReviewDate: iosReviewStr2,
+            iosReviewDateDay: iosReviewDay2,
+            iosReviewDateFull: iosReviewFull2,
+            paidProductDate: paidProductStr2,
+            paidProductDateDay: paidProductDay2,
+            paidProductDateFull: paidProductFull2,
             projectName: currentProject.name,
             taskName: stage.name,
             subtaskName: '',

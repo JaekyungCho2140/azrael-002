@@ -15,7 +15,7 @@
 
 /** "기본" 템플릿 제목 (PRD §2.6) */
 export const BASIC_SUBJECT_TEMPLATE =
-  '[L10n] {updateDateShort} 업데이트 일정 안내';
+  '[L10n] {updateDate} 업데이트 일정 안내';
 
 /**
  * "기본" 템플릿 본문 HTML (PRD §2.6)
@@ -64,7 +64,7 @@ export const BASIC_BODY_TEMPLATE = `<p style="font-family: Arial, sans-serif; fo
 
 /** "상세" 템플릿 제목 (PRD §2.6) */
 export const DETAILED_SUBJECT_TEMPLATE =
-  '[L10n] {updateDateShort} 업데이트 일정 안내 (상세)';
+  '[L10n] {updateDate} 업데이트 일정 안내 (상세)';
 
 /**
  * "상세" 템플릿 본문 HTML (PRD §2.6)
