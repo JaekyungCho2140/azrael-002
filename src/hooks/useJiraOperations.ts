@@ -10,12 +10,14 @@ import {
 } from '../lib/businessDays';
 import {
   getSummary,
+  applyTemplate,
   formatDateYYMMDD,
   formatDateMMDD,
   formatDateDay,
   formatDateFull,
   type TemplateVars
 } from '../lib/jira/templates';
+import { formatScheduleTableForADF } from '../lib/jira/scheduleTableFormatter';
 import {
   fetchEpicMapping,
   createEpicMappingPending,
@@ -165,16 +167,54 @@ export function useJiraOperations({
       const paidProductDay = calculationResult.paidProductDate ? formatDateDay(calculationResult.paidProductDate) : '';
       const paidProductFull = calculationResult.paidProductDate ? formatDateFull(calculationResult.paidProductDate) : '';
 
+      // v1.2: baseVars를 Task 루프 밖에서 먼저 구성
+      const baseVars: TemplateVars = {
+        date: dateStr,
+        updateDate: formatDateMMDD(calculationResult.updateDate),
+        updateDateDay,
+        updateDateFull,
+        headsUp: headsUpStr,
+        headsUpDay,
+        headsUpFull,
+        iosReviewDate: iosReviewStr,
+        iosReviewDateDay: iosReviewDay,
+        iosReviewDateFull: iosReviewFull,
+        paidProductDate: paidProductStr,
+        paidProductDateDay: paidProductDay,
+        paidProductDateFull: paidProductFull,
+        projectName: currentProject.name,
+        taskName: '',
+        subtaskName: '',
+        stageName: '',
+      };
+
       const epicSummary = currentProject.jiraEpicTemplate
-        ? currentProject.jiraEpicTemplate.replace(/{date}/g, dateStr).replace(/{projectName}/g, currentProject.name).replace(/{headsUp}/g, headsUpStr)
+        ? applyTemplate(currentProject.jiraEpicTemplate, baseVars)
         : `${dateStr} 업데이트`;
+
+      // v1.2: Epic Description 생성 (템플릿 + 표 자동 삽입)
+      let epicDescription: string | undefined;
+      if (currentProject.jiraEpicDescription) {
+        epicDescription = applyTemplate(currentProject.jiraEpicDescription, baseVars);
+      }
+      if (currentProject.jiraEpicTableEnabled && calculationResult) {
+        const tableMarkup = formatScheduleTableForADF(
+          calculationResult,
+          currentProject.jiraEpicTableType || 'table1'
+        );
+        if (tableMarkup) {
+          epicDescription = epicDescription
+            ? `${epicDescription}\n\n${tableMarkup}`
+            : tableMarkup;
+        }
+      }
 
       const tasks: any[] = [];
 
       // 헤즈업 Task
       const taskIssueType = currentProject.jiraTaskIssueType || 'PM(표준)';
       const headsupSummary = currentProject.jiraHeadsupTemplate
-        ? currentProject.jiraHeadsupTemplate.replace(/{date}/g, dateStr).replace(/{projectName}/g, currentProject.name).replace(/{headsUp}/g, headsUpStr)
+        ? applyTemplate(currentProject.jiraHeadsupTemplate, baseVars)
         : `${dateStr} 업데이트 일정 헤즈업`;
       const headsupStart = new Date(calculationResult.headsUpDate);
       headsupStart.setHours(10, 0, 0, 0);
@@ -277,6 +317,7 @@ export function useJiraOperations({
       setJiraPreviewData({
         epic: {
           summary: epicSummary,
+          description: epicDescription,
           startDate: calculationResult.headsUpDate,
           endDate: calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate,
         },
@@ -316,6 +357,7 @@ export function useJiraOperations({
         projectKey: currentProject.jiraProjectKey!,
         epic: {
           summary: jiraPreviewData.epic.summary,
+          description: jiraPreviewData.epic.description || undefined,
           startDate: jiraPreviewData.epic.startDate.toISOString(),
           endDate: jiraPreviewData.epic.endDate.toISOString(),
         },
@@ -513,6 +555,44 @@ export function useJiraOperations({
       const paidProductDay2 = calculationResult.paidProductDate ? formatDateDay(calculationResult.paidProductDate) : '';
       const paidProductFull2 = calculationResult.paidProductDate ? formatDateFull(calculationResult.paidProductDate) : '';
 
+      // v1.2: 업데이트용 baseVars 구성
+      const updateBaseVars: TemplateVars = {
+        date: dateStr,
+        updateDate: formatDateMMDD(calculationResult.updateDate),
+        updateDateDay: updateDateDay2,
+        updateDateFull: updateDateFull2,
+        headsUp: headsUpStr,
+        headsUpDay: headsUpDay2,
+        headsUpFull: headsUpFull2,
+        iosReviewDate: iosReviewStr2,
+        iosReviewDateDay: iosReviewDay2,
+        iosReviewDateFull: iosReviewFull2,
+        paidProductDate: paidProductStr2,
+        paidProductDateDay: paidProductDay2,
+        paidProductDateFull: paidProductFull2,
+        projectName: currentProject.name,
+        taskName: '',
+        subtaskName: '',
+        stageName: '',
+      };
+
+      // v1.2: Epic Description 생성 (업데이트용)
+      let updateEpicDescription: string | undefined;
+      if (currentProject.jiraEpicDescription) {
+        updateEpicDescription = applyTemplate(currentProject.jiraEpicDescription, updateBaseVars);
+      }
+      if (currentProject.jiraEpicTableEnabled && calculationResult) {
+        const tableMarkup = formatScheduleTableForADF(
+          calculationResult,
+          currentProject.jiraEpicTableType || 'table1'
+        );
+        if (tableMarkup) {
+          updateEpicDescription = updateEpicDescription
+            ? `${updateEpicDescription}\n\n${tableMarkup}`
+            : tableMarkup;
+        }
+      }
+
       const updates: any[] = [];
       let updatedCount = 0;
       let createdCount = 0;
@@ -520,6 +600,7 @@ export function useJiraOperations({
       const epicUpdate = {
         startDate: calculationResult.headsUpDate.toISOString(),
         endDate: (calculationResult.table2Entries[calculationResult.table2Entries.length - 1]?.endDateTime || calculationResult.updateDate).toISOString(),
+        description: updateEpicDescription,
       };
 
       // 헤즈업 Task
