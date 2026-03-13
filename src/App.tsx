@@ -214,7 +214,12 @@ function App() {
       />
     );
   } else {
-    const currentProject = projects.find(p => p.id === userState?.lastProjectId);
+    let currentProject = projects.find(p => p.id === userState?.lastProjectId);
+    if (!currentProject && projects.length > 0) {
+      // 삭제된 프로젝트 등으로 못 찾으면 첫 번째 프로젝트로 폴백
+      currentProject = projects[0];
+      handleProjectChange(currentProject.id);
+    }
     if (!currentProject) {
       content = <div>프로젝트를 찾을 수 없습니다.</div>;
     } else {
