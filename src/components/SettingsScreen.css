@@ -127,3 +127,20 @@
 .subtask-row:hover {
   background: var(--azrael-gray-100) !important;
 }
+
+/* 업무 단계 체크박스 열 */
+.stage-checkbox-col {
+  width: 40px;
+  text-align: center !important;
+}
+
+.stage-checkbox-col input[type="checkbox"] {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+/* 선택된 행 하이라이트 */
+.stage-row-selected {
+  background: var(--azrael-orange-50) !important;
+}

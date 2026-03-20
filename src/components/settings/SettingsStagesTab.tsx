@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Project, WorkTemplate, WorkStage } from '../../types';
 import { Button } from '../Button';
 import { StageEditModal } from '../StageEditModal';
 import { useSaveTemplate } from '../../hooks/useSupabase';
+import type { StageClipboard } from '../SettingsScreen';
 
 interface SettingsStagesTabProps {
   selectedProjectId: string;
@@ -10,6 +11,8 @@ interface SettingsStagesTabProps {
   isAdmin: boolean;
   projects: Project[];
   selectedTemplate: WorkTemplate | undefined;
+  stageClipboard: StageClipboard | null;
+  onStageClipboardChange: (clipboard: StageClipboard | null) => void;
 }
 
 export function SettingsStagesTab({
@@ -18,11 +21,204 @@ export function SettingsStagesTab({
   isAdmin,
   projects,
   selectedTemplate,
+  stageClipboard,
+  onStageClipboardChange,
 }: SettingsStagesTabProps) {
   const [stageModalOpen, setStageModalOpen] = useState(false);
   const [editingStage, setEditingStage] = useState<WorkStage | undefined>();
+  const [selectedStageIds, setSelectedStageIds] = useState<Set<string>>(new Set());
 
   const saveTemplateMutation = useSaveTemplate();
+
+  // 프로젝트 변경 시 선택 초기화
+  useEffect(() => {
+    setSelectedStageIds(new Set());
+  }, [selectedProjectId]);
+
+  const handleToggleStage = (stageId: string, isParent: boolean) => {
+    setSelectedStageIds(prev => {
+      const next = new Set(prev);
+      if (next.has(stageId)) {
+        next.delete(stageId);
+        // 부모 해제 시 자식도 해제
+        if (isParent && selectedTemplate) {
+          selectedTemplate.stages
+            .filter(s => s.parentStageId === stageId)
+            .forEach(child => next.delete(child.id));
+        }
+      } else {
+        next.add(stageId);
+        // 부모 선택 시 자식도 선택
+        if (isParent && selectedTemplate) {
+          selectedTemplate.stages
+            .filter(s => s.parentStageId === stageId)
+            .forEach(child => next.add(child.id));
+        }
+      }
+      return next;
+    });
+  };
+
+  const handleToggleAll = () => {
+    if (!selectedTemplate) return;
+    const allIds = selectedTemplate.stages.map(s => s.id);
+    if (allIds.every(id => selectedStageIds.has(id))) {
+      setSelectedStageIds(new Set());
+    } else {
+      setSelectedStageIds(new Set(allIds));
+    }
+  };
+
+  const handleCopyStages = () => {
+    if (!selectedTemplate || selectedStageIds.size === 0) return;
+    const selectedProject = projects?.find(p => p.id === selectedProjectId);
+    if (!selectedProject) return;
+
+    const selectedParents = selectedTemplate.stages.filter(
+      s => s.depth === 0 && selectedStageIds.has(s.id)
+    );
+    const childIdsInParents = new Set<string>();
+
+    const items: StageClipboard['items'] = [];
+
+    // 부모 단계 처리: 자식 포함
+    for (const parent of selectedParents) {
+      const children = selectedTemplate.stages.filter(s => s.parentStageId === parent.id);
+      children.forEach(c => childIdsInParents.add(c.id));
+      items.push({
+        stage: { ...parent },
+        children: children.map(c => ({ ...c })),
+        type: 'parent',
+      });
+    }
+
+    // 부모가 선택 안 된 자식만 단독 항목으로 추가
+    const orphanChildren = selectedTemplate.stages.filter(
+      s => s.depth === 1 && selectedStageIds.has(s.id) && !childIdsInParents.has(s.id)
+    );
+    for (const child of orphanChildren) {
+      items.push({
+        stage: { ...child },
+        children: [],
+        type: 'child',
+      });
+    }
+
+    if (items.length === 0) return;
+
+    onStageClipboardChange({
+      sourceProjectId: selectedProjectId,
+      sourceProjectName: selectedProject.name,
+      items,
+    });
+
+    setSelectedStageIds(new Set());
+    const totalCount = items.reduce((acc, item) => acc + 1 + item.children.length, 0);
+    alert(`${totalCount}개 업무 단계가 복사되었습니다.`);
+  };
+
+  const handlePasteStages = () => {
+    if (!stageClipboard || stageClipboard.items.length === 0) return;
+
+    const selectedProject = projects?.find(p => p.id === selectedProjectId);
+    if (!selectedProject) return;
+
+    const existingStages = selectedTemplate?.stages ?? [];
+
+    // 자식만 복사된 경우 부모 선택 필요
+    const hasOnlyChildren = stageClipboard.items.every(item => item.type === 'child');
+    let targetParentId: string | null = null;
+
+    if (hasOnlyChildren) {
+      const parentStages = existingStages.filter(s => s.depth === 0);
+      if (parentStages.length === 0) {
+        alert('부모 단계가 없습니다. 먼저 부모 업무 단계를 추가해주세요.');
+        return;
+      }
+      if (parentStages.length === 1) {
+        targetParentId = parentStages[0].id;
+      } else {
+        const parentOptions = parentStages.map((p, i) => `${i + 1}. ${p.name}`).join('\n');
+        const choice = prompt(`하위 일감을 추가할 부모 단계를 선택하세요:\n${parentOptions}\n\n번호를 입력하세요:`);
+        if (!choice) return;
+        const idx = parseInt(choice, 10) - 1;
+        if (isNaN(idx) || idx < 0 || idx >= parentStages.length) {
+          alert('잘못된 선택입니다.');
+          return;
+        }
+        targetParentId = parentStages[idx].id;
+      }
+    }
+
+    // 새 stages 생성
+    const newStages: WorkStage[] = [];
+    const parentMaxOrder = existingStages.filter(s => s.depth === 0).length > 0
+      ? Math.max(...existingStages.filter(s => s.depth === 0).map(s => Math.floor(s.order)))
+      : 0;
+
+    let parentOrderOffset = 0;
+
+    for (const item of stageClipboard.items) {
+      if (item.type === 'parent') {
+        const newParentId = crypto.randomUUID();
+        const newParentOrder = parentMaxOrder + 1 + parentOrderOffset;
+        parentOrderOffset++;
+
+        newStages.push({
+          ...item.stage,
+          id: newParentId,
+          order: newParentOrder,
+          parentStageId: undefined,
+        });
+
+        for (let i = 0; i < item.children.length; i++) {
+          newStages.push({
+            ...item.children[i],
+            id: crypto.randomUUID(),
+            parentStageId: newParentId,
+            order: newParentOrder + (i + 1) * 0.1,
+          });
+        }
+      } else {
+        // 자식 단독 붙여넣기
+        const existingChildrenOfTarget = existingStages.filter(s => s.parentStageId === targetParentId);
+        const targetParent = existingStages.find(s => s.id === targetParentId);
+        const baseOrder = targetParent ? Math.floor(targetParent.order) : 0;
+        const childOffset = existingChildrenOfTarget.length + newStages.filter(s => s.parentStageId === targetParentId).length;
+
+        newStages.push({
+          ...item.stage,
+          id: crypto.randomUUID(),
+          parentStageId: targetParentId!,
+          order: baseOrder + (childOffset + 1) * 0.1,
+        });
+      }
+    }
+
+    const allStages = [...existingStages, ...newStages];
+
+    if (selectedTemplate) {
+      const updatedTemplate: WorkTemplate = {
+        ...selectedTemplate,
+        stages: allStages,
+      };
+      saveTemplateMutation.mutate(updatedTemplate, {
+        onSuccess: () => alert('붙여넣기 완료'),
+        onError: (err: any) => alert(`붙여넣기 실패: ${err.message}`),
+      });
+    } else {
+      // 템플릿이 없는 프로젝트
+      const newTemplate: WorkTemplate = {
+        id: selectedProject.templateId,
+        projectId: selectedProject.id,
+        stages: newStages,
+      };
+      saveTemplateMutation.mutate(newTemplate, {
+        onSuccess: () => alert('붙여넣기 완료'),
+        onError: (err: any) => alert(`붙여넣기 실패: ${err.message}`),
+      });
+    }
+  };
 
   const handleAddStage = () => {
     setEditingStage(undefined);
@@ -203,7 +399,24 @@ export function SettingsStagesTab({
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h3>업무 단계 템플릿</h3>
-        <Button onClick={handleAddStage}>+ 업무 단계 추가</Button>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <Button onClick={handleAddStage}>+ 추가</Button>
+          <Button
+            variant="secondary"
+            onClick={handleCopyStages}
+            disabled={selectedStageIds.size === 0}
+          >
+            복사 {selectedStageIds.size > 0 ? `(${selectedStageIds.size})` : ''}
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={handlePasteStages}
+            disabled={!stageClipboard}
+            title={stageClipboard ? `${stageClipboard.sourceProjectName}에서 복사된 ${stageClipboard.items.length}개 항목` : '복사된 항목 없음'}
+          >
+            붙여넣기
+          </Button>
+        </div>
       </div>
 
       <div style={{ marginBottom: '1rem' }}>
@@ -225,6 +438,13 @@ export function SettingsStagesTab({
             <table className="stages-table">
               <thead>
                 <tr>
+                  <th className="stage-checkbox-col">
+                    <input
+                      type="checkbox"
+                      checked={selectedTemplate.stages.length > 0 && selectedTemplate.stages.every(s => selectedStageIds.has(s.id))}
+                      onChange={handleToggleAll}
+                    />
+                  </th>
                   <th>#</th>
                   <th>업무명</th>
                   <th>마감 Offset</th>
@@ -243,7 +463,14 @@ export function SettingsStagesTab({
                     const children = selectedTemplate.stages.filter(s => s.parentStageId === parentStage.id);
                     return (
                       <>
-                        <tr key={parentStage.id}>
+                        <tr key={parentStage.id} className={selectedStageIds.has(parentStage.id) ? 'stage-row-selected' : ''}>
+                          <td className="stage-checkbox-col">
+                            <input
+                              type="checkbox"
+                              checked={selectedStageIds.has(parentStage.id)}
+                              onChange={() => handleToggleStage(parentStage.id, true)}
+                            />
+                          </td>
                           <td>{parentIndex + 1}</td>
                           <td>{parentStage.name}</td>
                           <td>{parentStage.startOffsetDays}</td>
@@ -269,7 +496,14 @@ export function SettingsStagesTab({
                           </td>
                         </tr>
                         {children.map((child, childIndex) => (
-                          <tr key={child.id} className="subtask-row">
+                          <tr key={child.id} className={`subtask-row${selectedStageIds.has(child.id) ? ' stage-row-selected' : ''}`}>
+                            <td className="stage-checkbox-col">
+                              <input
+                                type="checkbox"
+                                checked={selectedStageIds.has(child.id)}
+                                onChange={() => handleToggleStage(child.id, false)}
+                              />
+                            </td>
                             <td style={{ color: 'var(--azrael-gray-500)' }}>
                               {parentIndex + 1}.{childIndex + 1}
                             </td>

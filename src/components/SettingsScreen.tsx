@@ -9,7 +9,20 @@
 import { useState, lazy, Suspense } from 'react';
 import { Button } from './Button';
 import { useProjects, useTemplates } from '../hooks/useSupabase';
+import type { WorkStage } from '../types';
 import './SettingsScreen.css';
+
+export interface StageClipboardItem {
+  stage: WorkStage;
+  children: WorkStage[];
+  type: 'parent' | 'child';
+}
+
+export interface StageClipboard {
+  sourceProjectId: string;
+  sourceProjectName: string;
+  items: StageClipboardItem[];
+}
 
 // 탭 컴포넌트 lazy loading (SettingsScreen 청크 분할)
 const SettingsProjectsTab = lazy(() => import('./settings/SettingsProjectsTab').then(m => ({ default: m.SettingsProjectsTab })));
@@ -38,6 +51,7 @@ export function SettingsScreen({
 }: SettingsScreenProps) {
   const [activeTab, setActiveTab] = useState<SettingsTab>('projects');
   const [selectedProjectId, setSelectedProjectId] = useState(currentProjectId);
+  const [stageClipboard, setStageClipboard] = useState<StageClipboard | null>(null);
 
   // 관리자 권한 확인
   const isAdmin = currentUserEmail === 'jkcho@wemade.com';
@@ -141,6 +155,8 @@ export function SettingsScreen({
                 isAdmin={isAdmin}
                 projects={projects}
                 selectedTemplate={selectedTemplate}
+                stageClipboard={stageClipboard}
+                onStageClipboardChange={setStageClipboard}
               />
             )}
 
