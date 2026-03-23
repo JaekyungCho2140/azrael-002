@@ -3,7 +3,7 @@
  * 참조: prd/Azrael-PRD-Phase0.md §4 메인 화면
  */
 
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useRef, lazy, Suspense } from 'react';
 import { Project, CalculationResult, WorkTemplate, ScheduleEntry } from '../types';
 import { Button } from './Button';
 import { ScheduleTable } from './ScheduleTable';
@@ -58,6 +58,14 @@ export function MainScreen({
   const [showVisualization, setShowVisualization] = useState(true);
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
   const [currentUserId, setCurrentUserId] = useState<string>('');
+  const [btnHint, setBtnHint] = useState<{ id: string; message: string } | null>(null);
+  const btnHintTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showBtnHint = (id: string, message: string) => {
+    if (btnHintTimerRef.current) clearTimeout(btnHintTimerRef.current);
+    setBtnHint({ id, message });
+    btnHintTimerRef.current = setTimeout(() => setBtnHint(null), 3000);
+  };
 
   // Phase 4: ViewMode 상태 관리
   const { viewMode, setViewMode } = useViewMode(currentProject.id);
@@ -348,35 +356,57 @@ export function MainScreen({
             className="input date-input"
           />
           <Button onClick={handleCalculate}>계산</Button>
-          <Button
-            onClick={jira.handleCreateJira}
-            disabled={!calculationResult || !jira.hasJiraConfig}
-            title={!calculationResult ? '일정 계산 후 사용 가능' : !jira.hasJiraConfig ? 'JIRA 설정 필요' : ''}
-          >
-            JIRA 생성
-          </Button>
-          <Button
-            onClick={jira.handleUpdateJira}
-            disabled={!jira.hasEpicMapping}
-            variant="secondary"
-            title={!jira.hasEpicMapping ? '먼저 JIRA 생성 필요' : ''}
-          >
-            JIRA 업데이트
-          </Button>
-          <Button
-            onClick={() => setShowEmailModal(true)}
-            disabled={!calculationResult}
-            title={!calculationResult ? '일정 계산 후 사용 가능' : ''}
-          >
-            ✉️ 이메일 복사
-          </Button>
-          <Button
-            onClick={() => setShowSlackModal(true)}
-            disabled={!calculationResult || !hasSlackToken}
-            title={!calculationResult ? '먼저 계산을 실행해주세요' : !hasSlackToken ? '설정에서 Slack 연동이 필요합니다' : ''}
-          >
-            💬 슬랙 발신
-          </Button>
+          <span className="btn-wrapper" onClick={() => {
+            if (!calculationResult) showBtnHint('jiraCreate', '일정 계산 후 사용 가능합니다.');
+            else if (!jira.hasJiraConfig) showBtnHint('jiraCreate', '설정 > JIRA 연동에서 API Token을 등록해주세요.');
+          }}>
+            <Button
+              onClick={jira.handleCreateJira}
+              disabled={!calculationResult || !jira.hasJiraConfig}
+            >
+              JIRA 생성
+            </Button>
+            {btnHint?.id === 'jiraCreate' && <div className="btn-hint">{btnHint.message}</div>}
+          </span>
+          <span className="btn-wrapper" onClick={() => {
+            if (!jira.hasEpicMapping) {
+              if (!jira.hasJiraConfig) showBtnHint('jiraUpdate', '설정 > JIRA 연동에서 API Token을 등록해주세요.');
+              else if (!calculationResult) showBtnHint('jiraUpdate', '일정 계산 후 사용 가능합니다.');
+              else showBtnHint('jiraUpdate', '먼저 JIRA 생성을 실행해주세요.');
+            }
+          }}>
+            <Button
+              onClick={jira.handleUpdateJira}
+              disabled={!jira.hasEpicMapping}
+              variant="secondary"
+            >
+              JIRA 업데이트
+            </Button>
+            {btnHint?.id === 'jiraUpdate' && <div className="btn-hint">{btnHint.message}</div>}
+          </span>
+          <span className="btn-wrapper" onClick={() => {
+            if (!calculationResult) showBtnHint('email', '일정 계산 후 사용 가능합니다.');
+          }}>
+            <Button
+              onClick={() => setShowEmailModal(true)}
+              disabled={!calculationResult}
+            >
+              ✉️ 이메일 복사
+            </Button>
+            {btnHint?.id === 'email' && <div className="btn-hint">{btnHint.message}</div>}
+          </span>
+          <span className="btn-wrapper" onClick={() => {
+            if (!calculationResult) showBtnHint('slack', '일정 계산 후 사용 가능합니다.');
+            else if (!hasSlackToken) showBtnHint('slack', '설정 > Slack 연동에서 인증을 완료해주세요.');
+          }}>
+            <Button
+              onClick={() => setShowSlackModal(true)}
+              disabled={!calculationResult || !hasSlackToken}
+            >
+              💬 슬랙 발신
+            </Button>
+            {btnHint?.id === 'slack' && <div className="btn-hint">{btnHint.message}</div>}
+          </span>
         </div>
       </div>
 
