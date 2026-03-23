@@ -59,12 +59,16 @@ export function useJiraOperations({
     setHasJiraConfig(!!jiraConfig);
   }, [calculationResult]);
 
-  // 프로젝트 변경 시 Epic 매핑 초기화
+  // calculationResult 변경 시 Epic 매핑 자동 확인
   useEffect(() => {
-    setHasEpicMapping(false);
-  }, [currentProject.id]);
+    if (!calculationResult) {
+      setHasEpicMapping(false);
+      return;
+    }
+    checkEpicMapping();
+  }, [currentProject.id, calculationResult?.projectId, calculationResult?.updateDate?.getTime()]);
 
-  // 계산 후 Epic 매핑 존재 여부 확인
+  // Epic 매핑 존재 여부 확인
   const checkEpicMapping = async () => {
     if (!calculationResult) return;
     try {

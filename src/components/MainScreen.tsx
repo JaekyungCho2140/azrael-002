@@ -32,7 +32,6 @@ import {
   formatDateOnly,
   formatDateLocal
 } from '../lib/businessDays';
-import { fetchEpicMapping } from '../lib/api/jira';
 import { useJiraOperations } from '../hooks/useJiraOperations';
 import './MainScreen.css';
 
@@ -261,14 +260,6 @@ export function MainScreen({
       }
     );
 
-    // Epic 매핑 존재 여부 확인 (JIRA 업데이트 버튼 활성화용)
-    fetchEpicMapping(currentProject.id, updateDateObj).then(epicMapping => {
-      const hasMapping = !!(epicMapping && epicMapping.epicId !== 'PENDING');
-      jira.setHasEpicMapping(hasMapping);
-    }).catch(err => {
-      console.error('[handleCalculate] Epic 매핑 확인 실패:', err);
-      jira.setHasEpicMapping(false);
-    });
   };
 
   // 설정 화면 표시
