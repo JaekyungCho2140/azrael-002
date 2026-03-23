@@ -488,6 +488,7 @@ export function useJiraOperations({
 
   // JIRA 업데이트 핸들러
   const handleUpdateJira = async () => {
+    console.log('[JIRA-UPDATE] 핸들러 진입', { hasCalcResult: !!calculationResult });
     if (!calculationResult) {
       alert('먼저 일정을 계산해주세요.');
       return;
@@ -495,27 +496,34 @@ export function useJiraOperations({
 
     setIsJiraLoading(true);
     setJiraLoadingMessage('JIRA 일감 확인 중...');
+    console.log('[JIRA-UPDATE] 로딩 시작');
 
     try {
       const jiraConfigStr = localStorage.getItem('azrael:jiraConfig');
       if (!jiraConfigStr) {
         setIsJiraLoading(false);
+        console.log('[JIRA-UPDATE] JIRA 설정 없음');
         alert('JIRA 설정을 찾을 수 없습니다.');
         return;
       }
       const jiraConfig = JSON.parse(jiraConfigStr);
+      console.log('[JIRA-UPDATE] JIRA 설정 로드 완료');
 
+      console.log('[JIRA-UPDATE] Epic 매핑 조회 시작', { projectId: currentProject.id, updateDate: calculationResult.updateDate });
       const epicMapping = await fetchEpicMapping(currentProject.id, calculationResult.updateDate);
+      console.log('[JIRA-UPDATE] Epic 매핑 결과:', epicMapping);
       if (!epicMapping || epicMapping.epicId === 'PENDING') {
         setIsJiraLoading(false);
         alert('생성된 Epic이 없습니다.\n먼저 [JIRA 생성]을 실행하세요.');
         return;
       }
 
+      console.log('[JIRA-UPDATE] JIRA Issue 존재 확인 시작:', epicMapping.epicKey);
       const checkResult = await checkJiraIssueExists(epicMapping.epicKey, {
         email: currentUserEmail,
         apiToken: jiraConfig.apiToken,
       });
+      console.log('[JIRA-UPDATE] JIRA Issue 확인 결과:', checkResult);
       if (checkResult.errorCode === 'UNAUTHORIZED') {
         setIsJiraLoading(false);
         alert('JIRA 인증에 실패했습니다.\n설정 → JIRA 연동 탭에서 API Token을 확인해주세요.');
@@ -540,9 +548,16 @@ export function useJiraOperations({
       }
 
       const existingTaskMappings = await fetchTaskMappings(epicMapping.id!);
+      console.log('[JIRA-UPDATE] 기존 Task 매핑:', existingTaskMappings.length, '개');
 
       const template = templates.find(t => t.id === currentProject.templateId);
-      if (!template) return;
+      console.log('[JIRA-UPDATE] 템플릿 조회:', { templateId: currentProject.templateId, found: !!template });
+      if (!template) {
+        setIsJiraLoading(false);
+        console.error('[JIRA-UPDATE] 템플릿을 찾을 수 없음! templateId:', currentProject.templateId, 'templates:', templates.map(t => t.id));
+        alert('업무 단계 템플릿을 찾을 수 없습니다. 설정을 확인해주세요.');
+        return;
+      }
 
       const dateStr = formatDateYYMMDD(calculationResult.updateDate);
       const headsUpStr = formatDateMMDD(calculationResult.headsUpDate);
@@ -716,13 +731,16 @@ export function useJiraOperations({
           }
         });
 
+      console.log('[JIRA-UPDATE] 업데이트 준비 완료', { updatedCount, createdCount, updatesLength: updates.length });
       setIsJiraLoading(false);
       if (!confirm(`JIRA 일감을 업데이트하시겠습니까?\n\n업데이트: ${updatedCount}개\n신규 생성: ${createdCount}개`)) {
+        console.log('[JIRA-UPDATE] 사용자 취소');
         return;
       }
 
       setIsJiraLoading(true);
       setJiraLoadingMessage('JIRA 업데이트 중...');
+      console.log('[JIRA-UPDATE] Edge Function 호출 시작');
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -769,9 +787,11 @@ export function useJiraOperations({
       }
 
       setIsJiraLoading(false);
+      console.log('[JIRA-UPDATE] 성공!', result);
       alert(`JIRA 일감이 업데이트되었습니다!\n\n업데이트: ${result.updatedCount}개\n신규 생성: ${result.createdCount}개`);
     } catch (err: any) {
       setIsJiraLoading(false);
+      console.error('[JIRA-UPDATE] 에러:', err);
       console.error('JIRA 업데이트 실패:', err);
       alert(`JIRA 업데이트 실패:\n${err.message}`);
     }
