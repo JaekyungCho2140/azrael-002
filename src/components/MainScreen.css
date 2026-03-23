@@ -95,6 +95,11 @@
 .btn-wrapper {
   position: relative;
   display: inline-block;
+  cursor: pointer;
+}
+
+.btn-wrapper > button:disabled {
+  pointer-events: none;
 }
 
 .btn-hint {
