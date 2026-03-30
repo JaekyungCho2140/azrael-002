@@ -5,6 +5,21 @@ import { StageEditModal } from '../StageEditModal';
 import { useSaveTemplate } from '../../hooks/useSupabase';
 import type { StageClipboard } from '../SettingsScreen';
 
+function recalculateOrders(orderedParents: WorkStage[], allStages: WorkStage[]): WorkStage[] {
+  const result: WorkStage[] = [];
+  orderedParents.forEach((parent, parentIdx) => {
+    const newParentOrder = parentIdx + 1;
+    result.push({ ...parent, order: newParentOrder });
+    const children = allStages
+      .filter(s => s.parentStageId === parent.id)
+      .sort((a, b) => a.order - b.order);
+    children.forEach((child, childIdx) => {
+      result.push({ ...child, order: newParentOrder + (childIdx + 1) * 0.1 });
+    });
+  });
+  return result;
+}
+
 interface SettingsStagesTabProps {
   selectedProjectId: string;
   onSelectedProjectIdChange: (id: string) => void;
@@ -319,6 +334,22 @@ export function SettingsStagesTab({
     });
   };
 
+  const handleMoveStage = (parentStageId: string, direction: 'up' | 'down') => {
+    if (!selectedTemplate) return;
+    const parentStages = selectedTemplate.stages
+      .filter(s => s.depth === 0)
+      .sort((a, b) => a.order - b.order);
+    const currentIndex = parentStages.findIndex(s => s.id === parentStageId);
+    const targetIndex = direction === 'up' ? currentIndex - 1 : currentIndex + 1;
+    if (targetIndex < 0 || targetIndex >= parentStages.length) return;
+    const reordered = [...parentStages];
+    [reordered[currentIndex], reordered[targetIndex]] = [reordered[targetIndex], reordered[currentIndex]];
+    const newStages = recalculateOrders(reordered, selectedTemplate.stages);
+    saveTemplateMutation.mutate({ ...selectedTemplate, stages: newStages }, {
+      onError: (err: any) => alert(`순서 변경 실패: ${err.message}`),
+    });
+  };
+
   const handleImportStagesCSV = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -446,6 +477,7 @@ export function SettingsStagesTab({
                     />
                   </th>
                   <th>#</th>
+                  <th>순서</th>
                   <th>업무명</th>
                   <th>마감 Offset</th>
                   <th>테이블 전달 Offset</th>
@@ -457,10 +489,10 @@ export function SettingsStagesTab({
                 </tr>
               </thead>
               <tbody>
-                {selectedTemplate.stages
-                  .filter(s => s.depth === 0)
-                  .map((parentStage, parentIndex) => {
-                    const children = selectedTemplate.stages.filter(s => s.parentStageId === parentStage.id);
+                {(() => {
+                  const parentStages = selectedTemplate.stages.filter(s => s.depth === 0).sort((a, b) => a.order - b.order);
+                  return parentStages.map((parentStage, parentIndex) => {
+                    const children = selectedTemplate.stages.filter(s => s.parentStageId === parentStage.id).sort((a, b) => a.order - b.order);
                     return (
                       <>
                         <tr key={parentStage.id} className={selectedStageIds.has(parentStage.id) ? 'stage-row-selected' : ''}>
@@ -472,6 +504,20 @@ export function SettingsStagesTab({
                             />
                           </td>
                           <td>{parentIndex + 1}</td>
+                          <td className="stage-order-col">
+                            <button
+                              className="btn-icon btn-order"
+                              onClick={() => handleMoveStage(parentStage.id, 'up')}
+                              disabled={parentIndex === 0}
+                              title="위로 이동"
+                            >▲</button>
+                            <button
+                              className="btn-icon btn-order"
+                              onClick={() => handleMoveStage(parentStage.id, 'down')}
+                              disabled={parentIndex === parentStages.length - 1}
+                              title="아래로 이동"
+                            >▼</button>
+                          </td>
                           <td>{parentStage.name}</td>
                           <td>{parentStage.startOffsetDays}</td>
                           <td>{parentStage.endOffsetDays}</td>
@@ -507,6 +553,7 @@ export function SettingsStagesTab({
                             <td style={{ color: 'var(--azrael-gray-500)' }}>
                               {parentIndex + 1}.{childIndex + 1}
                             </td>
+                            <td className="stage-order-col"></td>
                             <td style={{ paddingLeft: '2rem', color: 'var(--azrael-gray-700)' }}>
                               ㄴ {child.name}
                             </td>
@@ -541,7 +588,8 @@ export function SettingsStagesTab({
                         ))}
                       </>
                     );
-                  })}
+                  });
+                })()}
               </tbody>
             </table>
           ) : (

@@ -140,6 +140,35 @@
   height: 16px;
 }
 
+/* 순서 변경 버튼 */
+.stage-order-col {
+  width: 60px;
+  text-align: center !important;
+  white-space: nowrap;
+}
+
+.btn-order {
+  width: 24px;
+  height: 24px;
+  font-size: 0.7rem;
+  padding: 0;
+  margin: 0 1px;
+  vertical-align: middle;
+  background: var(--azrael-gray-100);
+  border: 1px solid var(--azrael-gray-300);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.btn-order:hover:not(:disabled) {
+  background: var(--azrael-gray-200);
+}
+
+.btn-order:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
 /* 선택된 행 하이라이트 */
 .stage-row-selected {
   background: var(--azrael-orange-50) !important;
