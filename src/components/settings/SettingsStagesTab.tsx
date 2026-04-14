@@ -317,6 +317,14 @@ export function SettingsStagesTab({
 
   const handleDeleteStage = (stageId: string) => {
     if (!selectedTemplate) return;
+
+    // 부모 단계 삭제 시 자식 존재 여부를 사전 검증 (saveTemplate 비트랜잭션 데이터 소실 방지)
+    const hasChildren = selectedTemplate.stages.some(s => s.parentStageId === stageId);
+    if (hasChildren) {
+      alert('하위 일감이 존재하는 업무 단계는 삭제할 수 없습니다.\n하위 일감을 먼저 삭제해주세요.');
+      return;
+    }
+
     if (!confirm('정말 삭제하시겠습니까?')) return;
 
     const updatedTemplate: WorkTemplate = {
@@ -326,10 +334,7 @@ export function SettingsStagesTab({
 
     saveTemplateMutation.mutate(updatedTemplate, {
       onError: (err: any) => {
-        const message = err.message?.includes('fk_parent_stage')
-          ? '하위 일감이 존재하는 업무 단계는 삭제할 수 없습니다. 하위 일감을 먼저 삭제해주세요.'
-          : `업무 단계 삭제 실패: ${err.message}`;
-        alert(message);
+        alert(`업무 단계 삭제 실패: ${err.message}`);
       },
     });
   };
