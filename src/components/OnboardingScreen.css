@@ -87,3 +87,281 @@
   text-align: center;
   margin-top: 1.5rem;
 }
+
+/* =========================================================
+   Funky (Soft Girl) 이식
+   ========================================================= */
+[data-theme='funky'] .onboarding {
+  position: relative;
+  overflow: hidden;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #FFEFF7 0%, #F5E9FF 45%, #E8F9F5 100%);
+}
+
+[data-theme='funky'] .onboarding::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(255, 209, 227, 0.7) 0%, transparent 35%),
+    radial-gradient(circle at 80% 70%, rgba(217, 195, 255, 0.6) 0%, transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(127, 232, 212, 0.4) 0%, transparent 45%);
+}
+
+[data-theme='funky'] .onboarding-card {
+  position: relative;
+  z-index: 2;
+  max-width: 640px;
+  padding: 48px 48px 40px;
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  border-radius: 36px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 20px 60px rgba(171, 122, 255, 0.2),
+    0 8px 20px rgba(255, 61, 154, 0.12);
+}
+
+[data-theme='funky'] .onboarding-ribbon {
+  position: absolute;
+  top: -18px;
+  left: 32px;
+  background: #FF3D9A;
+  color: #FFF;
+  font-family: 'Jua', sans-serif;
+  font-size: 14px;
+  padding: 8px 16px 9px;
+  border-radius: 999px;
+  box-shadow: 0 6px 16px rgba(255, 61, 154, 0.4);
+  transform: rotate(-4deg);
+  letter-spacing: 0.02em;
+}
+
+[data-theme='funky'] .onboarding-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Gaegu', cursive;
+  font-size: 16px;
+  color: #7A3AE0;
+  margin-bottom: 6px;
+}
+
+[data-theme='funky'] .onboarding-stepper .pip {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #D9C3FF;
+  display: inline-block;
+}
+
+[data-theme='funky'] .onboarding-stepper .pip.on {
+  background: linear-gradient(135deg, #FF3D9A, #B388FF);
+  box-shadow: 0 0 0 3px rgba(255, 61, 154, 0.2);
+}
+
+[data-theme='funky'] .onboarding-title {
+  font-family: 'Fraunces', serif;
+  font-size: 56px;
+  font-weight: 400;
+  font-style: italic;
+  text-align: left;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #FF3D9A 0%, #B388FF 60%, #7A3AE0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  margin-bottom: 12px;
+}
+
+[data-theme='funky'] .onboarding-title .wave {
+  display: inline-block;
+  transform-origin: 70% 70%;
+  animation: obWave 2.2s ease-in-out infinite;
+  color: #FFE36E;
+  -webkit-text-fill-color: #FFE36E;
+  filter: drop-shadow(0 2px 0 #1A0B2E);
+}
+
+[data-theme='funky'] .onboarding-subtitle {
+  font-family: 'Gowun Dodum', sans-serif;
+  color: rgba(43, 20, 84, 0.65);
+  text-align: left;
+  font-size: 16px;
+  margin-bottom: 22px;
+}
+
+[data-theme='funky'] .onboarding-section-label {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0;
+  font-size: 17px;
+  margin: 10px 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+[data-theme='funky'] .onboarding-section-label .dash {
+  flex: 1;
+  height: 0;
+  border-top: 2px dashed #D9C3FF;
+}
+
+[data-theme='funky'] .onboarding-section-label .count {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #B388FF;
+}
+
+[data-theme='funky'] .radio-group {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+[data-theme='funky'] .radio-item {
+  position: relative;
+  gap: 14px;
+  padding: 18px;
+  background: #FFF;
+  border: 2px solid #FFE1EE;
+  border-radius: 22px;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.2s ease,
+    box-shadow 0.25s ease,
+    background 0.2s ease;
+}
+
+[data-theme='funky'] .radio-item:hover {
+  border-color: #FFB8D6;
+  background: #FFF;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(255, 61, 154, 0.14);
+}
+
+[data-theme='funky'] .radio-item.selected {
+  border-color: #FF3D9A;
+  background: linear-gradient(135deg, #FFF 0%, #FFEFF7 100%);
+  box-shadow: 0 12px 28px rgba(255, 61, 154, 0.22);
+}
+
+[data-theme='funky'] .radio-item.selected::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 26px;
+  border: 2px dashed #FF3D9A;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+[data-theme='funky'] .radio-item input[type='radio'] {
+  display: none;
+}
+
+[data-theme='funky'] .radio-item label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-family: 'Jua', sans-serif;
+  font-size: 17px;
+  color: #1A0B2E;
+}
+
+[data-theme='funky'] .onboarding-chip {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Jua', sans-serif;
+  font-size: 20px;
+  color: #1A0B2E;
+  flex-shrink: 0;
+  border: 2px solid #1A0B2E;
+  box-shadow: 3px 3px 0 #1A0B2E;
+  transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  background: #FFD1E3;
+}
+
+[data-theme='funky'] .radio-item:hover .onboarding-chip { transform: rotate(-6deg) scale(1.05); }
+[data-theme='funky'] .radio-item.selected .onboarding-chip { transform: rotate(-3deg); }
+
+[data-theme='funky'] .onboarding-check {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #FFF;
+  border: 2px solid #FFD1E3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  transition: all 0.25s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  color: #FFF;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+[data-theme='funky'] .radio-item.selected .onboarding-check {
+  background: linear-gradient(135deg, #FF3D9A, #B388FF);
+  border-color: #FF3D9A;
+  transform: scale(1.08);
+}
+
+[data-theme='funky'] .radio-item .onboarding-check-mark {
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+[data-theme='funky'] .radio-item.selected .onboarding-check-mark { opacity: 1; }
+
+[data-theme='funky'] .onboarding-note {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0;
+  font-size: 16px;
+  margin-top: 22px;
+}
+
+[data-theme='funky'] .onboarding-note .warn {
+  display: inline-block;
+  margin-right: 6px;
+  color: #FF3D9A;
+  animation: funkyHeartbeat 2.2s ease-in-out infinite;
+}
+
+/* 플로팅 장식 */
+[data-theme='funky'] .onboarding-stickers {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+[data-theme='funky'] .onboarding-stickers > * { position: absolute; }
+[data-theme='funky'] .onboarding-stickers .f1 { top: 6%; left: 5%; animation: funkyFloatA 5s ease-in-out infinite; }
+[data-theme='funky'] .onboarding-stickers .f2 { top: 10%; right: 6%; animation: funkyFloatB 5s ease-in-out infinite; }
+[data-theme='funky'] .onboarding-stickers .f3 { bottom: 8%; left: 8%; animation: funkyFloatC 4s ease-in-out infinite; }
+[data-theme='funky'] .onboarding-stickers .f4 { bottom: 10%; right: 7%; animation: funkyFloatA 6s ease-in-out infinite; }
+
+@keyframes obWave {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-10deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-4deg); }
+  75% { transform: rotate(0); }
+}
+
+/* 공용 funky-only / default-only (LoginScreen과 동일 패턴 — 이 파일에도 선언) */
+[data-theme='funky'] .default-only { display: none; }
+.funky-only { display: none; }
+[data-theme='funky'] .funky-only { display: block; }

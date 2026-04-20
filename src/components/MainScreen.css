@@ -273,3 +273,182 @@
     transform: rotate(360deg);
   }
 }
+
+/* =========================================================
+   Funky (Soft Girl) — Dashboard 이식
+   ========================================================= */
+[data-theme='funky'] .main-screen {
+  background: transparent;
+  position: relative;
+}
+
+/* 배경 플로팅 스티커 (.main-screen 컨테이너 기준) */
+[data-theme='funky'] .main-stickers {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+[data-theme='funky'] .main-stickers > * { position: fixed; }
+[data-theme='funky'] .main-stickers .s1 { top: 110px; left: 24px; animation: funkyFloatA 8s ease-in-out infinite; opacity: 0.85; }
+[data-theme='funky'] .main-stickers .s2 { top: 220px; right: 30px; animation: funkyFloatB 7s ease-in-out infinite; opacity: 0.75; }
+[data-theme='funky'] .main-stickers .s3 { bottom: 12%; left: 2%; animation: funkyFloatC 9s ease-in-out infinite; opacity: 0.7; }
+[data-theme='funky'] .main-stickers .s4 { bottom: 8%; right: 3%; animation: funkyFloatA 10s ease-in-out infinite; opacity: 0.65; }
+
+/* Header: 글래시 헤더 */
+[data-theme='funky'] .main-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  padding: 16px 32px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border-bottom: 2px solid rgba(255, 61, 154, 0.12);
+  box-shadow: 0 4px 20px rgba(171, 122, 255, 0.08);
+}
+
+[data-theme='funky'] .main-header .logo-text {
+  font-family: 'Fraunces', serif;
+  font-weight: 900;
+  font-style: italic;
+  font-size: 28px;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #FF3D9A 0%, #7A3AE0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+[data-theme='funky'] .project-dropdown {
+  font-family: 'Jua', sans-serif;
+  border: 2px solid #FFD1E3;
+  border-radius: 999px;
+  padding: 8px 14px 8px 16px;
+  color: #1A0B2E;
+  transition: all 0.2s ease;
+}
+[data-theme='funky'] .project-dropdown:hover {
+  border-color: #FF3D9A;
+  box-shadow: 0 4px 14px rgba(255, 61, 154, 0.15);
+}
+
+/* Input Section: 리본 달린 글래시 카드 */
+[data-theme='funky'] .input-section {
+  position: relative;
+  z-index: 2;
+  margin: 32px auto 24px;
+  max-width: 1280px;
+  padding: 28px 32px;
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
+  box-shadow: 0 14px 40px rgba(171, 122, 255, 0.12);
+}
+
+[data-theme='funky'] .input-section::before {
+  content: '♡ let\'s calculate';
+  position: absolute;
+  top: -14px;
+  left: 32px;
+  background: #FF3D9A;
+  color: #FFF;
+  font-family: 'Jua', sans-serif;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  transform: rotate(-3deg);
+  box-shadow: 0 4px 12px rgba(255, 61, 154, 0.4);
+}
+
+[data-theme='funky'] .input-label {
+  font-family: 'Gaegu', cursive;
+  font-size: 15px;
+  color: #7A3AE0;
+  font-weight: 700;
+}
+
+[data-theme='funky'] .date-input {
+  background: #FFF;
+  border: 2px solid #FFD1E3;
+  border-radius: 16px;
+  padding: 12px 18px;
+  font-family: 'Space Grotesk', monospace;
+  color: #1A0B2E;
+  transition: all 0.2s ease;
+}
+[data-theme='funky'] .date-input:hover { border-color: #FFB3D1; }
+[data-theme='funky'] .date-input:focus {
+  outline: none;
+  border-color: #FF3D9A;
+  box-shadow: 0 0 0 4px rgba(255, 61, 154, 0.15);
+}
+
+/* Date Summary: 4-col 오프셋 쉐도우 카드 */
+[data-theme='funky'] .date-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-left: none;
+  margin: 16px auto 32px;
+  max-width: 1280px;
+  padding: 0 32px;
+}
+
+[data-theme='funky'] .date-item,
+[data-theme='funky'] .date-item-right {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 14px;
+  padding: 20px 22px;
+  background: linear-gradient(135deg, #FFEFF7 0%, #FFD1E3 100%);
+  border: 2px solid #1A0B2E;
+  border-radius: 22px;
+  box-shadow: 4px 4px 0 #1A0B2E;
+  text-align: left;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+[data-theme='funky'] .date-item:nth-child(2) { background: linear-gradient(135deg, #F5E9FF 0%, #D9C3FF 100%); }
+[data-theme='funky'] .date-item:nth-child(3) { background: linear-gradient(135deg, #FFF7D4 0%, #FFE36E 100%); }
+[data-theme='funky'] .date-item:nth-child(4) { background: linear-gradient(135deg, #E8F9F5 0%, #7FE8D4 100%); }
+
+[data-theme='funky'] .date-item:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 6px 6px 0 #1A0B2E;
+}
+
+[data-theme='funky'] .date-label {
+  font-family: 'Gaegu', cursive;
+  font-size: 13px;
+  color: rgba(43, 20, 84, 0.7);
+  font-weight: 700;
+}
+
+[data-theme='funky'] .date-value {
+  font-family: 'Jua', sans-serif;
+  font-size: 17px;
+  color: #1A0B2E;
+  letter-spacing: -0.02em;
+}
+
+/* 결과 섹션 카드 */
+[data-theme='funky'] .results-section {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  padding: 0 32px 48px;
+}
+
+/* Funky 전용 공용 토글 */
+.funky-only { display: none; }
+[data-theme='funky'] .funky-only { display: block; }
+[data-theme='funky'] .default-only { display: none; }

@@ -1,0 +1,137 @@
+/**
+ * Azrael · Funky Theme — Soft Girl
+ * 출처: Claude Design 핸드오프 번들 (2026-04-20)
+ * 전략: 기본 토큰(--azrael-*, --color-*, --chart-*)을 오버라이드해
+ *        컴포넌트 수정 없이 전체 화면을 재스킨한다.
+ */
+
+[data-theme='funky'] {
+  color-scheme: light;
+
+  /* === Funky 코어 팔레트 === */
+  --hot-pink: #FF3D9A;
+  --soft-pink: #FFD1E3;
+  --blush: #FFEFF7;
+  --cream: #FFF7EC;
+  --butter: #FFE36E;
+  --lime: #D5F24A;
+  --grape: #7A3AE0;
+  --grape-soft: #B388FF;
+  --lavender: #D9C3FF;
+  --lavender-bg: #F5E9FF;
+  --mint: #7FE8D4;
+  --mint-bg: #E8F9F5;
+  --ink: #1A0B2E;
+  --shadow-deep: #2B1454;
+
+  --surface-glass: rgba(255, 255, 255, 0.72);
+  --surface-white: #FFFFFF;
+  --surface-bg-grad: linear-gradient(180deg, #FFF7EC 0%, #FFEFF7 35%, #F5E9FF 100%);
+
+  /* === 기존 오렌지 팔레트 오버라이드 → 핑크/그레이프 === */
+  --azrael-orange-50: #FFEFF7;
+  --azrael-orange-100: #FFD1E3;
+  --azrael-orange-300: #FFB0CF;
+  --azrael-orange-500: #FF3D9A;
+  --azrael-orange-600: #E91E63;
+  --azrael-orange-700: #AD1457;
+  --azrael-orange-900: #7A3AE0;
+
+  /* === 기존 그레이 팔레트 오버라이드 → 라벤더/잉크 === */
+  --azrael-white: #FFFFFF;
+  --azrael-gray-50: #FFF7EC;
+  --azrael-gray-100: #FFEFF7;
+  --azrael-gray-200: #F5E9FF;
+  --azrael-gray-300: #D9C3FF;
+  --azrael-gray-400: #B388FF;
+  --azrael-gray-600: #7A3AE0;
+  --azrael-gray-800: #2B1454;
+  --azrael-gray-900: #1A0B2E;
+
+  /* === 시맨틱 컬러 === */
+  --azrael-success: #3BB78F;
+  --azrael-success-light: #E8F9F5;
+  --azrael-success-dark: #1F8E6A;
+  --azrael-error: #FF3D9A;
+  --azrael-error-light: #FFEFF7;
+  --azrael-error-dark: #C2185B;
+  --azrael-warning: #FFE36E;
+  --azrael-warning-light: #FFFAD6;
+  --azrael-warning-dark: #B38A00;
+  --azrael-info: #B388FF;
+  --azrael-info-light: #F5E9FF;
+  --azrael-info-dark: #7A3AE0;
+
+  /* === 차트 색상 (T1=pink, T2=mint, T3=grape) === */
+  --chart-table1: #FF3D9A;
+  --chart-table1-light: #FFD1E3;
+  --chart-table2: #3BB78F;
+  --chart-table2-light: #A5E8D4;
+  --chart-table3: #7A3AE0;
+  --chart-table3-light: #D9C3FF;
+
+  /* === 타이포 === */
+  --font-display: 'Fraunces', 'Jua', 'Noto Sans KR', serif;
+  --font-body: 'Space Grotesk', 'Gowun Dodum', 'Noto Sans KR', sans-serif;
+  --font-mono: 'JetBrains Mono', 'Consolas', monospace;
+  --font-ko-display: 'Jua', 'Gowun Dodum', sans-serif;
+  --font-ko-body: 'Gowun Dodum', 'Jua', sans-serif;
+  --font-decor: 'Gaegu', cursive;
+
+  /* === Radius 업스케일 (펑키한 부드러움) === */
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-full: 9999px;
+
+  /* === Shadows (꿈결 같은 핑크 쉐도우) === */
+  --shadow-sm: 0 4px 14px rgba(255, 61, 154, 0.12);
+  --shadow-md: 0 8px 24px rgba(255, 61, 154, 0.18);
+  --shadow-lg: 0 20px 60px rgba(171, 122, 255, 0.2), 0 8px 20px rgba(255, 61, 154, 0.12);
+  --shadow-orange: 0 6px 20px rgba(255, 61, 154, 0.25);
+
+  /* === 이징 === */
+  --ease-bounce: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  /* === Alias 오버라이드 === */
+  --color-primary: var(--hot-pink);
+  --color-primary-hover: #E91E63;
+  --color-primary-active: #AD1457;
+  --color-bg: var(--surface-bg-grad);
+  --color-surface: var(--blush);
+  --color-border: var(--soft-pink);
+  --color-text: var(--ink);
+  --color-text-muted: rgba(43, 20, 84, 0.65);
+}
+
+/* === Funky 전용 글로벌 장식 === */
+[data-theme='funky'] body {
+  background-attachment: fixed;
+}
+
+[data-theme='funky'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(255, 209, 227, 0.55) 0%, transparent 30%),
+    radial-gradient(circle at 92% 24%, rgba(217, 195, 255, 0.45) 0%, transparent 30%),
+    radial-gradient(circle at 82% 88%, rgba(127, 232, 212, 0.35) 0%, transparent 32%);
+}
+
+[data-theme='funky'] #root {
+  position: relative;
+  z-index: 1;
+}
+
+[data-theme='funky'] ::selection {
+  background: var(--butter);
+  color: var(--ink);
+}
+
+/* === 부드러운 전환 === */
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}

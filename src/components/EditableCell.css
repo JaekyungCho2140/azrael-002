@@ -76,3 +76,31 @@
   color: var(--azrael-gray-400);
   font-style: italic;
 }
+
+/* =========================================================
+   Funky (Soft Girl) — EditableCell 이식
+   ========================================================= */
+[data-theme='funky'] .format-toolbar {
+  background: #FFF;
+  border: 2px solid #1A0B2E;
+  border-radius: 14px;
+  box-shadow: 3px 3px 0 #1A0B2E;
+  padding: 6px;
+  gap: 4px;
+}
+
+[data-theme='funky'] .format-btn {
+  background: #FFF;
+  border: 1.5px solid #FFD1E3;
+  border-radius: 10px;
+  color: #7A3AE0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+[data-theme='funky'] .format-btn:hover {
+  border-color: #FF3D9A;
+  background: #FFEFF7;
+}
+[data-theme='funky'] .format-btn-red { color: #FF3D9A; }
+[data-theme='funky'] .format-btn-blue { color: #7A3AE0; }

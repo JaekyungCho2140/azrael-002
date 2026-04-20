@@ -33,6 +33,7 @@ import {
   formatDateLocal
 } from '../lib/businessDays';
 import { useJiraOperations } from '../hooks/useJiraOperations';
+import { FlowerSVG, BlobSVG, HeartSVG } from './funky/FunkyDecor';
 import './MainScreen.css';
 
 interface MainScreenProps {
@@ -287,6 +288,14 @@ export function MainScreen({
 
   return (
     <div className="main-screen">
+      {/* Funky 배경 플로팅 스티커 */}
+      <div className="main-stickers funky-only" aria-hidden="true">
+        <div className="s1"><FlowerSVG size={80} petal="#FFD1E3" core="#FFE36E" /></div>
+        <div className="s2"><HeartSVG size={46} color="#B388FF" /></div>
+        <div className="s3"><BlobSVG size={140} color="#D9C3FF" /></div>
+        <div className="s4"><FlowerSVG size={70} petal="#7FE8D4" core="#FF3D9A" /></div>
+      </div>
+
       {/* JIRA 로딩 오버레이 */}
       {jira.isJiraLoading && (
         <div className="jira-loading-overlay">

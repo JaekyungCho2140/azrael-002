@@ -53,3 +53,38 @@
   font-family: var(--font-mono);
   letter-spacing: 0.02em;
 }
+
+/* =========================================================
+   Funky (Soft Girl) — Input 이식
+   ========================================================= */
+[data-theme='funky'] .input-label {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+[data-theme='funky'] .input {
+  font-family: 'Space Grotesk', 'Gowun Dodum', sans-serif;
+  border: 2px solid #FFD1E3;
+  border-radius: 14px;
+  padding: 10px 16px;
+  color: #1A0B2E;
+  background: #FFF;
+  transition: all 0.2s ease;
+}
+[data-theme='funky'] .input:hover { border-color: #FFB3D1; }
+[data-theme='funky'] .input:focus {
+  border-color: #FF3D9A;
+  box-shadow: 0 0 0 4px rgba(255, 61, 154, 0.15);
+}
+[data-theme='funky'] .input::placeholder {
+  color: rgba(43, 20, 84, 0.4);
+}
+[data-theme='funky'] .input:disabled {
+  background: #F5E9FF;
+  color: rgba(43, 20, 84, 0.45);
+}
+[data-theme='funky'] .date-input {
+  font-family: 'Space Grotesk', monospace;
+}

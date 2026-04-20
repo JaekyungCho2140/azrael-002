@@ -117,11 +117,14 @@ export interface Holiday {
  * UserState (사용자 상태)
  * 참조: Azrael-PRD-Shared.md §2.6
  */
+export type ThemeName = 'default' | 'funky';
+
 export interface UserState {
   email: string;                 // 사용자 이메일
   lastProjectId: string;         // 마지막 사용 프로젝트 ID
   hasCompletedOnboarding: boolean; // 온보딩 완료 여부
   showVisualization?: boolean;   // 간트 차트/캘린더 뷰 표시 여부 (기본값: true)
+  theme?: ThemeName;             // 디자인 테마 (기본값: 'default')
   lastCalculationDates?: Record<string, string>; // 프로젝트별 마지막 계산 날짜 (projectId → "YYYY-MM-DD")
   viewModeByProject?: Record<string, ViewMode>;  // Phase 4: 프로젝트별 화면 모드
 }

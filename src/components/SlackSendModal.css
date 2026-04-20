@@ -261,3 +261,17 @@
   justify-content: flex-end;
   width: 100%;
 }
+
+/* =========================================================
+   Funky (Soft Girl) — SlackSendModal 이식
+   ========================================================= */
+[data-theme='funky'] .slack-section {
+  border-bottom: 2px dashed #D9C3FF;
+}
+
+[data-theme='funky'] .slack-section-label {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0;
+  font-weight: 700;
+  font-size: 15px;
+}

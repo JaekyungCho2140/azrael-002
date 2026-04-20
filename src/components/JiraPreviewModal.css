@@ -59,3 +59,29 @@
   font-weight: var(--weight-medium);
   color: var(--azrael-gray-700);
 }
+
+/* =========================================================
+   Funky (Soft Girl) — JiraPreviewModal 이식
+   ========================================================= */
+[data-theme='funky'] .jira-issue-item {
+  background: #FFF;
+  border: 2px solid #FFE1EE;
+  border-left: 4px solid #B388FF;
+  border-radius: 14px;
+  font-family: 'Space Grotesk', 'Gowun Dodum', sans-serif;
+  color: #1A0B2E;
+  box-shadow: 2px 2px 0 rgba(122, 58, 224, 0.12);
+}
+
+[data-theme='funky'] .jira-issue-item.epic {
+  background: linear-gradient(135deg, #FFEFF7, #FFF);
+  border-left-color: #FF3D9A;
+  box-shadow: 3px 3px 0 #1A0B2E;
+  border: 2px solid #1A0B2E;
+  border-left: 4px solid #FF3D9A;
+}
+
+[data-theme='funky'] .jira-issue-item .issue-header {
+  font-family: 'Jua', sans-serif;
+  color: #1A0B2E;
+}

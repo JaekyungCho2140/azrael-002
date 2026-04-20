@@ -74,3 +74,57 @@
   margin: 0.5rem 0 0 0;
   font-weight: var(--weight-medium);
 }
+
+/* =========================================================
+   Funky (Soft Girl) — PresetSaveModal 이식
+   ========================================================= */
+[data-theme='funky'] .preset-save-description {
+  font-family: 'Gowun Dodum', sans-serif;
+  color: rgba(43, 20, 84, 0.75);
+}
+
+[data-theme='funky'] .preset-save-info {
+  background: linear-gradient(135deg, #FFF7D4, #FFEFF7);
+  border: 1.5px dashed #D9C3FF;
+  border-radius: 16px;
+}
+
+[data-theme='funky'] .preset-save-info-label {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0;
+  font-weight: 700;
+}
+
+[data-theme='funky'] .preset-save-info-value {
+  font-family: 'Jua', sans-serif;
+  color: #1A0B2E;
+}
+
+[data-theme='funky'] .preset-name-count {
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgba(43, 20, 84, 0.5);
+}
+
+[data-theme='funky'] .preset-table-radio-group {
+  gap: 10px;
+}
+[data-theme='funky'] .preset-table-radio-group label,
+[data-theme='funky'] .preset-save-modal .preset-table-radio {
+  border: 2px solid #FFE1EE;
+  border-radius: 16px;
+  padding: 12px 16px;
+  background: #FFF;
+  font-family: 'Jua', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+[data-theme='funky'] .preset-table-radio-group label:hover {
+  border-color: #FFB3D1;
+  background: #FFEFF7;
+}
+[data-theme='funky'] .preset-table-radio-group input[type='radio']:checked + *,
+[data-theme='funky'] .preset-table-radio-group label:has(input:checked) {
+  border-color: #FF3D9A;
+  background: linear-gradient(135deg, #FFF, #FFEFF7);
+  box-shadow: 3px 3px 0 #1A0B2E;
+}

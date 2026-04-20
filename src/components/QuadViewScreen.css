@@ -43,3 +43,30 @@
     gap: 1rem;
   }
 }
+
+/* =========================================================
+   Funky (Soft Girl) — QuadViewScreen 이식
+   ========================================================= */
+[data-theme='funky'] .quad-view-screen {
+  position: relative;
+  padding: 28px 36px;
+}
+
+[data-theme='funky'] .quad-view-screen::before {
+  content: '✨ 몰아보기 · 최대 4개까지 비교할 수 있어요';
+  display: block;
+  font-family: 'Gaegu', cursive;
+  font-size: 15px;
+  color: #7A3AE0;
+  margin-bottom: 14px;
+  padding-left: 8px;
+}
+
+[data-theme='funky'] .quad-grid {
+  gap: 18px;
+}
+
+[data-theme='funky'] .quad-view-loading {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0;
+}

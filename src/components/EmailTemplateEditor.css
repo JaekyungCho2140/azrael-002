@@ -169,3 +169,98 @@
   color: #0066cc;
   text-decoration: underline;
 }
+
+/* =========================================================
+   Funky (Soft Girl) — EmailTemplateEditor 이식
+   ========================================================= */
+[data-theme='funky'] .tiptap-editor-wrapper {
+  border: 2px solid #1A0B2E;
+  border-radius: 18px;
+  box-shadow: 3px 3px 0 #1A0B2E;
+  background: #FFF;
+  overflow: hidden;
+}
+
+[data-theme='funky'] .tiptap-toolbar {
+  background: linear-gradient(180deg, #FFF7D4, #FFEFF7);
+  border-bottom: 2px solid #1A0B2E;
+  padding: 8px 10px;
+  gap: 8px;
+}
+
+[data-theme='funky'] .toolbar-group {
+  border-right: 1.5px dashed #D9C3FF;
+  padding-right: 8px;
+}
+[data-theme='funky'] .toolbar-group:last-child { border-right: none; padding-right: 0; }
+
+[data-theme='funky'] .toolbar-btn {
+  background: #FFF;
+  border: 1.5px solid #FFD1E3;
+  border-radius: 10px;
+  color: #7A3AE0;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+[data-theme='funky'] .toolbar-btn:hover {
+  border-color: #FF3D9A;
+  color: #FF3D9A;
+  background: #FFEFF7;
+}
+[data-theme='funky'] .toolbar-btn.active {
+  background: linear-gradient(135deg, #FF3D9A, #B388FF);
+  color: #FFF;
+  border-color: #1A0B2E;
+  box-shadow: 2px 2px 0 #1A0B2E;
+}
+
+[data-theme='funky'] .toolbar-variable-btn {
+  background: linear-gradient(135deg, #FFE36E, #FFD1E3);
+  border: 2px solid #1A0B2E;
+  color: #1A0B2E;
+  border-radius: 999px;
+  font-family: 'Jua', sans-serif;
+  box-shadow: 2px 2px 0 #1A0B2E;
+  padding: 4px 12px;
+}
+[data-theme='funky'] .toolbar-variable-btn:hover {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #1A0B2E;
+}
+
+[data-theme='funky'] .toolbar-variable-dropdown {
+  background: #FFF;
+  border: 2px solid #1A0B2E;
+  border-radius: 16px;
+  box-shadow: 4px 4px 0 #1A0B2E;
+  padding: 6px;
+}
+[data-theme='funky'] .variable-option {
+  font-family: 'Space Grotesk', sans-serif;
+  color: #1A0B2E;
+  border-radius: 10px;
+  padding: 6px 10px;
+}
+[data-theme='funky'] .variable-option:hover {
+  background: linear-gradient(135deg, #FFEFF7, #FFD1E3);
+}
+
+[data-theme='funky'] .tiptap-content {
+  background: #FFFCFB;
+}
+
+[data-theme='funky'] .tiptap-content .tiptap {
+  font-family: 'Gowun Dodum', sans-serif;
+  color: #1A0B2E;
+}
+
+[data-theme='funky'] .tiptap-content .tiptap th {
+  background: linear-gradient(180deg, #FFF7D4, #FFEFF7);
+  color: #7A3AE0;
+  font-family: 'Jua', sans-serif;
+}
+
+[data-theme='funky'] .tiptap-content .tiptap a {
+  color: #FF3D9A;
+}

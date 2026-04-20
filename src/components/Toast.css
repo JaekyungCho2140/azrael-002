@@ -67,3 +67,35 @@
     transform: translateX(0);
   }
 }
+
+/* =========================================================
+   Funky (Soft Girl) — Toast 이식
+   ========================================================= */
+[data-theme='funky'] .toast {
+  font-family: 'Jua', sans-serif;
+  font-weight: 500;
+  border-radius: 18px;
+  border: 2px solid #1A0B2E;
+  box-shadow: 4px 4px 0 #1A0B2E;
+  padding: 14px 18px;
+}
+
+[data-theme='funky'] .toast-success {
+  background: linear-gradient(135deg, #E8F9F5, #7FE8D4);
+  color: #1A0B2E;
+  border-left: 2px solid #1A0B2E;
+}
+[data-theme='funky'] .toast-error {
+  background: linear-gradient(135deg, #FFEFF7, #FFD1E3);
+  color: #1A0B2E;
+  border-left: 2px solid #1A0B2E;
+}
+[data-theme='funky'] .toast-info {
+  background: linear-gradient(135deg, #FFF7D4, #FFE36E);
+  color: #1A0B2E;
+  border-left: 2px solid #1A0B2E;
+}
+
+[data-theme='funky'] .toast-icon {
+  font-size: 1.4rem;
+}

@@ -170,3 +170,108 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* =========================================================
+   Funky (Soft Girl) — CalendarView 이식
+   ========================================================= */
+[data-theme='funky'] .calendar-container {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 2px solid rgba(255, 255, 255, 0.95);
+  border-radius: 28px;
+  padding: 22px 26px;
+  box-shadow: 0 12px 32px rgba(255, 61, 154, 0.1);
+  overflow: visible;
+}
+
+[data-theme='funky'] .calendar-header h4,
+[data-theme='funky'] .calendar-header h3 {
+  font-family: 'Jua', sans-serif;
+  color: #1A0B2E;
+}
+
+[data-theme='funky'] .fc {
+  font-family: 'Space Grotesk', 'Gowun Dodum', sans-serif;
+}
+
+/* 테이블 경계/헤더 */
+[data-theme='funky'] .fc .fc-scrollgrid,
+[data-theme='funky'] .fc .fc-theme-standard td,
+[data-theme='funky'] .fc .fc-theme-standard th {
+  border-color: #FFE1EE;
+}
+[data-theme='funky'] .fc-col-header-cell {
+  background: linear-gradient(180deg, #FFF7D4, #FFEFF7);
+  font-family: 'Jua', sans-serif;
+  color: #7A3AE0;
+  padding: 8px 0;
+  font-weight: 500;
+}
+[data-theme='funky'] .fc-col-header-cell.fc-day-sun a { color: #FF3D9A; }
+[data-theme='funky'] .fc-col-header-cell.fc-day-sat a { color: #7A3AE0; }
+
+/* 툴바 */
+[data-theme='funky'] .fc .fc-toolbar-title {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-style: italic;
+  color: #1A0B2E;
+  letter-spacing: -0.02em;
+}
+[data-theme='funky'] .fc .fc-button {
+  background: #FFF;
+  border: 2px solid #1A0B2E;
+  color: #1A0B2E;
+  font-family: 'Jua', sans-serif;
+  font-weight: 500;
+  border-radius: 999px;
+  padding: 6px 14px;
+  box-shadow: 2px 2px 0 #1A0B2E;
+  transition: all 0.2s ease;
+  text-transform: none;
+}
+[data-theme='funky'] .fc .fc-button:hover {
+  background: #FFE36E;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 #1A0B2E;
+}
+[data-theme='funky'] .fc .fc-button-primary:not(:disabled).fc-button-active,
+[data-theme='funky'] .fc .fc-button-primary:not(:disabled):active {
+  background: linear-gradient(135deg, #FF3D9A, #B388FF);
+  color: #FFF;
+  border-color: #1A0B2E;
+}
+
+/* 날짜 셀 */
+[data-theme='funky'] .fc-daygrid-day-number {
+  font-family: 'Jua', sans-serif;
+  color: #1A0B2E;
+  padding: 6px 10px;
+}
+[data-theme='funky'] .fc-day-other .fc-daygrid-day-number { color: rgba(43, 20, 84, 0.35); }
+[data-theme='funky'] .fc-day-today {
+  background: linear-gradient(135deg, #FFEFF7, #FFF) !important;
+  box-shadow: inset 0 0 0 2px #FF3D9A;
+}
+
+/* 이벤트(일정) 칩 */
+[data-theme='funky'] .fc-daygrid-event {
+  border-radius: 999px;
+  border: 1.5px solid #1A0B2E;
+  font-family: 'Jua', sans-serif;
+  padding: 2px 10px;
+  font-size: 12px;
+  box-shadow: 1px 1px 0 #1A0B2E;
+  margin: 2px 4px 0;
+}
+[data-theme='funky'] .fc-daygrid-event .fc-event-main-custom {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+[data-theme='funky'] .fc-daygrid-event .fc-event-time {
+  font-family: 'Space Grotesk', monospace;
+  font-size: 11px;
+  opacity: 0.8;
+}
