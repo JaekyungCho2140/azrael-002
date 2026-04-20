@@ -66,3 +66,44 @@
     transform: translateY(-20px);
   }
 }
+
+/* =========================================================
+   Funky (Soft Girl) — ResolutionWarning 이식
+   ========================================================= */
+[data-theme='funky'] .resolution-warning {
+  background:
+    linear-gradient(135deg, rgba(255, 61, 154, 0.75) 0%, rgba(122, 58, 224, 0.8) 100%),
+    rgba(26, 11, 46, 0.85);
+  color: #1A0B2E;
+}
+
+[data-theme='funky'] .warning-content {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 2px solid #1A0B2E;
+  border-radius: 28px;
+  box-shadow: 6px 6px 0 #1A0B2E;
+  transform: rotate(-1.5deg);
+}
+
+[data-theme='funky'] .warning-content h2 {
+  font-family: 'Fraunces', serif;
+  font-weight: 600;
+  font-style: italic;
+  background: linear-gradient(135deg, #FF3D9A 0%, #7A3AE0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+[data-theme='funky'] .warning-content p {
+  font-family: 'Gowun Dodum', sans-serif;
+  color: rgba(43, 20, 84, 0.85);
+}
+
+[data-theme='funky'] .warning-note {
+  font-family: 'Gaegu', cursive;
+  color: #7A3AE0 !important;
+}
