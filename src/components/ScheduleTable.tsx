@@ -118,7 +118,7 @@ export function ScheduleTable({
   const tableId = `table-${type}`;
 
   return (
-    <div className="table-container" id={tableId}>
+    <div className="table-container" id={tableId} data-type={type}>
       <div className="table-header">
         <h3 className="table-title">{title}</h3>
         <div className="copy-exclude">

@@ -72,3 +72,22 @@
     transform: rotate(20deg);
   }
 }
+
+/* =========================================================
+   Funky (Soft Girl) — Loading 이식
+   ========================================================= */
+[data-theme='funky'] .loading-overlay {
+  background:
+    linear-gradient(135deg, rgba(255, 61, 154, 0.2) 0%, rgba(122, 58, 224, 0.25) 100%),
+    rgba(26, 11, 46, 0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+[data-theme='funky'] .cat-tail {
+  background: #FF3D9A;
+}
+[data-theme='funky'] .loading-message {
+  font-family: 'Jua', sans-serif;
+  color: #FFF;
+  text-shadow: 0 2px 0 #1A0B2E, 2px 2px 0 rgba(255, 61, 154, 0.4);
+}
