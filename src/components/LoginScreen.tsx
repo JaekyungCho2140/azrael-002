@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 import { signInWithGoogleToken, supabase } from '../lib/supabase';
+import { FlowerSVG, HeartSVG, SquiggleSVG, BlobSVG } from './funky/FunkyDecor';
 import './LoginScreen.css';
 
 interface LoginScreenProps {
@@ -82,15 +83,35 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
   return (
     <GoogleOAuthProvider clientId={clientId}>
       <div className="login-container">
+        {/* Funky 전용 플로팅 장식 */}
+        <div className="login-stickers funky-only" aria-hidden="true">
+          <div className="sk-f1"><FlowerSVG size={120} petal="#FFD1E3" core="#FFE36E" /></div>
+          <div className="sk-f2"><FlowerSVG size={90} petal="#D9C3FF" core="#FFD1E3" /></div>
+          <div className="sk-f3"><FlowerSVG size={100} petal="#7FE8D4" core="#FF3D9A" /></div>
+          <div className="sk-f4"><BlobSVG size={180} color="#D9C3FF" /></div>
+          <div className="sk-h1"><HeartSVG size={54} color="#FF3D9A" /></div>
+          <div className="sk-h2"><HeartSVG size={40} color="#B388FF" /></div>
+          <div className="sk-sq"><SquiggleSVG w={360} h={40} color="#FF3D9A" /></div>
+        </div>
+
         <div className="login-card">
-          {/* 고양이 일러스트 */}
-          <div className="cat-logo">
+          {/* Funky 리본 배지 */}
+          <div className="login-ribbon funky-only">♡ hi, welcome back</div>
+
+          {/* 고양이 일러스트 (Default 전용) */}
+          <div className="cat-logo default-only">
             🐱
           </div>
 
           {/* 로고 */}
-          <h1 className="login-title">Azrael</h1>
-          <p className="login-subtitle">L10n 일정 관리 도구</p>
+          <h1 className="login-title">
+            Azrael<span className="title-dot funky-only" aria-hidden="true" />
+          </h1>
+          <div className="login-ko funky-only">L10n 일정 관리 도구</div>
+          <p className="login-subtitle">
+            <span className="default-only">L10n 일정 관리 도구</span>
+            <span className="funky-only">회사 계정으로 로그인해<br />팀의 일정을 한눈에 확인하세요.</span>
+          </p>
 
           {/* Google 로그인 버튼 */}
           <div className="login-form" style={{ marginTop: '2rem' }}>
@@ -115,7 +136,12 @@ export function LoginScreen({ onLogin }: LoginScreenProps) {
             )}
           </div>
 
-          <p className="login-note">회사 계정만 접근 가능합니다.</p>
+          <p className="login-note">
+            <span className="default-only">회사 계정만 접근 가능합니다.</span>
+            <span className="funky-only">
+              회사 계정만 접근 가능합니다 <span className="heart">♥</span>
+            </span>
+          </p>
         </div>
       </div>
     </GoogleOAuthProvider>
