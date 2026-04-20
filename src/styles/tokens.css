@@ -3,7 +3,8 @@
  * 참조: prd/Azrael-PRD-Design.md §2 색상 시스템
  */
 
-:root {
+:root,
+[data-theme='default'] {
   /* Color Scheme - Light Only */
   color-scheme: light;
 

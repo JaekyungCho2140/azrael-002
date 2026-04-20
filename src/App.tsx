@@ -12,6 +12,7 @@ import { MainScreen } from './components/MainScreen';
 import { ResolutionWarning } from './components/ResolutionWarning';
 import { Toast } from './components/Toast';
 import { initializeDefaultData, getUserState, saveUserState } from './lib/storage';
+import { applyTheme, getStoredTheme } from './lib/theme';
 import { supabase } from './lib/supabase';
 import { useProjects, useTemplates } from './hooks/useSupabase';
 import { useToast } from './hooks/useToast';
@@ -35,6 +36,7 @@ function App() {
   // 초기 데이터 생성
   useEffect(() => {
     initializeDefaultData();
+    applyTheme(getStoredTheme());
   }, []);
 
   // Supabase 세션 상태 관리

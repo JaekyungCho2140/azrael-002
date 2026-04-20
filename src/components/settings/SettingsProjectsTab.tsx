@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Project } from '../../types';
+import { Project, ThemeName } from '../../types';
 import { Button } from '../Button';
 import { ProjectEditModal } from '../ProjectEditModal';
 import {
@@ -9,6 +9,7 @@ import {
   useDuplicateProject,
 } from '../../hooks/useSupabase';
 import { getUserState, saveUserState } from '../../lib/storage';
+import { applyTheme, DEFAULT_THEME } from '../../lib/theme';
 
 interface SettingsProjectsTabProps {
   selectedProjectId: string;
@@ -26,17 +27,19 @@ export function SettingsProjectsTab({
   const [projectModalOpen, setProjectModalOpen] = useState(false);
   const [editingProject, setEditingProject] = useState<Project | undefined>();
   const [showVisualization, setShowVisualization] = useState(true);
+  const [theme, setTheme] = useState<ThemeName>(DEFAULT_THEME);
 
   const createProjectMutation = useCreateProject();
   const updateProjectMutation = useUpdateProject();
   const deleteProjectMutation = useDeleteProject();
   const duplicateProjectMutation = useDuplicateProject();
 
-  // 시각화 설정 로드
+  // 시각화/테마 설정 로드
   useEffect(() => {
     const userState = getUserState();
     if (userState) {
       setShowVisualization(userState.showVisualization ?? true);
+      setTheme(userState.theme ?? DEFAULT_THEME);
     }
   }, []);
 
@@ -46,6 +49,16 @@ export function SettingsProjectsTab({
     const userState = getUserState();
     if (userState) {
       saveUserState({ ...userState, showVisualization: newValue });
+    }
+  };
+
+  const handleChangeTheme = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const next = e.target.value as ThemeName;
+    setTheme(next);
+    applyTheme(next);
+    const userState = getUserState();
+    if (userState) {
+      saveUserState({ ...userState, theme: next });
     }
   };
 
@@ -253,6 +266,24 @@ export function SettingsProjectsTab({
         </label>
         <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)', marginTop: '0.25rem', display: 'block' }}>
           비활성화하면 메인 화면에서 간트 차트와 캘린더가 숨겨집니다.
+        </small>
+      </div>
+
+      {/* 테마 선택 */}
+      <div style={{ marginTop: '1rem', padding: '1rem', background: 'var(--azrael-gray-50)', borderRadius: '8px' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <span style={{ fontWeight: 600 }}>테마 선택</span>
+          <select
+            value={theme}
+            onChange={handleChangeTheme}
+            style={{ padding: '0.4rem 0.6rem', borderRadius: '6px', border: '1px solid var(--azrael-gray-300)' }}
+          >
+            <option value="default">Default</option>
+            <option value="funky">Funky</option>
+          </select>
+        </label>
+        <small style={{ color: 'var(--azrael-gray-500)', fontSize: 'var(--text-xs)', marginTop: '0.25rem', display: 'block' }}>
+          앱 전반의 색상·스타일 테마를 변경합니다. Funky는 실험적 디자인입니다.
         </small>
       </div>
 

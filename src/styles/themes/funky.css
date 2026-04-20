@@ -1,0 +1,18 @@
+/**
+ * Funky Theme (skeleton)
+ *
+ * Claude Design 산출물을 받아 이 파일의 변수 오버라이드를 교체한다.
+ * 기본값은 Default 테마와 구분 가능한 임시 플레이스홀더 색상이다.
+ */
+
+[data-theme='funky'] {
+  color-scheme: light;
+
+  /* TODO: Claude Design 산출물로 교체 */
+  --color-bg: #FDF2FF;
+  --color-text: #2A0F3D;
+
+  --azrael-orange-500: #E91E63;
+  --azrael-orange-600: #C2185B;
+  --azrael-orange-700: #AD1457;
+}
