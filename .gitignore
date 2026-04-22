@@ -43,6 +43,8 @@ CLAUDE.md
 # 내부 문서 및 자료 (로컬 전용)
 plan.md
 talkwiththeuser/
+docs/analysis/
+tasks/handoff-*.md
 
 # CSV 데이터 파일
 *.csv
