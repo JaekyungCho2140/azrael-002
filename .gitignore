@@ -44,6 +44,9 @@ CLAUDE.md
 plan.md
 talkwiththeuser/
 docs/analysis/
+docs/Google-OAuth-*.md
+docs/Phase*.md
+docs/Supabase-*.md
 tasks/handoff-*.md
 
 # CSV 데이터 파일
